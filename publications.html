@@ -47,11 +47,19 @@
                 publicationsList.innerHTML = "<li>No publications found.</li>";
                 return;
             }
+
             data.forEach((item, index) => {
                 if (item.data.title) {
+                    let authors = item.data.creators.map(c => {
+                        if (c.lastName && c.lastName.includes("Bassey")) {
+                            return `<u>${c.lastName}</u>`;  // Underline your name
+                        }
+                        return c.lastName;
+                    }).join(", ");
+
                     let li = document.createElement("li");
                     li.innerHTML = `<strong>${index + 1}. ${item.data.title}</strong><br>
-                        ${item.data.creators.map(c => c.lastName).join(", ")}<br>
+                        ${authors}<br>
                         <em>${item.data.publicationTitle || 'N/A'}</em> (${item.data.date || 'N/A'})<br>
                         <a href="${item.data.url || '#'}" target="_blank">[Link]</a>`;
                     li.style.marginBottom = "20px"; // Adds space between publications
