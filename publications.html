@@ -63,10 +63,16 @@
                     // Construct DOI link if available
                     let doiLink = item.data.DOI ? `<a href="https://doi.org/${item.data.DOI}" target="_blank">DOI</a>` : "";
 
+                    // Format volume, issue, and pages (hide missing elements)
+                    let volume = item.data.volume ? `<strong>${item.data.volume}</strong>` : "";
+                    let pages = item.data.pages ? `, ${item.data.pages}` : "";
+                    let journalInfo = item.data.publicationTitle ? `<em>${item.data.publicationTitle}</em>` : "N/A";
+                    let year = item.data.date ? `(${item.data.date.split("-")[0]})` : ""; // Extract only the year
+
                     let li = document.createElement("li");
                     li.innerHTML = `<strong>${index + 1}. ${item.data.title}</strong><br>
                         ${authors}<br>
-                        <em>${item.data.publicationTitle || 'N/A'}</em> (${item.data.date || 'N/A'})<br>
+                        ${journalInfo} ${volume}${pages} ${year}<br>
                         ${doiLink}`;
                     li.style.marginBottom = "20px"; // Adds space between publications
                     publicationsList.appendChild(li);
