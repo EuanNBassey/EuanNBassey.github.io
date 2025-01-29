@@ -69,8 +69,11 @@
                     let journalInfo = item.data.publicationTitle ? `<em>${item.data.publicationTitle}</em>` : "N/A";
                     let year = item.data.date ? `(${item.data.date.split("-")[0]})` : ""; // Extract only the year
 
+                    // Create the clickable link for the article title
+                    let articleLink = item.data.url ? item.data.url : (item.data.DOI ? `https://doi.org/${item.data.DOI}` : "#");
+
                     let li = document.createElement("li");
-                    li.innerHTML = `<strong>${index + 1}. ${item.data.title}</strong><br>
+                    li.innerHTML = `<strong>${index + 1}. <a href="${articleLink}" target="_blank">${item.data.title}</a></strong><br>
                         ${authors}<br>
                         ${journalInfo} ${volume}${pages} ${year}<br>
                         ${doiLink}`;
