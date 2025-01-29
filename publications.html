@@ -48,6 +48,13 @@
                 return;
             }
 
+            // Sort publications by year (newest first)
+            data.sort((a, b) => {
+                const yearA = a.data.date ? parseInt(a.data.date.split("-")[0]) : 0;
+                const yearB = b.data.date ? parseInt(b.data.date.split("-")[0]) : 0;
+                return yearB - yearA; // Sort in descending order of year
+            });
+
             data.forEach((item, index) => {
                 if (item.data.title) {
                     // Format author names with initials
@@ -60,23 +67,19 @@
                         return c.lastName;
                     }).join(", ");
 
-                    // Construct DOI link if available
-                    let doiLink = item.data.DOI ? `<a href="https://doi.org/${item.data.DOI}" target="_blank">DOI</a>` : "";
-
                     // Format volume, issue, and pages (hide missing elements)
                     let volume = item.data.volume ? `<strong>${item.data.volume}</strong>` : "";
                     let pages = item.data.pages ? `, ${item.data.pages}` : "";
                     let journalInfo = item.data.publicationTitle ? `<em>${item.data.publicationTitle}</em>` : "N/A";
                     let year = item.data.date ? `(${item.data.date.split("-")[0]})` : ""; // Extract only the year
 
-                    // Create the clickable link for the article title
+                    // Create the clickable link for the article title (use DOI or URL)
                     let articleLink = item.data.url ? item.data.url : (item.data.DOI ? `https://doi.org/${item.data.DOI}` : "#");
 
                     let li = document.createElement("li");
                     li.innerHTML = `<strong>${index + 1}. <a href="${articleLink}" target="_blank">${item.data.title}</a></strong><br>
                         ${authors}<br>
-                        ${journalInfo} ${volume}${pages} ${year}<br>
-                        ${doiLink}`;
+                        ${journalInfo} ${volume}${pages} ${year}<br>`;
                     li.style.marginBottom = "20px"; // Adds space between publications
                     publicationsList.appendChild(li);
                 }
