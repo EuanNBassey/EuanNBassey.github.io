@@ -51,8 +51,10 @@
             data.forEach((item, index) => {
                 if (item.data.title) {
                     let authors = item.data.creators.map(c => {
-                        if (c.lastName && c.lastName.includes("Bassey")) {
-                            return `<u>${c.lastName}</u>`;  // Underline your name
+                        if (c.lastName && c.firstName) {
+                            let initials = c.firstName.split(" ").map(n => n[0]).join(".") + "."; // Convert to initials
+                            let fullName = `${initials} ${c.lastName}`;
+                            return c.lastName.includes("Bassey") ? `<u>${fullName}</u>` : fullName; // Underline your name
                         }
                         return c.lastName;
                     }).join(", ");
