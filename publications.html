@@ -50,6 +50,7 @@
 
             data.forEach((item, index) => {
                 if (item.data.title) {
+                    // Format author names with initials
                     let authors = item.data.creators.map(c => {
                         if (c.lastName && c.firstName) {
                             let initials = c.firstName.split(" ").map(n => n[0]).join(".") + "."; // Convert to initials
@@ -59,11 +60,14 @@
                         return c.lastName;
                     }).join(", ");
 
+                    // Construct DOI link if available
+                    let doiLink = item.data.DOI ? `<a href="https://doi.org/${item.data.DOI}" target="_blank">DOI</a>` : "";
+
                     let li = document.createElement("li");
                     li.innerHTML = `<strong>${index + 1}. ${item.data.title}</strong><br>
                         ${authors}<br>
                         <em>${item.data.publicationTitle || 'N/A'}</em> (${item.data.date || 'N/A'})<br>
-                        <a href="${item.data.url || '#'}" target="_blank">[Link]</a>`;
+                        ${doiLink}`;
                     li.style.marginBottom = "20px"; // Adds space between publications
                     publicationsList.appendChild(li);
                 }
