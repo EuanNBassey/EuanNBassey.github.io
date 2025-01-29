@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About</title>
+    <title>Publications</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +14,6 @@
         </div>
     </header>
 
-    <!-- Navigation Section -->
     <nav>
         <div class="container">
             <ul>
@@ -28,29 +27,41 @@
         </div>
     </nav>
 
-    <!-- Publications Section -->
-    <section id="publications">
+    <section>
         <div class="container">
             <h2>Publications</h2>
-            <p>Brief description of your academic background and research interests. You can also add links to your research groups or professional networks here.</p>
+            <ul id="publications-list">Loading publications...</ul>
         </div>
-        <script>
-    const zoteroGroupID = "5846342";  // Replace with your Zotero Group ID
-    const zoteroAPI = `https://api.zotero.org/groups/${zoteroGroupID}/items?format=json&tag=publication`;
-
-    fetch(zoteroAPI)
-        .then(response => response.json())
-        .then(data => {
-            let publicationsList = document.getElementById("publications");
-            data.forEach(item => {
-                let li = document.createElement("li");
-                li.innerHTML = `<strong>${item.data.title}</strong>, ${item.data.creators.map(c => c.lastName).join(", ")}, <em>${item.data.publicationTitle || 'N/A'}</em> (${item.data.date})`;
-                publicationsList.appendChild(li);
-            });
-        })
-        .catch(error => console.error("Error fetching publications:", error));
-</script>
     </section>
+
+    <script>
+        const zoteroGroupID = "5846342";  // Replace with your actual Zotero Group ID
+        const zoteroAPI = `https://api.zotero.org/groups/${zoteroGroupID}/items?format=json`;
+
+        fetch(zoteroAPI)
+            .then(response => response.json())
+            .then(data => {
+                let publicationsList = document.getElementById("publications-list");
+                publicationsList.innerHTML = ""; // Clear loading text
+                if (data.length === 0) {
+                    publicationsList.innerHTML = "<li>No publications found.</li>";
+                    return;
+                }
+                data.forEach(item => {
+                    if (item.data.title) {
+                        let li = document.createElement("li");
+                        li.innerHTML = `<strong>${item.data.title}</strong>, ${item.data.creators.map(c => c.lastName).join(", ")} 
+                            <em>${item.data.publicationTitle || 'N/A'}</em> (${item.data.date || 'N/A'}) 
+                            <a href="${item.data.url || '#'}" target="_blank">[Link]</a>`;
+                        publicationsList.appendChild(li);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching publications:", error);
+                document.getElementById("publications-list").innerHTML = "<li>Error loading publications.</li>";
+            });
+    </script>
 
     <footer>
         <div class="container">
