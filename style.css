@@ -72,6 +72,7 @@ section h2 {
 section p {
     font-size: 1.1em;
     line-height: 1.6;
+    padding: 10px 0;
 }
 
 section ul {
