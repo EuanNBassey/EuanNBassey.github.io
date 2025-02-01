@@ -100,3 +100,11 @@ footer a {
 footer a:hover {
     text-decoration: underline;
 }
+
+.about-img {
+    float: left; /* Floats the image to the left */
+    margin-right: 15px; /* Adds space between the image and the text */
+    margin-bottom: 10px; /* Optional: Adds space below the image */
+    width: 300px; /* Maintain the image size */
+    height: 400px;
+}
