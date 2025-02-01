@@ -21,10 +21,8 @@ body {
 
 /* Header styles */
 header {
-    background-color: #008CBA;
-    color: white;
-    padding: 40px 0;
-    text-align: center;
+    background-color: transparent !important; /* Remove the blue background */
+    background: none !important; /* Ensures no background is applied */
 }
 
 header h1 {
