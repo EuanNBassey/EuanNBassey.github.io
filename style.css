@@ -118,7 +118,7 @@ footer a:hover {
     float: left; /* Floats the image to the left */
     margin-right: 20px; /* Creates a gap between the image and text */
     margin-bottom: 10px; /* Optional: Adds space below the image */
-    width: 1600px; /* Keep the original dimensions */
+    width: 800px; /* Keep the original dimensions */
     height: auto; /* Ensures aspect ratio is maintained */
     display: block; /* Ensures proper wrapping */
 }
