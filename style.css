@@ -159,7 +159,3 @@ footer a:hover {
     height: auto;        /* Keep the aspect ratio */
     display: block;      /* Remove any extra spacing */
 }
-
-#plot {
-    margin: 50px;
-}
