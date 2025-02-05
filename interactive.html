@@ -33,10 +33,18 @@
   
 
     <h2>Interactive Plot</h2>
-    <div class="container">
+
+    <div class="content-container">
         <div id="plot" style="width: 800px; height: 800px;"></div>
+
+        <!-- Multiplication Controls -->
+        <div class="controls">
+            <label for="multiplier">Multiply Y-axis by:</label>
+            <input type="number" id="multiplier" value="1" step="0.1" min="0" />
+            <button onclick="updatePlot()">Apply</button>
+        </div>
     </div>
-    
+
     <script>
         var trace1 = {
             x: [1, 2, 3, 4, 5],
@@ -61,6 +69,14 @@
         };
 
         Plotly.newPlot('plot', [trace1, trace2], layout);
+
+        function updatePlot() {
+            var multiplier = parseFloat(document.getElementById('multiplier').value);
+            var updatedTrace1 = { ...trace1, y: trace1.y.map(val => val * multiplier) };
+            var updatedTrace2 = { ...trace2, y: trace2.y.map(val => val * multiplier) };
+
+            Plotly.react('plot', [updatedTrace1, updatedTrace2], layout);
+        }
     </script>
 </body>
 </html>
