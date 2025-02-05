@@ -160,13 +160,6 @@ footer a:hover {
     display: block;      /* Remove any extra spacing */
 }
 
-.container {
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 #plot {
     margin: 50px;
 }
