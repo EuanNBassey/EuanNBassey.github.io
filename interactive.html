@@ -282,7 +282,7 @@ function updatePlot() {
         showlegend: true, // Make sure legend is enabled
     };
 
-    Plotly.newPlot('plot', traces, layout);
+    Plotly.newPlot('plot', traces, layout, { doubleClickDelay: 300 });
 }
 
 // Initialize plot
