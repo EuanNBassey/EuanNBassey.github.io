@@ -199,20 +199,54 @@
 {name: '209Bi', gamma: 6.96303, spin: 3.5 },
 {name: '235U', gamma: -0.82761, spin: 3.5 }
                          ];
+// Define colors for different spin values
+        const spinColors = {
+            0.5: 'orange',
+            1: 'blue',
+            1.5: 'green',
+            2: 'red',
+            2.5: 'purple',
+            3: 'brown',
+            3.5: 'pink',
+            4: 'cyan',
+            4.5: 'magenta',
+            5: 'gray',
+            6: 'black'
+        };
 
         function updatePlot() {
             let B = parseFloat(document.getElementById("magField").value);
-            let x = nuclides.map((_, i) => i + 1); // Index numbers
-            let y = nuclides.map(nuclide => Math.abs(nuclide.gamma * B)); // Frequencies
 
-            let trace = {
-                x: x,
-                y: y,
-                text: nuclides.map(n => n.name),
-                mode: 'markers+text',
-                type: 'scatter',
-                textposition: 'top center'
-            };
+            // Group nuclides by spin
+            let spinGroups = {};
+            nuclides.forEach(nuclide => {
+                let spinKey = nuclide.spin;
+                if (!spinGroups[spinKey]) {
+                    spinGroups[spinKey] = [];
+                }
+                spinGroups[spinKey].push(nuclide);
+            });
+
+            let traces = [];
+            let spinKeys = Object.keys(spinGroups).map(Number).sort((a, b) => a - b); // Sort spins numerically
+
+            spinKeys.forEach(spin => {
+                let group = spinGroups[spin];
+                let x = group.map((_, i) => i + 1); // Index numbers per spin group
+                let y = group.map(nuclide => Math.abs(nuclide.gamma * B)); // Frequencies
+                let labels = group.map(n => n.name);
+
+                traces.push({
+                    x: x,
+                    y: y,
+                    text: labels,
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    textposition: 'top center',
+                    marker: { color: spinColors[spin] || 'black', size: 8 },
+                    name: `Spin = ${spin}`
+                });
+            });
 
             let layout = {
                 title: `NMR Frequency at ${B} T`,
@@ -220,7 +254,7 @@
                 yaxis: { title: "Frequency (MHz)" }
             };
 
-            Plotly.newPlot('plot', [trace], layout);
+            Plotly.newPlot('plot', traces, layout);
         }
 
         // Initialize plot
