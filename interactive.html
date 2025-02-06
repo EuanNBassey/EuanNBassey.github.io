@@ -196,6 +196,7 @@
                          ];
 // Define colors for different spin values
         // Define colors for different spin values
+// Define colors for different spin values
 const spinColors = {
     0.5: '#a6cee3',
     1: '#1f78b4',
@@ -250,7 +251,8 @@ function updatePlot() {
                         size: 12, // Large size for the cross
                         symbol: 'x' // Cross symbol
                     },
-                    name: `${nuclide.name} (Highlighted)`
+                    name: `${nuclide.name} (Highlighted)`,
+                    showlegend: true // Ensure the legend is visible for the highlighted nucleus
                 };
             }
         });
@@ -263,7 +265,8 @@ function updatePlot() {
             type: 'scatter',
             textposition: 'top center',
             marker: { color: spinColors[spin] || 'black', size: 8 },
-            name: `Spin = ${spin}`
+            name: `Spin = ${spin}`,
+            showlegend: true // Ensure the legend is visible for spin groups
         });
     });
 
@@ -275,7 +278,8 @@ function updatePlot() {
     let layout = {
         title: `NMR Frequency at ${B} T`,
         xaxis: { title: "Nuclide Index" },
-        yaxis: { title: "Frequency (MHz)" }
+        yaxis: { title: "Frequency (MHz)" },
+        showlegend: true, // Make sure legend is enabled
     };
 
     Plotly.newPlot('plot', traces, layout);
