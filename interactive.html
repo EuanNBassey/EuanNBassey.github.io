@@ -265,6 +265,7 @@
         document.getElementById('getInfoButton').addEventListener('click', getNMRInfo);
 
         function getNMRInfo() {
+            let B = parseFloat(document.getElementById("magField").value);
             const nucleus = document.getElementById('nucleusInput').value.trim().toUpperCase();
             const field = parseFloat(document.getElementById('fieldInput').value);
 
