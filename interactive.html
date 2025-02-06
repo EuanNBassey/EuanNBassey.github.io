@@ -195,25 +195,17 @@
 {name: '235U', gamma: -0.82761, spin: 3.5 }
                          ];
 // Define colors for different spin values
-        // Define colors for different spin values
 // Define colors for different spin values
 const spinColors = {
-    0.5: '#a6cee3',
-    1: '#1f78b4',
-    1.5: '#b2df8a',
-    2: '#33a02c',
-    2.5: '#fb9a99',
-    3: '#e31a1c',
-    3.5: '#fdbf6f',
-    4: '#ff7f00',
-    4.5: '#cab2d6',
-    5: '#6a3d9a',
-    6: 'black'
+    0.5: '#a6cee3', 1: '#1f78b4', 1.5: '#b2df8a', 
+    2: '#33a02c', 2.5: '#fb9a99', 3: '#e31a1c', 
+    3.5: '#fdbf6f', 4: '#ff7f00', 4.5: '#cab2d6', 
+    5: '#6a3d9a', 6: 'black'
 };
 
 function updatePlot() {
     let B = parseFloat(document.getElementById("magField").value);
-    let selectedNucleus = document.getElementById("nucleusInput").value.trim().toUpperCase(); // Get the entered nucleus
+    let selectedNucleus = document.getElementById("nucleusInput").value.trim().toUpperCase();
 
     // Group nuclides by spin
     let spinGroups = {};
@@ -226,63 +218,64 @@ function updatePlot() {
     });
 
     let traces = [];
-    let spinKeys = Object.keys(spinGroups).map(Number).sort((a, b) => a - b); // Sort spins numerically
-
-    let highlightedTrace = null;  // For the selected nucleus
+    let spinKeys = Object.keys(spinGroups).map(Number).sort((a, b) => a - b);
+    
+    let highlightTrace = null; // Will store the highlighted nucleus if found
 
     spinKeys.forEach(spin => {
         let group = spinGroups[spin];
-        let x = group.map((_, i) => i + 1); // Index numbers per spin group
-        let y = group.map(nuclide => Math.abs(nuclide.gamma * B)); // Frequencies
+        let x = group.map((_, i) => i + 1);
+        let y = group.map(nuclide => Math.abs(nuclide.gamma * B));
         let labels = group.map(n => n.name);
 
-        // Check if the entered nucleus matches any in this spin group
+        let markerStyle = {
+            color: spinColors[spin] || 'black',
+            size: 8
+        };
+
+        // Search for the selected nucleus in this group
         group.forEach((nuclide, index) => {
             if (nuclide.name.toUpperCase() === selectedNucleus) {
-                highlightedTrace = {
-                    x: [index + 1], // The x position of the selected nucleus
-                    y: [Math.abs(nuclide.gamma * B)], // The frequency of the selected nucleus
-                    text: [nuclide.name],
+                highlightTrace = {
+                    x: [index + 1], 
+                    y: [Math.abs(nuclide.gamma * B)], 
+                    text: [nuclide.name], 
                     mode: 'markers+text',
                     type: 'scatter',
                     textposition: 'top center',
-                    marker: {
-                        color: 'red',
-                        size: 12, // Large size for the cross
-                        symbol: 'x' // Cross symbol
-                    },
-                    name: `${nuclide.name} (Highlighted)`,
-                    showlegend: true // Ensure the legend is visible for the highlighted nucleus
+                    marker: { color: 'red', size: 12, symbol: 'x' },
+                    name: `Selected: ${nuclide.name}`,
+                    legendgroup: 'highlight', // Ensure it's separate from spin groups
+                    showlegend: true
                 };
             }
         });
 
         traces.push({
-            x: x,
-            y: y,
-            text: labels,
+            x: x, y: y, text: labels,
             mode: 'markers+text',
             type: 'scatter',
             textposition: 'top center',
-            marker: { color: spinColors[spin] || 'black', size: 8 },
+            marker: markerStyle,
             name: `Spin = ${spin}`,
-            showlegend: true // Ensure the legend is visible for spin groups
+            legendgroup: `spin${spin}`, // Grouping for legend isolation
+            showlegend: true
         });
     });
 
-    // If the selected nucleus was found, add its highlighted trace
-    if (highlightedTrace) {
-        traces.push(highlightedTrace);
+    // Add the highlight trace if found
+    if (highlightTrace) {
+        traces.push(highlightTrace);
     }
 
     let layout = {
         title: `NMR Frequency at ${B} T`,
         xaxis: { title: "Nuclide Index" },
         yaxis: { title: "Frequency (MHz)" },
-        showlegend: true, // Make sure legend is enabled
+        showlegend: true
     };
 
-    Plotly.newPlot('plot', traces, layout, { doubleClickDelay: 300 });
+    Plotly.newPlot('plot', traces, layout);
 }
 
 // Initialize plot
