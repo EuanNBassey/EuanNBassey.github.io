@@ -254,10 +254,11 @@
 
     <label for="nucleusInput">Nucleus (e.g., 59Co):</label>
     <input type="text" id="nucleusInput" placeholder="e.g., 59Co">
-    <button onclick="getNMRInfo()">Get Info</button>
+    <button id="getInfoButton">Get Info</button>
 
     <div class="result" id="result"></div>
 
+    <!-- Move the script to the bottom of the body -->
     <script>
         const nuclides = [
             {name: '1H', gamma: 42.57746460132430, spin: 0.5 },
@@ -291,6 +292,9 @@
             {name: '47Ti', gamma: -2.40404, spin: 2.5 },
             // Add more nuclei data as needed
         ];
+
+        // Add an event listener to the button
+        document.getElementById('getInfoButton').addEventListener('click', getNMRInfo);
 
         function getNMRInfo() {
             const nucleus = document.getElementById('nucleusInput').value.trim().toUpperCase();
