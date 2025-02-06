@@ -11,37 +11,17 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <style>
-        .content-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        #plot {
-            width: 3000px;
-            height: 800px;
-        }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-
-        .controls label {
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .controls input {
-            width: 80px;
+        body {
             text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #controls {
             margin-bottom: 10px;
+        }
+        #plot {
+            margin: auto;
+            width: 80%; /* Adjust width */
+            max-width: 1000px; /* Max width for larger screens */
         }
     </style>
 </head>
