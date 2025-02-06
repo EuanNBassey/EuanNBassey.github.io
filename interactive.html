@@ -195,7 +195,6 @@
 {name: '235U', gamma: -0.82761, spin: 3.5 }
                          ];
 // Define colors for different spin values
-// Define colors for different spin values
 const spinColors = {
     0.5: '#a6cee3', 1: '#1f78b4', 1.5: '#b2df8a', 
     2: '#33a02c', 2.5: '#fb9a99', 3: '#e31a1c', 
@@ -228,12 +227,22 @@ function updatePlot() {
         let y = group.map(nuclide => Math.abs(nuclide.gamma * B));
         let labels = group.map(n => n.name);
 
-        let markerStyle = {
-            color: spinColors[spin] || 'black',
-            size: 8
+        let trace = {
+            x: x, 
+            y: y, 
+            text: labels,
+            mode: 'markers+text',
+            type: 'scatter',
+            textposition: 'top center',
+            marker: { color: spinColors[spin] || 'black', size: 8 },
+            name: `I = ${spin}`,
+            legendgroup: `spin_${spin}`,  // Unique legend group for each spin
+            showlegend: true
         };
 
-        // Search for the selected nucleus in this group
+        traces.push(trace);
+
+        // Check for user-selected nucleus
         group.forEach((nuclide, index) => {
             if (nuclide.name.toUpperCase() === selectedNucleus) {
                 highlightTrace = {
@@ -245,25 +254,14 @@ function updatePlot() {
                     textposition: 'top center',
                     marker: { color: 'red', size: 12, symbol: 'x' },
                     name: `Selected: ${nuclide.name}`,
-                    legendgroup: 'highlight', // Ensure it's separate from spin groups
+                    legendgroup: 'highlight',  // Separate from spin groups
                     showlegend: true
                 };
             }
         });
-
-        traces.push({
-            x: x, y: y, text: labels,
-            mode: 'markers+text',
-            type: 'scatter',
-            textposition: 'top center',
-            marker: markerStyle,
-            name: `I = ${spin}`,
-            legendgroup: `spin${spin}`, // Grouping for legend isolation
-            showlegend: true
-        });
     });
 
-    // Add the highlight trace if found
+    // Add highlight trace if applicable
     if (highlightTrace) {
         traces.push(highlightTrace);
     }
