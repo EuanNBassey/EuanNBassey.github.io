@@ -266,17 +266,28 @@
 
         function getNMRInfo() {
             const nucleus = document.getElementById('nucleusInput').value.trim().toUpperCase();
-            console.log("Input Nucleus: ", nucleus);  // Debugging: log input value
+            const field = parseFloat(document.getElementById('fieldInput').value);
 
             const resultDiv = document.getElementById('result');
+            
+            // Ensure that the magnetic field is valid
+            if (isNaN(field) || field <= 0) {
+                resultDiv.innerHTML = "Please enter a valid magnetic field strength.";
+                return;
+            }
 
             // Search for the nucleus in the nuclides array (case insensitive)
             const nuclide = nuclides.find(item => item.name.toUpperCase() === nucleus);
-            console.log("Matching Nuclide: ", nuclide);  // Debugging: log matched nuclide
 
             if (nuclide) {
                 const { gamma, spin } = nuclide;
-                resultDiv.innerHTML = `Gamma (γ): ${gamma} MHz/T, Spin: ${spin}`;
+                const resonantFrequency = gamma * field;  // Calculate resonant frequency
+
+                resultDiv.innerHTML = `
+                    Gamma (γ): ${gamma} MHz/T <br>
+                    Spin: ${spin} <br>
+                    Resonant Frequency: ${resonantFrequency.toFixed(2)} MHz (for B0 = ${field} T)
+                `;
             } else {
                 resultDiv.innerHTML = `No data found for nucleus ${nucleus}. Please check the input.`;
             }
