@@ -271,7 +271,7 @@
             const resultDiv = document.getElementById('result');
             
             // Ensure that the magnetic field is valid
-            if (isNaN(field) || field <= 0) {
+            if (isNaN(B) || B <= 0) {
                 resultDiv.innerHTML = "Please enter a valid magnetic field strength.";
                 return;
             }
@@ -281,12 +281,12 @@
 
             if (nuclide) {
                 const { gamma, spin } = nuclide;
-                const resonantFrequency = gamma * field;  // Calculate resonant frequency
+                const resonantFrequency = gamma * B;  // Calculate resonant frequency
 
                 resultDiv.innerHTML = `
                     Gamma (γ): ${gamma} MHz/T <br>
                     Spin: ${spin} <br>
-                    Resonant Frequency: ${resonantFrequency.toFixed(2)} MHz (for B0 = ${field} T)
+                    Resonant Frequency: ${resonantFrequency.toFixed(2)} MHz (for B0 = ${B} T)
                 `;
             } else {
                 resultDiv.innerHTML = `No data found for nucleus ${nucleus}. Please check the input.`;
