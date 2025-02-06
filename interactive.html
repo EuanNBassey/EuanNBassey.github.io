@@ -294,10 +294,13 @@
 
         function getNMRInfo() {
             const nucleus = document.getElementById('nucleusInput').value.trim().toUpperCase();
+            console.log("Input Nucleus: ", nucleus);  // Debugging: log input value
+
             const resultDiv = document.getElementById('result');
 
             // Search for the nucleus in the nuclides array (case insensitive)
             const nuclide = nuclides.find(item => item.name.toUpperCase() === nucleus);
+            console.log("Matching Nuclide: ", nuclide);  // Debugging: log matched nuclide
 
             if (nuclide) {
                 const { gamma, spin } = nuclide;
