@@ -200,11 +200,6 @@ const spinColors = {
     3.5: '#fdbf6f', 4: '#ff7f00', 4.5: '#cab2d6', 
     5: '#6a3d9a', 6: 'black'
 };
-
-function handleUpdate() {
-            getNuclideInfo();
-            updatePlot();
-        }
         
 function updatePlot() {
     let B = parseFloat(document.getElementById("magField").value);
@@ -288,7 +283,6 @@ updatePlot();
     <script>
 
         // Add an event listener to the button
-        document.getElementById('getInfoButton').addEventListener('click', getNMRInfo);
 
         function getNMRInfo() {
             let B = parseFloat(document.getElementById("magField").value);
@@ -317,6 +311,13 @@ updatePlot();
             } else {
                 resultDiv.innerHTML = `No data found for nucleus ${nucleus}. Please check the input.`;
             }
+        }
+    </script>
+
+    <script>
+        function handleUpdate() {
+            getNuclideInfo();
+            updatePlot();
         }
     </script>
         
