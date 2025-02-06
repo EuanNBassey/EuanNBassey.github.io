@@ -249,6 +249,29 @@
         // Initialize plot
         updatePlot();
     </script>
+    <h2>Enter Nucleus Information</h2>
+
+    <label for="nucleusInput">Nucleus (e.g., 59Co):</label>
+    <input type="text" id="nucleusInput" placeholder="e.g., 59Co">
+    <button onclick="getNMRInfo()">Get Info</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+
+        function getNMRInfo() {
+            const nucleus = document.getElementById('nucleusInput').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (nuclides[nucleus]) {
+                const { frequency, spin } = nuclides[nucleus];
+                resultDiv.innerHTML = `Frequency: ${frequency}, Spin: ${spin}`;
+            } else {
+                resultDiv.innerHTML = `No data found for nucleus ${nucleus}.`;
+            }
+        }
+    </script>
+        
     <footer>
         <div class="container">
             <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
