@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NMR Frequencies</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        canvas { max-width: 800px; margin-top: 20px; }
+        input, button { margin: 10px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h2>NMR Frequencies vs. Magnetic Field</h2>
+    <label for="nucleusInput">Enter Nucleus (e.g., 1H, 13C):</label>
+    <input type="text" id="nucleusInput" placeholder="1H">
+    <label for="fieldInput">Enter Magnetic Field (T):</label>
+    <input type="number" id="fieldInput" step="0.1" placeholder="1">
+    <button onclick="highlightNucleus()">Highlight</button>
+    <canvas id="nmrChart"></canvas>
+
+    <script>
+        const nmrData = [
+            { nucleus: "1H", gamma: 42.576 },
+            { nucleus: "13C", gamma: 10.705 },
+            { nucleus: "19F", gamma: 40.053 },
+            { nucleus: "31P", gamma: 17.235 }
+        ];
+        
+        const B0 = Array.from({ length: 100 }, (_, i) => i * 0.1);
+        let datasets = nmrData.map(n => ({
+            label: n.nucleus,
+            data: B0.map(B => ({ x: B, y: n.gamma * B })),
+            borderColor: 'blue',
+            borderWidth: 1,
+            fill: false,
+            pointRadius: 0
+        }));
+        
+        const ctx = document.getElementById('nmrChart').getContext('2d');
+        let nmrChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Magnetic Field (T)' } },
+                    y: { title: { display: true, text: 'Frequency (MHz)' } }
+                },
+                plugins: {
+                    legend: { display: true, labels: { font: { size: 14 } } }
+                }
+            }
+        });
+        
+        function highlightNucleus() {
+            const nucleusInput = document.getElementById("nucleusInput").value.trim();
+            const fieldInput = parseFloat(document.getElementById("fieldInput").value);
+            let found = false;
+            let frequency = null;
+            datasets.forEach(ds => {
+                if (ds.label === nucleusInput) {
+                    ds.borderColor = 'red';
+                    ds.borderWidth = 3;
+                    found = true;
+                    if (!isNaN(fieldInput)) {
+                        const gamma = nmrData.find(n => n.nucleus === nucleusInput).gamma;
+                        frequency = gamma * fieldInput;
+                    }
+                } else {
+                    ds.borderColor = 'blue';
+                    ds.borderWidth = 1;
+                }
+            });
+            
+            if (!found) {
+                alert("Nucleus not found. Please enter a valid nucleus (e.g., 1H, 13C). ");
+            } else if (frequency !== null) {
+                alert(`For ${nucleusInput} at ${fieldInput}T, the frequency is ${frequency.toFixed(2)} MHz.`);
+            }
+            
+            nmrChart.update();
+        }
+    </script>
+</body>
+</html>
