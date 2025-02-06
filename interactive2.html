@@ -56,31 +56,26 @@
         function highlightNucleus() {
             const nucleusInput = document.getElementById("nucleusInput").value.trim();
             const fieldInput = parseFloat(document.getElementById("fieldInput").value);
-            let found = false;
-            let frequency = null;
             
             datasets.forEach(ds => {
                 ds.pointBackgroundColor = 'blue';
+                ds.data = ds.data.filter(point => !point.customHighlight);
             });
             
             if (!isNaN(fieldInput)) {
                 const nucleusData = nmrData.find(n => n.nucleus === nucleusInput);
                 if (nucleusData) {
-                    found = true;
-                    frequency = nucleusData.gamma * fieldInput;
+                    const frequency = nucleusData.gamma * fieldInput;
                     datasets.forEach(ds => {
                         if (ds.label === nucleusInput) {
-                            ds.data.push({ x: fieldInput, y: frequency });
-                            ds.pointBackgroundColor = ds.data.map(point => (point.x === fieldInput && point.y === frequency) ? 'red' : 'blue');
+                            ds.data.push({ x: fieldInput, y: frequency, customHighlight: true });
+                            ds.pointBackgroundColor = ds.data.map(point => point.customHighlight ? 'red' : 'blue');
                         }
                     });
+                    alert(`For ${nucleusInput} at ${fieldInput}T, the frequency is ${frequency.toFixed(2)} MHz.`);
+                } else {
+                    alert("Nucleus not found. Please enter a valid nucleus (e.g., 1H, 13C).");
                 }
-            }
-            
-            if (!found) {
-                alert("Nucleus not found. Please enter a valid nucleus (e.g., 1H, 13C). ");
-            } else if (frequency !== null) {
-                alert(`For ${nucleusInput} at ${fieldInput}T, the frequency is ${frequency.toFixed(2)} MHz.`);
             }
             
             nmrChart.update();
