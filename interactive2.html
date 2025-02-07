@@ -217,10 +217,10 @@
     }
 
     // Function to set the Y-axis min to zero
-    function setYAxisMinToZero() {
+function setYAxisMinToZero() {
   const layout = {
     yaxis: {
-      range: [0, undefined] // Explicitly sets the min to 0 and leaves the max auto-adjusted
+      range: [0, null]  // Sets the min to 0 and auto-scales the max (null allows auto-scaling)
     }
   };
   Plotly.relayout('plot', layout);
