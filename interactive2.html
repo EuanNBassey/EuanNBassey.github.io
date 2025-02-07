@@ -218,13 +218,13 @@
 
     // Function to set the Y-axis min to zero
     function setYAxisMinToZero() {
-      const layout = {
-        yaxis: {
-          rangemode: 'tozero' // This will ensure the y-axis starts from 0
-        }
-      };
-      Plotly.relayout('plot', layout);
+  const layout = {
+    yaxis: {
+      range: [0, undefined] // Explicitly sets the min to 0 and leaves the max auto-adjusted
     }
+  };
+  Plotly.relayout('plot', layout);
+}
 
     // Initial plot rendering
     updatePlot();
