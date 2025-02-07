@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Curie-Weiss Law Plot</title>
-  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.21.0/plotly.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 20px;
-    }
-    #plot {
-      width: 80%;
-      margin: 20px auto;
-    }
-    .input-section {
-      margin-bottom: 20px;
-    }
-    .input-section label {
-      margin-right: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euan N. Bassey - NMR Freqs.</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        #plot {
+            margin: auto;
+            width: 80%; /* Adjust width */
+            height: 60%;
+            max-width: 1200px; /* Max width for larger screens */
+            max-height: 750px; /* Max width for larger screens */
+        }
+    </style>
 </head>
 <body>
   <h1>Interactive Curie-Weiss Law Plot</h1>
