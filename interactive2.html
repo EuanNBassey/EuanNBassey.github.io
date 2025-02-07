@@ -220,7 +220,8 @@
 function setYAxisMinToZero() {
   const layout = {
     yaxis: {
-      range: [0, null]  // Sets the min to 0 and auto-scales the max (null allows auto-scaling)
+      range: [0, null], 
+      title: 'Magnetic Susceptibility (χ)'
     }
   };
   Plotly.relayout('plot', layout);
