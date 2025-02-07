@@ -49,23 +49,23 @@
   <h1>Interactive Curie-Weiss Law Plot</h1>
   
   <div class="input-section">
-    <label for="curie-constant">Curie Constant (C):</label>
-    <input type="number" id="curie-constant" value="3.0" step="0.1" />
+    <label for="spin">Spin (S):</label>
+    <input type="number" id="spin" value="1" step="0.1" />
   </div>
 
   <div class="input-section">
     <label for="weiss-constant">Weiss Constant (θ):</label>
-    <input type="number" id="weiss-constant" value="-50" step="5" />
+    <input type="number" id="weiss-constant" value="300" step="10" />
   </div>
 
   <div class="input-section">
     <label for="temp-min">Temperature Min (Tmin):</label>
-    <input type="number" id="temp-min" value="5" step="5" />
+    <input type="number" id="temp-min" value="50" step="10" />
   </div>
 
   <div class="input-section">
     <label for="temp-max">Temperature Max (Tmax):</label>
-    <input type="number" id="temp-max" value="350" step="5" />
+    <input type="number" id="temp-max" value="400" step="10" />
   </div>
 
   <div class="input-section">
@@ -75,12 +75,22 @@
   <div id="plot"></div>
 
   <script>
+    // Constants
+    const muB = 9.274e-24; // Bohr magneton (J/T)
+    const kB = 1.38e-23; // Boltzmann constant (J/K)
+
     function updatePlot() {
-      const curieConstant = parseFloat(document.getElementById('curie-constant').value);
+      const spin = parseFloat(document.getElementById('spin').value);
       const weissConstant = parseFloat(document.getElementById('weiss-constant').value);
       const tempMin = parseFloat(document.getElementById('temp-min').value);
       const tempMax = parseFloat(document.getElementById('temp-max').value);
-      
+
+      // Calculate the effective magnetic moment using the spin-only approximation
+      const muEff = Math.sqrt(spin * (spin + 1)) * muB;
+
+      // Calculate the Curie constant using the spin-only approximation
+      const curieConstant = (muEff ** 2) / (3 * kB);
+
       // Generate temperature range
       const temperatures = Array.from({length: tempMax - tempMin + 1}, (_, i) => tempMin + i);
 
