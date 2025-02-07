@@ -144,7 +144,7 @@
       const susceptibilityBase = calculateSusceptibility(spinBase, weissConstantBase);
 
       // Additional curves
-      let allSusceptibilities = [...susceptibilityBase];
+      let allSusceptibilities = [susceptibilityBase];
       let sumSusceptibility = [...susceptibilityBase];
 
       for (let i = 1; i <= curveCount; i++) {
