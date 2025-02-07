@@ -17,8 +17,11 @@
       padding: 20px;
     }
     #plot {
-      width: 80%;
-      margin: 20px auto;
+      margin: auto;
+      width: 80%; /* Adjust width */
+      height: 60%;
+      max-width: 1200px; /* Max width for larger screens */
+      max-height: 750px; /* Max width for larger screens */
     }
     .input-section {
       margin-bottom: 20px;
@@ -56,12 +59,12 @@
   
   <div class="input-section">
     <label for="temp-min">Temperature Min (Tmin):</label>
-    <input type="number" id="temp-min" value="5" step="5" />
+    <input type="number" id="temp-min" value="10" step="10" />
   </div>
 
   <div class="input-section">
     <label for="temp-max">Temperature Max (Tmax):</label>
-    <input type="number" id="temp-max" value="350" step="5" />
+    <input type="number" id="temp-max" value="350" step="10" />
   </div>
 
   <div class="input-section">
@@ -76,7 +79,7 @@
 
   <div class="input-section">
     <label for="weiss-constant">Weiss Constant (θ):</label>
-    <input type="number" id="weiss-constant" value="-50" step="5" />
+    <input type="number" id="weiss-constant" value="-20" step="5" />
   </div>
 
   <h3>Additional Curves:</h3>
@@ -109,6 +112,8 @@
           <input type="number" id="spin-${curveCount}" value="1" step="0.1" />
           <label for="weiss-constant-${curveCount}">Weiss Constant (θ) for Curve ${curveCount}:</label>
           <input type="number" id="weiss-constant-${curveCount}" value="300" step="10" />
+          <label for="weight-${curveCount}">Weight (Fraction) for Curve ${curveCount}:</label>
+          <input type="number" id="weight-${curveCount}" value="1" step="0.01" min="0" max="1" />
         `;
         document.getElementById('additional-curves').appendChild(curveDiv);
       }
@@ -150,9 +155,15 @@
       for (let i = 1; i <= curveCount; i++) {
         const spin = parseFloat(document.getElementById(`spin-${i}`).value);
         const weissConstant = parseFloat(document.getElementById(`weiss-constant-${i}`).value);
+        const weight = parseFloat(document.getElementById(`weight-${i}`).value); // Get the weight for this curve
         const susceptibility = calculateSusceptibility(spin, weissConstant);
-        allSusceptibilities.push(susceptibility);
-        sumSusceptibility = sumSusceptibility.map((value, idx) => value + susceptibility[idx]);
+
+        // Apply the weight to the susceptibility
+        const weightedSusceptibility = susceptibility.map(value => value * weight);
+        allSusceptibilities.push(weightedSusceptibility);
+
+        // Add weighted susceptibility to the sum
+        sumSusceptibility = sumSusceptibility.map((value, idx) => value + weightedSusceptibility[idx]);
       }
 
       // Create traces for all curves
