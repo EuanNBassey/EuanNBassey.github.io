@@ -35,7 +35,7 @@ header p {
     margin-top: 10px;
 }
 
-/* Navigation styles */
+/* Navigation styles 
 nav {
     background-color: #333;
     padding: 10px 0;
@@ -55,7 +55,7 @@ nav ul li a {
     color: white;
     text-decoration: none;
     font-size: 1.2em;
-}
+} */
 
 /* Section styles */
 section {
@@ -198,7 +198,7 @@ footer a:hover {
     font-family: Arial, sans-serif !important;
 }
 
-/* Ensure the dropdown is positioned correctly */
+/* Ensure the dropdown container is positioned relative */
 nav ul {
     list-style-type: none;
     padding: 0;
@@ -208,7 +208,7 @@ nav ul {
 }
 
 nav ul li {
-    position: relative;
+    position: relative; /* Ensures child dropdown is positioned relative to this */
 }
 
 nav ul li a {
@@ -218,27 +218,39 @@ nav ul li a {
     display: block;
 }
 
-/* Dropdown menu styling */
+/* Dropdown menu styles */
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%;
-    left: 0;  /* Remove or adjust this */
+    top: 100%;  /* Directly below Tools */
+    left: 0;  /* Align with parent <li> */
     background: #444;
     list-style: none;
     padding: 0;
     margin: 0;
-    min-width: 150px;
+    min-width: 200px;
     z-index: 1000;
 }
 
-/* Make sure it's positioned relative to the parent LI */
-.dropdown {
-    position: relative;
+/* Ensure dropdown items are properly styled */
+.dropdown-menu li {
+    width: 100%;
 }
 
-/* Align dropdown directly under "Tools" */
-.dropdown-menu {
-    left: 0; /* Aligns with the parent li */
-    right: auto; /* Prevents misalignment */
+.dropdown-menu li a {
+    padding: 10px;
+    display: block;
+    color: white;
+    white-space: nowrap;
+}
+
+/* Show dropdown on hover */
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+    display: block;
+}
+
+/* Optional: Add border and styling */
+.dropdown-menu li a:hover {
+    background: #555;
 }
