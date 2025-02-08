@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy/Wavelength/Frequency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            width: 60%;
+            margin: 0 auto;
+        }
+        .converter-section {
+            margin-bottom: 20px;
+        }
+        select, input {
+            width: 150px;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Energy/Wavelength/Frequency Converter</h1>
+    <div class="container">
+        <div class="converter-section">
+            <h3>Energy to Frequency/Wavelength Converter</h3>
+            <label for="energy-input">Energy:</label>
+            <input type="number" id="energy-input" placeholder="Energy">
+            <select id="energy-unit">
+                <option value="J">J (Joules)</option>
+                <option value="eV">eV (Electron Volts)</option>
+                <option value="K">K (Kelvin)</option>
+            </select>
+            
+            <label for="energy-prefix">Unit Prefix:</label>
+            <select id="energy-prefix">
+                <option value="1">Base</option>
+                <option value="milli">milli (m)</option>
+                <option value="kilo">kilo (k)</option>
+                <option value="Mega">Mega (M)</option>
+                <option value="nano">nano (n)</option>
+                <option value="micro">micro (μ)</option>
+                <option value="Giga">Giga (G)</option>
+            </select>
+            
+            <button onclick="convertEnergy()">Convert</button>
+        </div>
+
+        <div class="converter-section">
+            <h3>Frequency/Wavelength to Energy Converter</h3>
+            <label for="frequency-input">Frequency (Hz):</label>
+            <input type="number" id="frequency-input" placeholder="Frequency in Hz">
+            
+            <button onclick="convertFrequency()">Convert</button>
+        </div>
+
+        <div class="result">
+            <h3>Results</h3>
+            <div id="energy-result"></div>
+            <div id="frequency-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const PLANCKS_CONSTANT = 6.62607015e-34; // in J·s
+        const BOLTZMANN_CONSTANT = 1.380649e-23; // in J/K
+
+        // Conversion between Joules and eV
+        function joulesToEV(energy) {
+            return energy / 1.60218e-19; // J to eV conversion
+        }
+
+        function evToJoules(energy) {
+            return energy * 1.60218e-19; // eV to J conversion
+        }
+
+        // Conversion between frequency and energy (E = h * f)
+        function frequencyToEnergy(frequency) {
+            return PLANCKS_CONSTANT * frequency; // E = h * f
+        }
+
+        // Convert Energy input (Joules, eV, Kelvin) to Frequency and Wavelength
+        function convertEnergy() {
+            let energy = parseFloat(document.getElementById('energy-input').value);
+            let energyUnit = document.getElementById('energy-unit').value;
+            let energyPrefix = document.getElementById('energy-prefix').value;
+
+            // Apply unit prefixes to energy
+            switch (energyPrefix) {
+                case 'milli':
+                    energy *= 1e-3;
+                    break;
+                case 'kilo':
+                    energy *= 1e3;
+                    break;
+                case 'Mega':
+                    energy *= 1e6;
+                    break;
+                case 'nano':
+                    energy *= 1e-9;
+                    break;
+                case 'micro':
+                    energy *= 1e-6;
+                    break;
+                case 'Giga':
+                    energy *= 1e9;
+                    break;
+            }
+
+            // Convert energy based on selected unit
+            if (energyUnit === "eV") {
+                energy = joulesToEV(energy); // convert from J to eV
+            } else if (energyUnit === "K") {
+                energy = energy / BOLTZMANN_CONSTANT; // Convert from J to K (Kelvin)
+            }
+
+            let frequency = frequencyToEnergy(energy);
+            let wavelength = (PLANCKS_CONSTANT * 3e8) / frequency; // λ = c / f
+
+            document.getElementById('energy-result').innerHTML = `
+                Converted Energy: ${energy.toFixed(6)} ${energyUnit}<br>
+                Frequency: ${frequency.toFixed(6)} Hz<br>
+                Wavelength: ${(wavelength / 1e-2).toFixed(6)} cm
+            `;
+        }
+
+        // Convert Frequency to Energy
+        function convertFrequency() {
+            let frequency = parseFloat(document.getElementById('frequency-input').value);
+            let energy = frequencyToEnergy(frequency); // E = h * f
+            document.getElementById('frequency-result').innerHTML = `
+                Energy: ${energy.toExponential(2)} J
+            `;
+        }
+    </script>
+</body>
+</html>
