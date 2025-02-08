@@ -41,6 +41,25 @@
         <option value="m">Wavelength (m)</option>
         <option value="Hz">Hertz (Hz)</option>
     </select>
+    <br>
+    <label for="outputPrefix">Convert To:</label>
+    <select id="outputPrefix">
+        <option value="1">(None)</option>
+        <option value="1e-9">Nano (n)</option>
+        <option value="1e-6">Micro (µ)</option>
+        <option value="1e-3">Milli (m)</option>
+        <option value="1e3">Kilo (k)</option>
+        <option value="1e6">Mega (M)</option>
+        <option value="1e9">Giga (G)</option>
+    </select>
+    <select id="outputUnit">
+        <option value="J">Joule (J)</option>
+        <option value="K">Kelvin (K)</option>
+        <option value="eV">Electron Volt (eV)</option>
+        <option value="cm-1">Wavenumber (cm⁻¹)</option>
+        <option value="m">Wavelength (m)</option>
+        <option value="Hz">Hertz (Hz)</option>
+    </select>
     <button onclick="convert()">Convert</button>
     <div id="output"></div>
 
@@ -50,21 +69,13 @@
         const c = 299792458;       // Speed of light (m/s)
         const eV_to_J = 1.602176634e-19;
         const cm1_to_J = h * c * 100;
-        const prefixes = {
-            "1": "",
-            "1e-9": "n",
-            "1e-6": "µ",
-            "1e-3": "m",
-            "1e3": "k",
-            "1e6": "M",
-            "1e9": "G"
-        };
 
         function convert() {
             let value = parseFloat(document.getElementById('value').value);
             let prefixFactor = parseFloat(document.getElementById('prefix').value);
             let unit = document.getElementById('unit').value;
-            let results = {};
+            let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
+            let outputUnit = document.getElementById('outputUnit').value;
             let value_J = value * prefixFactor;
 
             if (unit === "J") value_J *= 1;
@@ -74,22 +85,17 @@
             if (unit === "m") value_J = h * c / value_J;
             if (unit === "Hz") value_J = h * value_J;
 
-            results["J"] = value_J;
-            results["K"] = value_J / kB;
-            results["eV"] = value_J / eV_to_J;
-            results["cm-1"] = value_J / cm1_to_J;
-            results["m"] = h * c / value_J;
-            results["Hz"] = value_J / h;
+            let convertedValue;
+            if (outputUnit === "J") convertedValue = value_J;
+            if (outputUnit === "K") convertedValue = value_J / kB;
+            if (outputUnit === "eV") convertedValue = value_J / eV_to_J;
+            if (outputUnit === "cm-1") convertedValue = value_J / cm1_to_J;
+            if (outputUnit === "m") convertedValue = h * c / value_J;
+            if (outputUnit === "Hz") convertedValue = value_J / h;
 
-            let output = "<h3>Conversions:</h3><ul>";
-            for (let [key, val] of Object.entries(results)) {
-                for (let [factor, prefix] of Object.entries(prefixes)) {
-                    output += `<li>${(val / parseFloat(factor)).toExponential(6)} ${prefix}${key}</li>`;
-                }
-            }
-            output += "</ul>";
+            convertedValue /= outputPrefixFactor;
 
-            document.getElementById('output').innerHTML = output;
+            document.getElementById('output').innerHTML = `<h3>Converted Value:</h3><p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit}</p>`;
         }
     </script>
 </body>
