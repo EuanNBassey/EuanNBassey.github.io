@@ -24,6 +24,15 @@
     <h2>Energy/Frequency/Wavelength Converter</h2>
     <label for="value">Enter Value:</label>
     <input type="number" id="value" step="any">
+    <select id="prefix">
+        <option value="1">(None)</option>
+        <option value="1e-9">Nano (n)</option>
+        <option value="1e-6">Micro (µ)</option>
+        <option value="1e-3">Milli (m)</option>
+        <option value="1e3">Kilo (k)</option>
+        <option value="1e6">Mega (M)</option>
+        <option value="1e9">Giga (G)</option>
+    </select>
     <select id="unit">
         <option value="J">Joule (J)</option>
         <option value="K">Kelvin (K)</option>
@@ -41,22 +50,30 @@
         const c = 299792458;       // Speed of light (m/s)
         const eV_to_J = 1.602176634e-19;
         const cm1_to_J = h * c * 100;
+        const prefixes = {
+            "1": "",
+            "1e-9": "n",
+            "1e-6": "µ",
+            "1e-3": "m",
+            "1e3": "k",
+            "1e6": "M",
+            "1e9": "G"
+        };
 
         function convert() {
             let value = parseFloat(document.getElementById('value').value);
+            let prefixFactor = parseFloat(document.getElementById('prefix').value);
             let unit = document.getElementById('unit').value;
             let results = {};
+            let value_J = value * prefixFactor;
 
-            // Convert input to Joules (J) as a common base
-            let value_J;
-            if (unit === "J") value_J = value;
-            if (unit === "K") value_J = value * kB;
-            if (unit === "eV") value_J = value * eV_to_J;
-            if (unit === "cm-1") value_J = value * cm1_to_J;
-            if (unit === "m") value_J = h * c / value;
-            if (unit === "Hz") value_J = h * value;
+            if (unit === "J") value_J *= 1;
+            if (unit === "K") value_J *= kB;
+            if (unit === "eV") value_J *= eV_to_J;
+            if (unit === "cm-1") value_J *= cm1_to_J;
+            if (unit === "m") value_J = h * c / value_J;
+            if (unit === "Hz") value_J = h * value_J;
 
-            // Convert from Joules to all other units
             results["J"] = value_J;
             results["K"] = value_J / kB;
             results["eV"] = value_J / eV_to_J;
@@ -64,10 +81,11 @@
             results["m"] = h * c / value_J;
             results["Hz"] = value_J / h;
 
-            // Generate output
             let output = "<h3>Conversions:</h3><ul>";
             for (let [key, val] of Object.entries(results)) {
-                output += `<li>${val.toExponential(6)} ${key}</li>`;
+                for (let [factor, prefix] of Object.entries(prefixes)) {
+                    output += `<li>${(val / parseFloat(factor)).toExponential(6)} ${prefix}${key}</li>`;
+                }
             }
             output += "</ul>";
 
