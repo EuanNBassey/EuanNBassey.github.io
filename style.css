@@ -218,39 +218,27 @@ nav ul li a {
     display: block;
 }
 
-/* Ensure dropdown is hidden initially */
+/* Dropdown menu styling */
 .dropdown-menu {
     display: none;
     position: absolute;
     top: 100%;
-    left: 0;
+    left: 0;  /* Remove or adjust this */
     background: #444;
     list-style: none;
     padding: 0;
     margin: 0;
     min-width: 150px;
-    z-index: 1000; /* Ensure it's above other content */
+    z-index: 1000;
 }
 
-/* Ensure dropdown items are clickable */
-.dropdown-menu li {
-    width: 100%;
+/* Make sure it's positioned relative to the parent LI */
+.dropdown {
+    position: relative;
 }
 
-.dropdown-menu li a {
-    padding: 10px;
-    display: block;
-    color: white;
-    white-space: nowrap; /* Prevents text from wrapping */
-}
-
-/* Show dropdown when hovering */
-.dropdown:hover .dropdown-menu,
-.dropdown:focus-within .dropdown-menu {
-    display: block;
-}
-
-/* Add fallback for touchscreens where hover doesn't work */
-.dropdown > a {
-    cursor: pointer;
+/* Align dropdown directly under "Tools" */
+.dropdown-menu {
+    left: 0; /* Aligns with the parent li */
+    right: auto; /* Prevents misalignment */
 }
