@@ -198,37 +198,27 @@ footer a:hover {
     font-family: Arial, sans-serif !important;
 }
 
-/* Center the navigation bar and set its width */
-.nav-container {
-    width: 100%;  /* Adjust to match the banner width */
-    margin: 0 auto;  /* Centers the nav */
-}
-
-/* Ensure the nav bar itself spans the full width of .nav-container */
+/* Navigation styles */
 nav {
-    background: #333;
+    background-color: #333;
     padding: 10px 0;
+    text-align: center;
 }
 
-/* Center align the nav items */
 nav ul {
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    padding: 0;
-    margin: 0;
     list-style-type: none;
-    background: #333;
 }
 
 nav ul li {
+    display: inline;
+    margin: 0 15px;
     position: relative; /* Ensures child dropdown is positioned relative to this */
 }
 
 nav ul li a {
-    text-decoration: none;
     color: white;
-    padding: 10px 15px;
-    display: block;
+    text-decoration: none;
+    font-size: 1.2em;
 }
 
 /* Dropdown menu styles */
