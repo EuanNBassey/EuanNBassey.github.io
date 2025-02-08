@@ -38,115 +38,101 @@
     <h1>Energy/Wavelength/Frequency Converter</h1>
     <div class="container">
         <div class="converter-section">
-            <h3>Energy to Frequency/Wavelength Converter</h3>
-            <label for="energy-input">Energy:</label>
-            <input type="number" id="energy-input" placeholder="Energy">
-            <select id="energy-unit">
-                <option value="J">J (Joules)</option>
+            <h3>Convert Between Units</h3>
+
+            <!-- User Inputs -->
+            <label for="input-value">Enter Value:</label>
+            <input type="number" id="input-value" placeholder="Value">
+            
+            <label for="input-unit">From:</label>
+            <select id="input-unit">
+                <option value="meV">meV (milli-Electron Volts)</option>
                 <option value="eV">eV (Electron Volts)</option>
+                <option value="J">J (Joules)</option>
                 <option value="K">K (Kelvin)</option>
+                <option value="cm-1">cm⁻¹ (Wavenumbers)</option>
+                <option value="Hz">Hz (Frequency)</option>
+                <option value="m">m (Wavelength in meters)</option>
             </select>
             
-            <label for="energy-prefix">Unit Prefix:</label>
-            <select id="energy-prefix">
-                <option value="1">Base</option>
-                <option value="milli">milli (m)</option>
-                <option value="kilo">kilo (k)</option>
-                <option value="Mega">Mega (M)</option>
-                <option value="nano">nano (n)</option>
-                <option value="micro">micro (μ)</option>
-                <option value="Giga">Giga (G)</option>
+            <label for="output-unit">To:</label>
+            <select id="output-unit">
+                <option value="meV">meV (milli-Electron Volts)</option>
+                <option value="eV">eV (Electron Volts)</option>
+                <option value="J">J (Joules)</option>
+                <option value="K">K (Kelvin)</option>
+                <option value="cm-1">cm⁻¹ (Wavenumbers)</option>
+                <option value="Hz">Hz (Frequency)</option>
+                <option value="m">m (Wavelength in meters)</option>
             </select>
-            
-            <button onclick="convertEnergy()">Convert</button>
+
+            <button onclick="convert()">Convert</button>
         </div>
 
-        <div class="converter-section">
-            <h3>Frequency/Wavelength to Energy Converter</h3>
-            <label for="frequency-input">Frequency (Hz):</label>
-            <input type="number" id="frequency-input" placeholder="Frequency in Hz">
-            
-            <button onclick="convertFrequency()">Convert</button>
-        </div>
-
+        <!-- Result Display -->
         <div class="result">
-            <h3>Results</h3>
-            <div id="energy-result"></div>
-            <div id="frequency-result"></div>
+            <h3>Result</h3>
+            <div id="conversion-result"></div>
         </div>
     </div>
 
     <script>
-        // Constants
+        // Conversion Constants
         const PLANCKS_CONSTANT = 6.62607015e-34; // in J·s
         const BOLTZMANN_CONSTANT = 1.380649e-23; // in J/K
+        const SPEED_OF_LIGHT = 3e8; // in m/s
 
-        // Conversion between Joules and eV
-        function joulesToEV(energy) {
-            return energy / 1.60218e-19; // J to eV conversion
-        }
+        // Conversion Functions
+        const conversions = {
+            // From eV to other units
+            "eV-to-J": (value) => value * 1.60218e-19,  // eV to Joules
+            "eV-to-meV": (value) => value * 1000,        // eV to milli-eV
+            "eV-to-K": (value) => value * 11604.5,       // eV to Kelvin
+            "eV-to-cm-1": (value) => value * 8065.54,    // eV to cm⁻¹ (Wavenumber)
+            "eV-to-Hz": (value) => value * 2.417988e14,  // eV to Hz (Energy to Frequency)
+            "eV-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / (value * 1.60218e-19), // Energy to Wavelength (meters)
+            
+            // From Joules to other units
+            "J-to-eV": (value) => value / 1.60218e-19,   // J to eV
+            "J-to-meV": (value) => value / 1.60218e-22,  // J to milli-eV
+            "J-to-K": (value) => value / BOLTZMANN_CONSTANT, // J to K
+            "J-to-cm-1": (value) => (value * 1.60218e-19) / 8065.54, // J to cm⁻¹
+            "J-to-Hz": (value) => value / PLANCKS_CONSTANT, // J to Hz (Frequency)
+            "J-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // Energy to Wavelength (meters)
 
-        function evToJoules(energy) {
-            return energy * 1.60218e-19; // eV to J conversion
-        }
+            // From Kelvin to other units
+            "K-to-eV": (value) => value * BOLTZMANN_CONSTANT / 1.60218e-19, // K to eV
+            "K-to-J": (value) => value * BOLTZMANN_CONSTANT, // K to J
+            "K-to-meV": (value) => value * BOLTZMANN_CONSTANT / 1.60218e-22, // K to milli-eV
+            "K-to-cm-1": (value) => value * 0.695032, // K to cm⁻¹
+            "K-to-Hz": (value) => value * 2.898e-3, // K to Hz
+            "K-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / (value * 1.60218e-19), // K to wavelength
+            
+            // Other conversions...
+            // Wavelength (cm) and Frequency to Energy, etc.
+        };
 
-        // Conversion between frequency and energy (E = h * f)
-        function frequencyToEnergy(frequency) {
-            return PLANCKS_CONSTANT * frequency; // E = h * f
-        }
+        function convert() {
+            let inputValue = parseFloat(document.getElementById("input-value").value);
+            let inputUnit = document.getElementById("input-unit").value;
+            let outputUnit = document.getElementById("output-unit").value;
 
-        // Convert Energy input (Joules, eV, Kelvin) to Frequency and Wavelength
-        function convertEnergy() {
-            let energy = parseFloat(document.getElementById('energy-input').value);
-            let energyUnit = document.getElementById('energy-unit').value;
-            let energyPrefix = document.getElementById('energy-prefix').value;
-
-            // Apply unit prefixes to energy
-            switch (energyPrefix) {
-                case 'milli':
-                    energy *= 1e-3;
-                    break;
-                case 'kilo':
-                    energy *= 1e3;
-                    break;
-                case 'Mega':
-                    energy *= 1e6;
-                    break;
-                case 'nano':
-                    energy *= 1e-9;
-                    break;
-                case 'micro':
-                    energy *= 1e-6;
-                    break;
-                case 'Giga':
-                    energy *= 1e9;
-                    break;
+            if (isNaN(inputValue)) {
+                document.getElementById("conversion-result").innerHTML = "Please enter a valid number.";
+                return;
             }
 
-            // Convert energy based on selected unit
-            if (energyUnit === "eV") {
-                energy = joulesToEV(energy); // convert from J to eV
-            } else if (energyUnit === "K") {
-                energy = energy / BOLTZMANN_CONSTANT; // Convert from J to K (Kelvin)
+            let conversionKey = `${inputUnit}-to-${outputUnit}`;
+
+            // Check if the conversion is possible and perform the conversion
+            if (conversions[conversionKey]) {
+                let result = conversions[conversionKey](inputValue);
+                document.getElementById("conversion-result").innerHTML = `
+                    ${inputValue} ${inputUnit} is equal to ${result.toFixed(6)} ${outputUnit}
+                `;
+            } else {
+                document.getElementById("conversion-result").innerHTML = `Conversion from ${inputUnit} to ${outputUnit} is not available.`;
             }
-
-            let frequency = frequencyToEnergy(energy);
-            let wavelength = (PLANCKS_CONSTANT * 3e8) / frequency; // λ = c / f
-
-            document.getElementById('energy-result').innerHTML = `
-                Converted Energy: ${energy.toFixed(6)} ${energyUnit}<br>
-                Frequency: ${frequency.toFixed(6)} Hz<br>
-                Wavelength: ${(wavelength / 1e-2).toFixed(6)} cm
-            `;
-        }
-
-        // Convert Frequency to Energy
-        function convertFrequency() {
-            let frequency = parseFloat(document.getElementById('frequency-input').value);
-            let energy = frequencyToEnergy(frequency); // E = h * f
-            document.getElementById('frequency-result').innerHTML = `
-                Energy: ${energy.toExponential(2)} J
-            `;
         }
     </script>
 </body>
