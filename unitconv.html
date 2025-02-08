@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy/Frequency/Wavelength Converter</title>
+    <title>About - Euan N. Bassey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,6 +25,27 @@
         }
     </style>
 </head>
+<body>
+    <header>
+        <div class="container">
+        </div>
+    </header>
+
+    <!-- Navigation Section -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="cv.html">CV</a></li>
+                <li><a href="publications.html">Publications</a></li>
+                <li><a href="talks.html">Talks</a></li>
+                <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 <body>
     <h2>Energy/Frequency/Wavelength Converter</h2>
     <label for="value">Enter Value:</label>
@@ -98,5 +124,10 @@
             document.getElementById('output').innerHTML = `<h3>Converted Value:</h3><p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit}</p>`;
         }
     </script>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
