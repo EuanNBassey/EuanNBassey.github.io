@@ -3,154 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy/Wavelength/Frequency Converter</title>
+    <title>Energy/Frequency/Wavelength Converter</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 10px;
-        }
-        h1 {
             text-align: center;
+            margin: 20px;
         }
-        .container {
-            width: 60%;
-            margin: 0 auto;
-        }
-        .converter-section {
-            margin-bottom: 20px;
-        }
-        select, input {
-            width: 150px;
+        input, select, button {
+            margin: 10px;
             padding: 8px;
-            margin-right: 10px;
         }
-        button {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .result {
+        #output {
             margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Energy/Wavelength/Frequency Converter</h1>
-    <div class="container">
-        <div class="converter-section">
-            <h3>Convert Between Units</h3>
-
-            <!-- User Inputs -->
-            <label for="input-value">Enter Value:</label>
-            <input type="number" id="input-value" placeholder="Value">
-            
-            <label for="input-unit">From:</label>
-            <select id="input-unit">
-                <option value="meV">meV (milli-Electron Volts)</option>
-                <option value="eV">eV (Electron Volts)</option>
-                <option value="J">J (Joules)</option>
-                <option value="K">K (Kelvin)</option>
-                <option value="cm-1">cm⁻¹ (Wavenumbers)</option>
-                <option value="Hz">Hz (Frequency)</option>
-                <option value="m">m (Wavelength in meters)</option>
-            </select>
-            
-            <label for="output-unit">To:</label>
-            <select id="output-unit">
-                <option value="meV">meV (milli-Electron Volts)</option>
-                <option value="eV">eV (Electron Volts)</option>
-                <option value="J">J (Joules)</option>
-                <option value="K">K (Kelvin)</option>
-                <option value="cm-1">cm⁻¹ (Wavenumbers)</option>
-                <option value="Hz">Hz (Frequency)</option>
-                <option value="m">m (Wavelength in meters)</option>
-            </select>
-
-            <button onclick="convert()">Convert</button>
-        </div>
-
-        <!-- Result Display -->
-        <div class="result">
-            <h3>Result</h3>
-            <div id="conversion-result"></div>
-        </div>
-    </div>
+    <h2>Energy/Frequency/Wavelength Converter</h2>
+    <label for="value">Enter Value:</label>
+    <input type="number" id="value" step="any">
+    <select id="unit">
+        <option value="J">Joule (J)</option>
+        <option value="K">Kelvin (K)</option>
+        <option value="eV">Electron Volt (eV)</option>
+        <option value="cm-1">Wavenumber (cm⁻¹)</option>
+        <option value="m">Wavelength (m)</option>
+        <option value="Hz">Hertz (Hz)</option>
+    </select>
+    <button onclick="convert()">Convert</button>
+    <div id="output"></div>
 
     <script>
-        // Constants
-        const PLANCKS_CONSTANT = 6.62607015e-34; // in J·s
-        const BOLTZMANN_CONSTANT = 1.380649e-23; // in J/K
-        const SPEED_OF_LIGHT = 3e8; // in m/s
-
-        // Conversion Functions
-        const conversions = {
-            // From eV to other units
-            "eV-to-J": (value) => value * 1.60218e-19,  // eV to Joules
-            "eV-to-meV": (value) => value * 1000,        // eV to milli-eV
-            "eV-to-K": (value) => value * 11604.5,       // eV to Kelvin
-            "eV-to-cm-1": (value) => value * 8065.54,    // eV to cm⁻¹ (Wavenumber)
-            "eV-to-Hz": (value) => value * 2.417988e14,  // eV to Hz (Energy to Frequency)
-            "eV-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / (value * 1.60218e-19), // Energy to Wavelength (meters)
-            
-            // From Joules to other units
-            "J-to-eV": (value) => value / 1.60218e-19,   // J to eV
-            "J-to-meV": (value) => value / 1.60218e-22,  // J to milli-eV
-            "J-to-K": (value) => value / BOLTZMANN_CONSTANT, // J to K
-            "J-to-cm-1": (value) => (value * 1.60218e-19) / 8065.54, // J to cm⁻¹
-            "J-to-Hz": (value) => value / PLANCKS_CONSTANT, // J to Hz (Frequency)
-            "J-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // Energy to Wavelength (meters)
-
-            // From Kelvin to other units
-            "K-to-eV": (value) => value * BOLTZMANN_CONSTANT / 1.60218e-19, // K to eV
-            "K-to-J": (value) => value * BOLTZMANN_CONSTANT, // K to J
-            "K-to-meV": (value) => value * BOLTZMANN_CONSTANT / 1.60218e-22, // K to milli-eV
-            "K-to-cm-1": (value) => value * 0.695032, // K to cm⁻¹
-            "K-to-Hz": (value) => value * 2.898e-3, // K to Hz
-            "K-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / (value * 1.60218e-19), // K to wavelength
-            
-            // From Wavenumbers (cm-1) to other units
-            "cm-1-to-eV": (value) => value / 8065.54, // cm⁻¹ to eV
-            "cm-1-to-J": (value) => value / 8065.54 * 1.60218e-19, // cm⁻¹ to J
-            "cm-1-to-K": (value) => value / 0.695032, // cm⁻¹ to K
-            "cm-1-to-Hz": (value) => value * SPEED_OF_LIGHT * 100, // cm⁻¹ to Hz
-            "cm-1-to-m": (value) => 1 / (value * 100), // cm⁻¹ to meters (Wavelength)
-            
-            // From Hz to other units
-            "Hz-to-eV": (value) => value * PLANCKS_CONSTANT / 1.60218e-19, // Hz to eV
-            "Hz-to-J": (value) => value * PLANCKS_CONSTANT, // Hz to J
-            "Hz-to-K": (value) => value * 2.898e-3, // Hz to K
-            "Hz-to-cm-1": (value) => value / (SPEED_OF_LIGHT * 100), // Hz to cm⁻¹
-            "Hz-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // Hz to wavelength
-            
-            // From Wavelength (m) to other units
-            "m-to-eV": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value / 1.60218e-19, // m to eV
-            "m-to-J": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // m to J
-            "m-to-K": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value / BOLTZMANN_CONSTANT, // m to K
-            "m-to-cm-1": (value) => 1 / (value * 100), // m to cm⁻¹
-            "m-to-Hz": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // m to Hz
-        };
+        const h = 6.62607015e-34; // Planck's constant (J·s)
+        const kB = 1.380649e-23;  // Boltzmann's constant (J/K)
+        const c = 299792458;       // Speed of light (m/s)
+        const eV_to_J = 1.602176634e-19;
+        const cm1_to_J = h * c * 100;
 
         function convert() {
-            let inputValue = parseFloat(document.getElementById("input-value").value);
-            let inputUnit = document.getElementById("input-unit").value;
-            let outputUnit = document.getElementById("output-unit").value;
+            let value = parseFloat(document.getElementById('value').value);
+            let unit = document.getElementById('unit').value;
+            let results = {};
 
-            if (isNaN(inputValue)) {
-                document.getElementById("conversion-result").innerHTML = "Please enter a valid number.";
-                return;
+            // Convert input to Joules (J) as a common base
+            let value_J;
+            if (unit === "J") value_J = value;
+            if (unit === "K") value_J = value * kB;
+            if (unit === "eV") value_J = value * eV_to_J;
+            if (unit === "cm-1") value_J = value * cm1_to_J;
+            if (unit === "m") value_J = h * c / value;
+            if (unit === "Hz") value_J = h * value;
+
+            // Convert from Joules to all other units
+            results["J"] = value_J;
+            results["K"] = value_J / kB;
+            results["eV"] = value_J / eV_to_J;
+            results["cm-1"] = value_J / cm1_to_J;
+            results["m"] = h * c / value_J;
+            results["Hz"] = value_J / h;
+
+            // Generate output
+            let output = "<h3>Conversions:</h3><ul>";
+            for (let [key, val] of Object.entries(results)) {
+                output += `<li>${val.toExponential(6)} ${key}</li>`;
             }
+            output += "</ul>";
 
-            let conversionKey = `${inputUnit}-to-${outputUnit}`;
-
-            // Check if the conversion is possible and perform the conversion
-            if (conversions[conversionKey]) {
-                let result = conversions[conversionKey](inputValue);
-                document.getElementById("conversion-result").innerHTML = `
-                    ${inputValue} ${inputUnit} is equal to ${result.toFixed(6)} ${outputUnit}
-                `;
-            } else {
-                document.getElementById("conversion-result").innerHTML = `Conversion from ${inputUnit} to ${outputUnit} is not available.`;
-            }
+            document.getElementById('output').innerHTML = output;
         }
     </script>
 </body>
