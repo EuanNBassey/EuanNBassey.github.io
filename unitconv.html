@@ -77,7 +77,7 @@
     </div>
 
     <script>
-        // Conversion Constants
+        // Constants
         const PLANCKS_CONSTANT = 6.62607015e-34; // in J·s
         const BOLTZMANN_CONSTANT = 1.380649e-23; // in J/K
         const SPEED_OF_LIGHT = 3e8; // in m/s
@@ -108,8 +108,26 @@
             "K-to-Hz": (value) => value * 2.898e-3, // K to Hz
             "K-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / (value * 1.60218e-19), // K to wavelength
             
-            // Other conversions...
-            // Wavelength (cm) and Frequency to Energy, etc.
+            // From Wavenumbers (cm-1) to other units
+            "cm-1-to-eV": (value) => value / 8065.54, // cm⁻¹ to eV
+            "cm-1-to-J": (value) => value / 8065.54 * 1.60218e-19, // cm⁻¹ to J
+            "cm-1-to-K": (value) => value / 0.695032, // cm⁻¹ to K
+            "cm-1-to-Hz": (value) => value * SPEED_OF_LIGHT * 100, // cm⁻¹ to Hz
+            "cm-1-to-m": (value) => 1 / (value * 100), // cm⁻¹ to meters (Wavelength)
+            
+            // From Hz to other units
+            "Hz-to-eV": (value) => value * PLANCKS_CONSTANT / 1.60218e-19, // Hz to eV
+            "Hz-to-J": (value) => value * PLANCKS_CONSTANT, // Hz to J
+            "Hz-to-K": (value) => value * 2.898e-3, // Hz to K
+            "Hz-to-cm-1": (value) => value / (SPEED_OF_LIGHT * 100), // Hz to cm⁻¹
+            "Hz-to-m": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // Hz to wavelength
+            
+            // From Wavelength (m) to other units
+            "m-to-eV": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value / 1.60218e-19, // m to eV
+            "m-to-J": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // m to J
+            "m-to-K": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value / BOLTZMANN_CONSTANT, // m to K
+            "m-to-cm-1": (value) => 1 / (value * 100), // m to cm⁻¹
+            "m-to-Hz": (value) => (PLANCKS_CONSTANT * SPEED_OF_LIGHT) / value, // m to Hz
         };
 
         function convert() {
