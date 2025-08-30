@@ -138,10 +138,19 @@
       svg.innerHTML='';
       const W=700,H=450,yScale=120;
 
-      // Y-axis for energy
+      // Y-axis for energy with arrow and label
       const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
       yAxis.setAttribute('x1',100); yAxis.setAttribute('x2',100); yAxis.setAttribute('y1',50); yAxis.setAttribute('y2',H-50);
-      yAxis.setAttribute('stroke','#333'); svg.appendChild(yAxis);
+      yAxis.setAttribute('stroke','#333'); yAxis.setAttribute('stroke-width','2'); svg.appendChild(yAxis);
+      // Arrowhead
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      arrow.setAttribute('points','95,50 105,50 100,40');
+      arrow.setAttribute('fill','#333'); svg.appendChild(arrow);
+      // Axis label
+      const axisLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+      axisLabel.setAttribute('x',70); axisLabel.setAttribute('y',40); axisLabel.setAttribute('fill','#333');
+      axisLabel.setAttribute('font-size','14'); axisLabel.textContent='Energy (eV)';
+      svg.appendChild(axisLabel);
 
       const groups={};
       filled.subs.forEach(s=>{ groups[s.label]=groups[s.label]||[]; groups[s.label].push(s); });
@@ -161,8 +170,10 @@
         text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','12');
         text.innerHTML = g.label;
         svg.appendChild(text);
+        // Energy label on y-axis
         const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
-        energyText.setAttribute('x',135); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','12');
+        energyText.setAttribute('x',80); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','12');
+        energyText.setAttribute('text-anchor','end');
         energyText.textContent=g.E.toFixed(2)+' eV';
         svg.appendChild(energyText);
       });
