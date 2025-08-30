@@ -12,27 +12,45 @@
     <link rel="manifest" href="/site.webmanifest">
   <style>
     #controls {
-      font-size: 12px;
-      padding: 8px;
+      font-size: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #controls label {
+      margin: 8px 0;
+      width: 100%;
+      text-align: center;
     }
     #controls input[type=range], #controls input[type=number], #controls select {
-      width: 100px;
-      margin: 4px;
+      width: 150px;
+      margin-left: 8px;
+    }
+    #controls span {
+      margin-left: 4px;
     }
     #controls button {
-      padding: 5px 8px;
-      font-size: 12px;
+      padding: 6px 12px;
+      font-size: 14px;
+      margin-top: 12px;
     }
     .legend {
-      font-size: 11px;
-      margin-top: 8px;
+      font-size: 12px;
+      margin-top: 12px;
+      text-align: center;
     }
     .legend span {
       display: inline-block;
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       margin-right: 4px;
       vertical-align: middle;
+    }
+    svg {
+      display: block;
+      margin: 20px auto;
+      max-width: 90%;
     }
   </style>
 </head>
@@ -61,37 +79,41 @@
   <div class="container">
     <h1>Crystal Field Splitting Tool</h1>
     <div class="controls" id="controls">
-      <label>Geometry
-        <select id="geom">
-          <option value="oh">Octahedral</option>
-          <option value="td">Tetrahedral</option>
-          <option value="sp">Square Planar</option>
-        </select>
-      </label>
-      <label>Δ (splitting, eV)
+      <label>Geometry <select id="geom">
+        <option value="oh">Octahedral</option>
+        <option value="td">Tetrahedral</option>
+        <option value="sp">Square Planar</option>
+      </select></label>
+
+      <label>Δ (splitting, eV)<br>
         <input id="delta" type="range" min="0" max="4" step="0.05" value="1.5">
+        <span id="deltaVal">1.50</span> eV
       </label>
-      <span id="deltaVal">1.50</span> eV
-      <label>d-electron count
+
+      <label>d-electron count<br>
         <input id="dcount" type="number" min="0" max="10" value="6">
       </label>
-      <label>Pairing energy (eV)
+
+      <label>Pairing energy (eV)<br>
         <input id="pair" type="range" min="0" max="2" step="0.05" value="0.8">
+        <span id="pairVal">0.80</span> eV
       </label>
-      <span id="pairVal">0.80</span> eV
+
       <div class="output">
         Spin state: <span id="spinState">—</span><br>
         CFSE: <span id="cfse">—</span><br>
         Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
       </div>
+
       <button id="downloadCF">Download Diagram</button>
+
       <div class="legend">
         <span style="background:#4285f4"></span> Spin up
-        <span style="background:#34a853; margin-left: 10px;"></span> Spin down
+        <span style="background:#34a853; margin-left: 8px;"></span> Spin down
       </div>
     </div>
 
-    <svg id="cftSVG" viewBox="0 0 700 450"></svg>
+    <svg id="cftSVG" viewBox="0 0 500 350"></svg>
   </div>
 
   <script>
