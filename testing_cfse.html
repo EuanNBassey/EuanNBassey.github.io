@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Euan N. Bassey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+</head>
+
+<body>
+  <div class="container">
+    <h1>Crystal Field Splitting Tool</h1>
+    <div class="controls">
+      <label>Geometry
+        <select id="geom">
+          <option value="oh">Octahedral</option>
+          <option value="td">Tetrahedral</option>
+          <option value="sp">Square Planar</option>
+        </select>
+      </label>
+      <label>Δ (splitting, eV)
+        <input id="delta" type="range" min="0" max="4" step="0.05" value="1.5">
+      </label>
+      <span id="deltaVal">1.50</span> eV
+      <label>d-electron count
+        <input id="dcount" type="number" min="0" max="10" value="6">
+      </label>
+      <label>Pairing energy (eV)
+        <input id="pair" type="number" step="0.05" value="0.8">
+      </label>
+      <div class="output">
+        Spin state: <span id="spinState">—</span><br>
+        CFSE: <span id="cfse">—</span><br>
+        Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
+      </div>
+      <button id="downloadCF">Download Diagram</button>
+    </div>
+    <svg id="cftSVG" viewBox="0 0 600 400"></svg>
+  </div>
+  <script>
+    const svg = document.getElementById('cftSVG');
+    const deltaInput = document.getElementById('delta');
+    const deltaVal = document.getElementById('deltaVal');
+    const geomInput = document.getElementById('geom');
+    const dcountInput = document.getElementById('dcount');
+    const pairInput = document.getElementById('pair');
+    const spinStateOutput = document.getElementById('spinState');
+    const cfseOutput = document.getElementById('cfse');
+    const pairsOutput = document.getElementById('pairs');
+    const unpairedOutput = document.getElementById('unpaired');
+
+    function getLevels(geom, Delta) {
+      if (geom === 'oh') {
+        return [
+          { label: 't2g', g: 3, E: -0.4 * Delta },
+          { label: 'eg', g: 2, E: 0.6 * Delta }
+        ];
+      } else if (geom === 'td') {
+        const Dt = 4/9*Delta;
+        return [
+          { label: 'e', g: 2, E: -0.6*Dt },
+          { label: 't2', g: 3, E: 0.4*Dt }
+        ];
+      } else {
+        const E = [-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
+        return [
+          { label: 'dxz/yz', g: 2, E: E[0] },
+          { label: 'dz2', g: 1, E: E[1] },
+          { label: 'dxy', g: 1, E: E[2] },
+          { label: 'dx2-y2', g: 1, E: E[3] }
+        ];
+      }
+    }
+
+    function fillElectrons(levels, n, P) {
+      const subs = [];
+      levels.forEach(L => { for(let i=0;i<L.g;i++) subs.push({E:L.E,label:L.label,occ:0}); });
+      subs.sort((a,b)=>a.E-b.E);
+      let rem = n;
+      // Determine high/low spin by comparing Delta vs P
+      const highSpin = (Math.max(...levels.map(l=>l.E)) - Math.min(...levels.map(l=>l.E))) < P;
+      if(highSpin){
+        while(rem>0){ subs.sort((a,b)=> (a.occ-b.occ)||(a.E-b.E)); subs[0].occ++; rem--; }
+      } else {
+        for(const s of subs){ const add = Math.min(2, rem); s.occ+=add; rem-=add; if(rem<=0) break; }
+      }
+      let cfse=0, pairs=0, unpaired=0;
+      subs.forEach(s=>{ cfse+=s.occ*s.E; if(s.occ===2) pairs++; else if(s.occ===1) unpaired++; });
+      return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
+    }
+
+    function renderCFT(){
+      const G = geomInput.value; const D = parseFloat(deltaInput.value); deltaVal.textContent = D.toFixed(2);
+      const n = parseInt(dcountInput.value)||0; const P = parseFloat(pairInput.value)||0;
+      const levels = getLevels(G,D); const filled = fillElectrons(levels,n,P);
+      svg.innerHTML='';
+      const W=600,H=400,midX=W/2,len=320,yScale=120;
+      const zero = document.createElementNS('http://www.w3.org/2000/svg','line');
+      zero.setAttribute('x1',50); zero.setAttribute('x2',550); zero.setAttribute('y1',H/2); zero.setAttribute('y2',H/2);
+      zero.setAttribute('stroke','#ccc'); svg.appendChild(zero);
+      // Draw orbitals
+      const groups = {};
+      filled.subs.forEach(s=>{ groups[s.label]=groups[s.label]||[]; groups[s.label].push(s); });
+      const uniq = Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
+      uniq.forEach((g,i)=>{
+        const y = H/2 - g.E*yScale;
+        const spacing = 40;
+        g.arr.forEach((s,idx)=>{
+          const x = 150 + idx*spacing;
+          const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+          line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-15); line.setAttribute('y2',y+15);
+          line.setAttribute('stroke','#000'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
+          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-5); c1.setAttribute('r',6); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
+          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+5); c2.setAttribute('r',6); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
+        });
+      });
+      spinStateOutput.textContent = filled.spin;
+      cfseOutput.textContent = filled.cfse.toFixed(2);
+      pairsOutput.textContent = filled.pairs;
+      unpairedOutput.textContent = filled.unpaired;
+    }
+
+    [geomInput, deltaInput, dcountInput, pairInput].forEach(el=>el.addEventListener('input',renderCFT));
+    renderCFT();
+
+    document.getElementById('downloadCF').addEventListener('click',()=>{
+      const s = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([s],{type:'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
