@@ -4,28 +4,42 @@
     
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CFSE - Crystal Field Splitting Tool</title>
+  <title>CFSE - Euan N. Bassey</title>
   <link rel="stylesheet" href="style.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
   <style>
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
     #controls {
       font-size: 14px;
       padding: 12px;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
+      width: 300px;
     }
     #controls label {
-      margin: 8px 0;
+      margin: 12px 0;
       width: 100%;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
     #controls input[type=range], #controls input[type=number], #controls select {
-      width: 150px;
-      margin-left: 8px;
+      width: 100%;
+      margin-top: 4px;
     }
     #controls span {
       margin-left: 4px;
@@ -38,7 +52,7 @@
     .legend {
       font-size: 12px;
       margin-top: 12px;
-      text-align: center;
+      text-align: left;
     }
     .legend span {
       display: inline-block;
@@ -48,9 +62,8 @@
       vertical-align: middle;
     }
     svg {
-      display: block;
-      margin: 20px auto;
-      max-width: 90%;
+      max-width: 500px;
+      flex: 1;
     }
   </style>
 </head>
@@ -76,8 +89,9 @@
     </ul>
   </nav>
 
+  <h1>Crystal Field Splitting Tool</h1>
+
   <div class="container">
-    <h1>Crystal Field Splitting Tool</h1>
     <div class="controls" id="controls">
       <label>Geometry <select id="geom">
         <option value="oh">Octahedral</option>
