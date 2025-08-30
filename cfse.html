@@ -19,8 +19,8 @@
   #controls span { margin-left:4px; }
   #controls button { padding:6px 12px; font-size:14px; margin-top:12px; }
   .legend { font-size:12px; margin-top:12px; text-align:left; }
-  .legend span { display:inline-block; width:12px; height:12px; margin-right:4px; vertical-align:middle; }
-  svg { max-width:700px; flex:1; margin-top:40px; }
+  .legend span { display:inline-block; width:16px; height:16px; margin-right:4px; vertical-align:middle; }
+  svg { max-width:900px; flex:1; margin-top:40px; }
 </style>
 </head>
 <body>
@@ -91,120 +91,113 @@ const pairsOutput=document.getElementById('pairs');
 const unpairedOutput=document.getElementById('unpaired');
 
 function getLevels(geom,Delta){
-if(geom==='oh') return [
-{label:'<i>t</i><sub>2g</sub>', g:3, E:-0.4*Delta},
-{label:'<i>e</i><sub>g</sub>', g:2, E:0.6*Delta}
-];
-else if(geom==='td'){const Dt=4/9*Delta; return [
-{label:'<i>e</i>', g:2, E:-0.6*Dt},
-{label:'<i>t</i><sub>2g</sub>', g:3, E:0.4*Dt}
-];}
-else{
-const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
-return [
-{label:'dxz/yz', g:2, E:E[0]},
-{label:'dz2', g:1, E:E[1]},
-{label:'dxy', g:1, E:E[2]},
-{label:'dx2-y2', g:1, E:E[3]}
-];
-}}
+  if(geom==='oh') return [
+    {label:'<i>t</i><sub>2g</sub>', g:3, E:-0.4*Delta},
+    {label:'<i>e</i><sub>g</sub>', g:2, E:0.6*Delta}
+  ];
+  else if(geom==='td'){const Dt=4/9*Delta; return [
+    {label:'<i>t</i><sub>2g</sub>', g:3, E:0.4*Dt},
+    {label:'<i>e</i><sub>g</sub>', g:2, E:-0.6*Dt}
+  ];}
+  else{
+    const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
+    return [
+      {label:'dxz/yz', g:2, E:E[0]},
+      {label:'dz2', g:1, E:E[1]},
+      {label:'dxy', g:1, E:E[2]},
+      {label:'dx2-y2', g:1, E:E[3]}
+    ];
+  }
+}
 
 function fillElectrons(levels,n,P){
-const subs=[];
-levels.forEach(L=>{for(let i=0;i<L.g;i++)subs.push({E:L.E,label:L.label,occ:0});});
-subs.sort((a,b)=>a.E-b.E);
-let rem=n;
-const highSpin=(Math.max(...levels.map(l=>l.E))-Math.min(...levels.map(l=>l.E)))<P;
-if(highSpin){while(rem>0){subs.sort((a,b)=>(a.occ-b.occ)||(a.E-b.E));subs[0].occ++;rem--;}}
-else{for(const s of subs){const add=Math.min(2,rem);s.occ+=add;rem-=add;if(rem<=0)break;}}
-let cfse=0,pairs=0,unpaired=0;
-subs.forEach(s=>{cfse+=s.occ*s.E;if(s.occ===2)pairs++;else if(s.occ===1)unpaired++;});
-return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
+  const subs=[];
+  levels.forEach(L=>{for(let i=0;i<L.g;i++)subs.push({E:L.E,label:L.label,occ:0});});
+  subs.sort((a,b)=>a.E-b.E);
+  let rem=n;
+  const highSpin=(Math.max(...levels.map(l=>l.E))-Math.min(...levels.map(l=>l.E)))<P;
+  if(highSpin){while(rem>0){subs.sort((a,b)=>(a.occ-b.occ)||(a.E-b.E));subs[0].occ++;rem--;}}
+  else{for(const s of subs){const add=Math.min(2,rem);s.occ+=add;rem-=add;if(rem<=0)break;}}
+  let cfse=0,pairs=0,unpaired=0;
+  subs.forEach(s=>{cfse+=s.occ*s.E;if(s.occ===2)pairs++;else if(s.occ===1)unpaired++;});
+  return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
 }
 
 function renderCFT(){
-const G=geomInput.value;const D=parseFloat(deltaInput.value);deltaVal.textContent=D.toFixed(2);
-const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;pairVal.textContent=P.toFixed(2);
-const levels=getLevels(G,D);const filled=fillElectrons(levels,n,P);
-svg.innerHTML='';
-const marginTop=150,marginLeft=250,H=400,yScale=120;
+  const G=geomInput.value; const D=parseFloat(deltaInput.value); deltaVal.textContent=D.toFixed(2);
+  const n=parseInt(dcountInput.value)||0; const P=parseFloat(pairInput.value)||0; pairVal.textContent=P.toFixed(2);
+  const levels=getLevels(G,D); const filled=fillElectrons(levels,n,P);
+  svg.innerHTML='';
 
-// Y axis
-const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
-yAxis.setAttribute('x1',marginLeft-60);yAxis.setAttribute('x2',marginLeft-60);
-yAxis.setAttribute('y1',marginTop-20);yAxis.setAttribute('y2',marginTop+H);
-yAxis.setAttribute('stroke','#000');yAxis.setAttribute('stroke-width','2');svg.appendChild(yAxis);
+  const marginTop=120,marginLeft=250,H=400,yScale=120;
 
-// Arrow
-const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-arrow.setAttribute('points',`${marginLeft-65},${marginTop-20} ${marginLeft-55},${marginTop-20} ${marginLeft-60},${marginTop-30}`);
-arrow.setAttribute('fill','#000');svg.appendChild(arrow);
+  // Y axis
+  const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
+  yAxis.setAttribute('x1',marginLeft-60); yAxis.setAttribute('x2',marginLeft-60);
+  yAxis.setAttribute('y1',marginTop-20); yAxis.setAttribute('y2',marginTop+H);
+  yAxis.setAttribute('stroke','#000'); yAxis.setAttribute('stroke-width','2'); svg.appendChild(yAxis);
 
-// Energy label horizontal
-const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
-yLabel.setAttribute('x',marginLeft+150);yLabel.setAttribute('y',marginTop-40);
-yLabel.setAttribute('text-anchor','middle');
-yLabel.setAttribute('font-size','16');
-yLabel.textContent='Energy (eV)';svg.appendChild(yLabel);
+  // Arrow
+  const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  arrow.setAttribute('points',`${marginLeft-65},${marginTop-20} ${marginLeft-55},${marginTop-20} ${marginLeft-60},${marginTop-30}`);
+  arrow.setAttribute('fill','#000'); svg.appendChild(arrow);
 
-const groups={};
-filled.subs.forEach(s=>{groups[s.label]=groups[s.label]||[];groups[s.label].push(s);});
-const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
+  // Energy label horizontal
+  const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
+  yLabel.setAttribute('x',marginLeft-60); yLabel.setAttribute('y',marginTop-50);
+  yLabel.setAttribute('text-anchor','middle'); yLabel.setAttribute('font-size','16');
+  yLabel.textContent='Energy (eV)'; svg.appendChild(yLabel);
 
-uniq.forEach(g=>{
-const y=marginTop+H/2-g.E*yScale;
-const lineLength=150,spacing=30;
-const textX=marginLeft-90;
+  const groups={};
+  filled.subs.forEach(s=>{groups[s.label]=groups[s.label]||[]; groups[s.label].push(s);});
+  const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
 
-// Draw horizontal level
-const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-line.setAttribute('x1',marginLeft);line.setAttribute('x2',marginLeft+lineLength);
-line.setAttribute('y1',y);line.setAttribute('y2',y);
-line.setAttribute('stroke','#000');line.setAttribute('stroke-width','3');svg.appendChild(line);
+  uniq.forEach(g=>{
+    const y=marginTop+H/2-g.E*yScale;
+    const lineLength=150, spacing=50;
 
-// Draw electrons horizontally
-g.arr.forEach((s,idx)=>{
-for(let e=0;e<s.occ;e++){
-const cx=marginLeft+20+e*20+idx*spacing;
-const cy=y;
-const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
-circle.setAttribute('cx',cx);circle.setAttribute('cy',cy);
-circle.setAttribute('r',10);circle.setAttribute('fill',e===0?'#4285f4':'#34a853');
-svg.appendChild(circle);
-}
-});
+    // Draw horizontal level
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',marginLeft); line.setAttribute('x2',marginLeft+lineLength);
+    line.setAttribute('y1',y); line.setAttribute('y2',y);
+    line.setAttribute('stroke','#000'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
 
-// Draw label
-const label=document.createElementNS('http://www.w3.org/2000/svg','text');
-label.setAttribute('x',textX);label.setAttribute('y',y+5);
-label.setAttribute('font-size','16');
-label.setAttribute('text-anchor','end');
-label.setAttribute('dominant-baseline','middle');
-label.innerHTML=g.label;svg.appendChild(label);
+    // Draw electrons horizontally
+    g.arr.forEach((s,idx)=>{
+      const x=marginLeft+15+idx*spacing;
+      if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-8); c1.setAttribute('r',10); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1);}
+      if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+8); c2.setAttribute('r',10); c2.setAttribute('fill','#34a853'); svg.appendChild(c2);}
+    });
 
-// Draw energy value
-const val=document.createElementNS('http://www.w3.org/2000/svg','text');
-val.setAttribute('x',marginLeft+lineLength+20);val.setAttribute('y',y+5);
-val.setAttribute('font-size','14');
-val.setAttribute('dominant-baseline','middle');
-val.textContent=g.E.toFixed(2);
-svg.appendChild(val);
-});
+    // Draw level label
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',marginLeft+lineLength+20); txt.setAttribute('y',y+5);
+    txt.setAttribute('font-size','16'); txt.setAttribute('fill','#000');
+    txt.innerHTML=g.label;
+    svg.appendChild(txt);
 
-spinStateOutput.textContent=filled.spin;
-cfseOutput.textContent=filled.cfse.toFixed(2);
-pairsOutput.textContent=filled.pairs;
-unpairedOutput.textContent=filled.unpaired;
+    // Draw energy value
+    const val=document.createElementNS('http://www.w3.org/2000/svg','text');
+    val.setAttribute('x',marginLeft-80); val.setAttribute('y',y+5);
+    val.setAttribute('font-size','14'); val.setAttribute('fill','#000');
+    val.textContent=g.E.toFixed(2);
+    svg.appendChild(val);
+  });
+
+  spinStateOutput.textContent=filled.spin;
+  cfseOutput.textContent=filled.cfse.toFixed(2);
+  pairsOutput.textContent=filled.pairs;
+  unpairedOutput.textContent=filled.unpaired;
 }
 
 [geomInput,deltaInput,dcountInput,pairInput].forEach(el=>el.addEventListener('input',renderCFT));
 renderCFT();
 
 document.getElementById('downloadCF').addEventListener('click',()=>{
-const s=new XMLSerializer().serializeToString(svg);
-const blob=new Blob([s],{type:'image/svg+xml'});
-const url=URL.createObjectURL(blob);
-const a=document.createElement('a');a.href=url;a.download='crystal_field.svg';a.click();URL.revokeObjectURL(url);
+  const s=new XMLSerializer().serializeToString(svg);
+  const blob=new Blob([s],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
 });
 </script>
     <footer>
