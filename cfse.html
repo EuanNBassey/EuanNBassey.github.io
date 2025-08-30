@@ -1,56 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - Euan N. Bassey</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CFSE - Crystal Field Splitting Tool</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3SM8P3KQ4N');
-</script>
 <body>
-    <header>
-        <div class="container">
-        </div>
-    </header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li class="dropdown">
+        <a href="#">Tools ▼</a>
+        <ul class="dropdown-menu">
+          <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+          <li><a href="curieweiss.html">Curie-Weiss</a></li>
+          <li><a href="unitconv.html">Unit Conversion</a></li>
+          <li><a href="testing_cfse.html">CFSE</a></li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
 
-    <!-- Navigation Section -->
-    <nav>
-        <div class="container">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="cv.html">CV</a></li>
-            <li><a href="publications.html">Publications</a></li>
-            <li><a href="talks.html">Talks</a></li>
-            <li class="dropdown">
-                <a href="#">Tools ▼</a>
-                <ul class="dropdown-menu">
-                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
-                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
-                    <li><a href="unitconv.html">Unit Conversion</a></li>
-                </ul>
-            </li>
-            <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
-    
   <div class="container">
     <h1>Crystal Field Splitting Tool</h1>
-    <div class="controls">
+    <div class="controls" id="controls">
       <label>Geometry
         <select id="geom">
           <option value="oh">Octahedral</option>
@@ -75,8 +51,10 @@
       </div>
       <button id="downloadCF">Download Diagram</button>
     </div>
+
     <svg id="cftSVG" viewBox="0 0 700 450"></svg>
   </div>
+
   <script>
     const svg = document.getElementById('cftSVG');
     const deltaInput = document.getElementById('delta');
@@ -128,18 +106,15 @@
           const x=150 + idx*spacing;
           const line=document.createElementNS('http://www.w3.org/2000/svg','line');
           line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-15); line.setAttribute('y2',y+15);
-          line.setAttribute('stroke','#000'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
-          // electron circles
+          line.setAttribute('stroke','#333'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
           if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-5); c1.setAttribute('r',6); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
           if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+5); c2.setAttribute('r',6); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
         });
-        // add orbital label
         const text=document.createElementNS('http://www.w3.org/2000/svg','text');
-        text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('class','label-text'); text.textContent=g.label;
+        text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','14'); text.textContent=g.label;
         svg.appendChild(text);
-        // add energy annotation
         const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
-        energyText.setAttribute('x',650); energyText.setAttribute('y',y+5); energyText.setAttribute('class','label-text'); energyText.textContent=g.E.toFixed(2)+' eV';
+        energyText.setAttribute('x',650); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','14'); energyText.textContent=g.E.toFixed(2)+' eV';
         svg.appendChild(energyText);
       });
       spinStateOutput.textContent=filled.spin;
@@ -158,8 +133,7 @@
       const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
     });
   </script>
-
-    <footer>
+     <footer>
         <div class="container">
             <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
         </div>
