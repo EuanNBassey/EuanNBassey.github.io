@@ -87,7 +87,7 @@
     <svg id="cftSVG" viewBox="0 0 700 450"></svg>
   </div>
 
-   <script>
+  <script>
     const svg = document.getElementById('cftSVG');
     const deltaInput = document.getElementById('delta');
     const deltaVal = document.getElementById('deltaVal');
@@ -101,10 +101,18 @@
     const unpairedOutput = document.getElementById('unpaired');
 
     function getLevels(geom, Delta) {
-      if (geom === 'oh') return [{ label: 't<sub>2</sub>g', g: 3, E: -0.4*Delta },{ label: 'e<sub>g</sub>', g:2, E:0.6*Delta }];
-      if (geom === 'td') { const Dt=4/9*Delta; return [{label:'e<sub>', g:2,E:-0.6*Dt},{label:'t<sub>2</sub>',g:3,E:0.4*Dt}]; }
+      if (geom === 'oh') return [
+        { label: 't<tspan baseline-shift="sub">2</tspan>g', g: 3, E: -0.4*Delta },
+        { label: 'e<tspan baseline-shift="sub">g</tspan>', g:2, E:0.6*Delta }
+      ];
+      if (geom === 'td') { const Dt=4/9*Delta; return [
+        {label:'e<tspan baseline-shift="sub">g</tspan>', g:2, E:-0.6*Dt},
+        {label:'t<tspan baseline-shift="sub">2</tspan>',g:3,E:0.4*Dt}
+      ];}
       const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
-      return [{label:'dxz/yz',g:2,E:E[0]},{label:'dz2',g:1,E:E[1]},{label:'dxy',g:1,E:E[2]},{label:'dx2-y2',g:1,E:E[3]}];
+      return [
+        {label:'dxz/yz',g:2,E:E[0]},{label:'dz2',g:1,E:E[1]},{label:'dxy',g:1,E:E[2]},{label:'dx2-y2',g:1,E:E[3]}
+      ];
     }
 
     function fillElectrons(levels, n, P) {
@@ -145,7 +153,7 @@
         });
         const text=document.createElementNS('http://www.w3.org/2000/svg','text');
         text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','12');
-        text.innerHTML = g.label; // use innerHTML to allow subscript formatting
+        text.innerHTML = g.label; // allow subscript formatting
         svg.appendChild(text);
         const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
         energyText.setAttribute('x',650); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','12'); energyText.textContent=g.E.toFixed(2)+' eV';
