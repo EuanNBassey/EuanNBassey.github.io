@@ -91,18 +91,15 @@ const pairsOutput=document.getElementById('pairs');
 const unpairedOutput=document.getElementById('unpaired');
 
 function getLevels(geom,Delta){
-if(geom==='oh'){
-return [
-{label:'<t style="font-style:italic">t</t><sub>2g</sub>', g:3, E:-0.4*Delta},
-{label:'<t style="font-style:italic">e</t><sub>g</sub>', g:2, E:0.6*Delta}
+if(geom==='oh') return [
+{label:'<i>t</i><sub>2g</sub>', g:3, E:-0.4*Delta},
+{label:'<i>e</i><sub>g</sub>', g:2, E:0.6*Delta}
 ];
-}else if(geom==='td'){
-const Dt=4/9*Delta;
-return [
-{label:'<t style="font-style:italic">e</t>', g:2, E:-0.6*Dt},
-{label:'<t style="font-style:italic">t</t><sub>2g</sub>', g:3, E:0.4*Dt}
-];
-}else{
+else if(geom==='td'){const Dt=4/9*Delta; return [
+{label:'<i>e</i>', g:2, E:-0.6*Dt},
+{label:'<i>t</i><sub>2g</sub>', g:3, E:0.4*Dt}
+];}
+else{
 const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
 return [
 {label:'dxz/yz', g:2, E:E[0]},
@@ -130,60 +127,68 @@ const G=geomInput.value;const D=parseFloat(deltaInput.value);deltaVal.textConten
 const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;pairVal.textContent=P.toFixed(2);
 const levels=getLevels(G,D);const filled=fillElectrons(levels,n,P);
 svg.innerHTML='';
-const W=700,H=400,marginTop=100,marginLeft=250,yScale=80;
+const marginTop=150,marginLeft=250,H=400,yScale=120;
 
 // Y axis
 const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
-yAxis.setAttribute('x1',marginLeft-50);yAxis.setAttribute('x2',marginLeft-50);
-yAxis.setAttribute('y1',marginTop);yAxis.setAttribute('y2',H+marginTop);
+yAxis.setAttribute('x1',marginLeft-60);yAxis.setAttribute('x2',marginLeft-60);
+yAxis.setAttribute('y1',marginTop-20);yAxis.setAttribute('y2',marginTop+H);
 yAxis.setAttribute('stroke','#000');yAxis.setAttribute('stroke-width','2');svg.appendChild(yAxis);
 
-// Arrow at top
+// Arrow
 const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-arrow.setAttribute('points',`${marginLeft-55},${marginTop} ${marginLeft-45},${marginTop} ${marginLeft-50},${marginTop-10}`);
+arrow.setAttribute('points',`${marginLeft-65},${marginTop-20} ${marginLeft-55},${marginTop-20} ${marginLeft-60},${marginTop-30}`);
 arrow.setAttribute('fill','#000');svg.appendChild(arrow);
 
-// Y axis label horizontal
+// Energy label horizontal
 const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
-yLabel.setAttribute('x',marginLeft-50);yLabel.setAttribute('y',marginTop-30);
+yLabel.setAttribute('x',marginLeft+150);yLabel.setAttribute('y',marginTop-40);
 yLabel.setAttribute('text-anchor','middle');
+yLabel.setAttribute('font-size','16');
 yLabel.textContent='Energy (eV)';svg.appendChild(yLabel);
 
 const groups={};
 filled.subs.forEach(s=>{groups[s.label]=groups[s.label]||[];groups[s.label].push(s);});
 const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
 
-uniq.forEach((g,i)=>{
-const y=marginTop + H/2 - g.E*yScale;
-const spacing=25;
-g.arr.forEach((s,idx)=>{
+uniq.forEach(g=>{
+const y=marginTop+H/2-g.E*yScale;
+const lineLength=150,spacing=30;
+const textX=marginLeft-90;
+
+// Draw horizontal level
 const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-line.setAttribute('x1',marginLeft);line.setAttribute('x2',marginLeft+60);line.setAttribute('y1',y);line.setAttribute('y2',y);
-line.setAttribute('stroke','#000');line.setAttribute('stroke-width','2');svg.appendChild(line);
+line.setAttribute('x1',marginLeft);line.setAttribute('x2',marginLeft+lineLength);
+line.setAttribute('y1',y);line.setAttribute('y2',y);
+line.setAttribute('stroke','#000');line.setAttribute('stroke-width','3');svg.appendChild(line);
 
-// Electrons horizontally
+// Draw electrons horizontally
+g.arr.forEach((s,idx)=>{
 for(let e=0;e<s.occ;e++){
-const cx=marginLeft+10+e*12;
-const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-c.setAttribute('cx',cx);c.setAttribute('cy',y);c.setAttribute('r',5);
-c.setAttribute('fill',e===0?'#4285f4':'#34a853');svg.appendChild(c);
+const cx=marginLeft+20+e*20+idx*spacing;
+const cy=y;
+const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+circle.setAttribute('cx',cx);circle.setAttribute('cy',cy);
+circle.setAttribute('r',10);circle.setAttribute('fill',e===0?'#4285f4':'#34a853');
+svg.appendChild(circle);
 }
+});
 
-// Orbital label
+// Draw label
 const label=document.createElementNS('http://www.w3.org/2000/svg','text');
-label.setAttribute('x',marginLeft-40);label.setAttribute('y',y+4);label.setAttribute('font-size','14');
-label.setAttribute('text-anchor','start');
+label.setAttribute('x',textX);label.setAttribute('y',y+5);
+label.setAttribute('font-size','16');
+label.setAttribute('text-anchor','end');
 label.setAttribute('dominant-baseline','middle');
 label.innerHTML=g.label;svg.appendChild(label);
 
-// Energy value
-const eVal=document.createElementNS('http://www.w3.org/2000/svg','text');
-eVal.setAttribute('x',marginLeft+70);eVal.setAttribute('y',y+4);
-eVal.setAttribute('font-size','12');
-eVal.setAttribute('text-anchor','start');
-eVal.setAttribute('dominant-baseline','middle');
-eVal.textContent=g.E.toFixed(2);svg.appendChild(eVal);
-});
+// Draw energy value
+const val=document.createElementNS('http://www.w3.org/2000/svg','text');
+val.setAttribute('x',marginLeft+lineLength+20);val.setAttribute('y',y+5);
+val.setAttribute('font-size','14');
+val.setAttribute('dominant-baseline','middle');
+val.textContent=g.E.toFixed(2);
+svg.appendChild(val);
 });
 
 spinStateOutput.textContent=filled.spin;
