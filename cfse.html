@@ -20,9 +20,7 @@
   #controls button { padding:6px 12px; font-size:14px; margin-top:12px; }
   .legend { font-size:12px; margin-top:12px; text-align:left; }
   .legend span { display:inline-block; width:12px; height:12px; margin-right:4px; vertical-align:middle; }
-  svg { max-width:600px; flex:1; margin-top:40px; }
-  .orbital-label { font-style:italic; font-size:16px; }
-  .orbital-sub { font-size:10px; vertical-align:sub; }
+  svg { max-width:700px; flex:1; margin-top:40px; }
 </style>
 </head>
 <body>
@@ -94,19 +92,19 @@ const unpairedOutput=document.getElementById('unpaired');
 
 function getLevels(geom,Delta){
 if(geom==='oh'){
-return[
+return [
 {label:'<t style="font-style:italic">t</t><sub>2g</sub>', g:3, E:-0.4*Delta},
 {label:'<t style="font-style:italic">e</t><sub>g</sub>', g:2, E:0.6*Delta}
 ];
 }else if(geom==='td'){
 const Dt=4/9*Delta;
-return[
+return [
 {label:'<t style="font-style:italic">e</t>', g:2, E:-0.6*Dt},
 {label:'<t style="font-style:italic">t</t><sub>2g</sub>', g:3, E:0.4*Dt}
 ];
 }else{
 const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
-return[
+return [
 {label:'dxz/yz', g:2, E:E[0]},
 {label:'dz2', g:1, E:E[1]},
 {label:'dxy', g:1, E:E[2]},
@@ -124,7 +122,7 @@ if(highSpin){while(rem>0){subs.sort((a,b)=>(a.occ-b.occ)||(a.E-b.E));subs[0].occ
 else{for(const s of subs){const add=Math.min(2,rem);s.occ+=add;rem-=add;if(rem<=0)break;}}
 let cfse=0,pairs=0,unpaired=0;
 subs.forEach(s=>{cfse+=s.occ*s.E;if(s.occ===2)pairs++;else if(s.occ===1)unpaired++;});
-return{subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
+return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
 }
 
 function renderCFT(){
@@ -132,17 +130,17 @@ const G=geomInput.value;const D=parseFloat(deltaInput.value);deltaVal.textConten
 const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;pairVal.textContent=P.toFixed(2);
 const levels=getLevels(G,D);const filled=fillElectrons(levels,n,P);
 svg.innerHTML='';
-const W=700,H=400,marginTop=100,marginLeft=200,yScale=80;
+const W=700,H=400,marginTop=100,marginLeft=250,yScale=80;
 
 // Y axis
 const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
-yAxis.setAttribute('x1',marginLeft-80);yAxis.setAttribute('x2',marginLeft-80);
+yAxis.setAttribute('x1',marginLeft-50);yAxis.setAttribute('x2',marginLeft-50);
 yAxis.setAttribute('y1',marginTop);yAxis.setAttribute('y2',H+marginTop);
 yAxis.setAttribute('stroke','#000');yAxis.setAttribute('stroke-width','2');svg.appendChild(yAxis);
 
 // Arrow at top
 const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-arrow.setAttribute('points',`${marginLeft-85},${marginTop} ${marginLeft-75},${marginTop} ${marginLeft-80},${marginTop-10}`);
+arrow.setAttribute('points',`${marginLeft-55},${marginTop} ${marginLeft-45},${marginTop} ${marginLeft-50},${marginTop-10}`);
 arrow.setAttribute('fill','#000');svg.appendChild(arrow);
 
 // Y axis label horizontal
@@ -159,29 +157,33 @@ uniq.forEach((g,i)=>{
 const y=marginTop + H/2 - g.E*yScale;
 const spacing=25;
 g.arr.forEach((s,idx)=>{
-const x1=marginLeft + idx*spacing;
-const x2=marginLeft+100;
 const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-line.setAttribute('x1',x1);line.setAttribute('x2',x2);line.setAttribute('y1',y);line.setAttribute('y2',y);
+line.setAttribute('x1',marginLeft);line.setAttribute('x2',marginLeft+60);line.setAttribute('y1',y);line.setAttribute('y2',y);
 line.setAttribute('stroke','#000');line.setAttribute('stroke-width','2');svg.appendChild(line);
-if(s.occ>=1){const c1=document.createElementNS('http://www.w3.org/2000/svg','circle');c1.setAttribute('cx',x1+10);c1.setAttribute('cy',y-5);c1.setAttribute('r',6);c1.setAttribute('fill','#4285f4');svg.appendChild(c1);}
-if(s.occ>=2){const c2=document.createElementNS('http://www.w3.org/2000/svg','circle');c2.setAttribute('cx',x1+25);c2.setAttribute('cy',y-5);c2.setAttribute('r',6);c2.setAttribute('fill','#34a853');svg.appendChild(c2);}
-});
+
+// Electrons horizontally
+for(let e=0;e<s.occ;e++){
+const cx=marginLeft+10+e*12;
+const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+c.setAttribute('cx',cx);c.setAttribute('cy',y);c.setAttribute('r',5);
+c.setAttribute('fill',e===0?'#4285f4':'#34a853');svg.appendChild(c);
+}
+
 // Orbital label
-const labelText=document.createElementNS('http://www.w3.org/2000/svg','text');
-labelText.setAttribute('x',marginLeft-60);
-labelText.setAttribute('y',y+5);
-labelText.setAttribute('text-anchor','end');
-labelText.setAttribute('font-style','italic');
-labelText.innerHTML=g.label;
-svg.appendChild(labelText);
+const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+label.setAttribute('x',marginLeft-40);label.setAttribute('y',y+4);label.setAttribute('font-size','14');
+label.setAttribute('text-anchor','start');
+label.setAttribute('dominant-baseline','middle');
+label.innerHTML=g.label;svg.appendChild(label);
+
 // Energy value
-const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
-energyText.setAttribute('x',marginLeft-85);
-energyText.setAttribute('y',y+5);
-energyText.setAttribute('text-anchor','end');
-energyText.textContent=g.E.toFixed(2);
-svg.appendChild(energyText);
+const eVal=document.createElementNS('http://www.w3.org/2000/svg','text');
+eVal.setAttribute('x',marginLeft+70);eVal.setAttribute('y',y+4);
+eVal.setAttribute('font-size','12');
+eVal.setAttribute('text-anchor','start');
+eVal.setAttribute('dominant-baseline','middle');
+eVal.textContent=g.E.toFixed(2);svg.appendChild(eVal);
+});
 });
 
 spinStateOutput.textContent=filled.spin;
