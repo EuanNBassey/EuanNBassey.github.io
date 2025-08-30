@@ -12,26 +12,26 @@
     <link rel="manifest" href="/site.webmanifest">
   <style>
     #controls {
-      font-size: 14px;
-      padding: 10px;
+      font-size: 12px;
+      padding: 8px;
     }
     #controls input[type=range], #controls input[type=number], #controls select {
-      width: 120px;
-      margin: 5px;
+      width: 100px;
+      margin: 4px;
     }
     #controls button {
-      padding: 6px 10px;
-      font-size: 14px;
+      padding: 5px 8px;
+      font-size: 12px;
     }
     .legend {
-      font-size: 12px;
-      margin-top: 10px;
+      font-size: 11px;
+      margin-top: 8px;
     }
     .legend span {
       display: inline-block;
-      width: 12px;
-      height: 12px;
-      margin-right: 5px;
+      width: 10px;
+      height: 10px;
+      margin-right: 4px;
       vertical-align: middle;
     }
   </style>
@@ -136,60 +136,56 @@
       const n=parseInt(dcountInput.value)||0; const P=parseFloat(pairInput.value)||0; pairVal.textContent=P.toFixed(2);
       const levels=getLevels(G,D); const filled=fillElectrons(levels,n,P);
       svg.innerHTML='';
-      const W=700,H=450,yScale=120;
+      const W=500,H=350,yScale=90;
 
-      // Y-axis for energy with arrow and label
       const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
-      yAxis.setAttribute('x1',100); yAxis.setAttribute('x2',100); yAxis.setAttribute('y1',50); yAxis.setAttribute('y2',H-50);
+      yAxis.setAttribute('x1',60); yAxis.setAttribute('x2',60); yAxis.setAttribute('y1',50); yAxis.setAttribute('y2',H-50);
       yAxis.setAttribute('stroke','#333'); yAxis.setAttribute('stroke-width','2'); svg.appendChild(yAxis);
-      // Arrowhead
       const arrow = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-      arrow.setAttribute('points','95,50 105,50 100,40');
-      arrow.setAttribute('fill','#333'); svg.appendChild(arrow);
-      // Axis label
+      arrow.setAttribute('points','55,50 65,50 60,40'); arrow.setAttribute('fill','#333'); svg.appendChild(arrow);
       const axisLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
-      axisLabel.setAttribute('x',70); axisLabel.setAttribute('y',40); axisLabel.setAttribute('fill','#333');
-      axisLabel.setAttribute('font-size','14'); axisLabel.textContent='Energy (eV)';
-      svg.appendChild(axisLabel);
+      axisLabel.setAttribute('x',30); axisLabel.setAttribute('y',40); axisLabel.setAttribute('fill','#333');
+      axisLabel.setAttribute('font-size','12'); axisLabel.textContent='Energy (eV)'; svg.appendChild(axisLabel);
 
       const groups={};
       filled.subs.forEach(s=>{ groups[s.label]=groups[s.label]||[]; groups[s.label].push(s); });
       const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
       uniq.forEach((g,i)=>{
         const y=H/2 - g.E*yScale;
-        const spacing=30;
+        const spacing=25;
         g.arr.forEach((s,idx)=>{
           const x=150 + idx*spacing;
           const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-          line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-12); line.setAttribute('y2',y+12);
+          line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-10); line.setAttribute('y2',y+10);
           line.setAttribute('stroke','#333'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
-          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-4); c1.setAttribute('r',5); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
-          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+4); c2.setAttribute('r',5); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
+          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-3); c1.setAttribute('r',4); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
+          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+3); c2.setAttribute('r',4); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
         });
         const text=document.createElementNS('http://www.w3.org/2000/svg','text');
-        text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','12');
-        text.innerHTML = g.label;
+        text.setAttribute('x',35); text.setAttribute('y',y+3);
+        text.setAttribute('fill','#000'); text.innerHTML=g.label;
         svg.appendChild(text);
-        // Energy label on y-axis
+
         const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
-        energyText.setAttribute('x',80); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','12');
-        energyText.setAttribute('text-anchor','end');
-        energyText.textContent=g.E.toFixed(2)+' eV';
+        energyText.setAttribute('x',85); energyText.setAttribute('y',y+3);
+        energyText.setAttribute('fill','#000'); energyText.setAttribute('font-size','10');
+        energyText.textContent=g.E.toFixed(2);
         svg.appendChild(energyText);
       });
-      spinStateOutput.textContent=filled.spin;
-      cfseOutput.textContent=filled.cfse.toFixed(2);
-      pairsOutput.textContent=filled.pairs;
-      unpairedOutput.textContent=filled.unpaired;
+
+      spinStateOutput.textContent = filled.spin;
+      cfseOutput.textContent = filled.cfse.toFixed(2);
+      pairsOutput.textContent = filled.pairs;
+      unpairedOutput.textContent = filled.unpaired;
     }
 
     [geomInput, deltaInput, dcountInput, pairInput].forEach(el=>el.addEventListener('input',renderCFT));
     renderCFT();
 
     document.getElementById('downloadCF').addEventListener('click',()=>{
-      const s=new XMLSerializer().serializeToString(svg);
-      const blob=new Blob([s],{type:'image/svg+xml'});
-      const url=URL.createObjectURL(blob);
+      const s = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([s],{type:'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
       const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
     });
   </script>
