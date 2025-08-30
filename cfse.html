@@ -20,7 +20,7 @@
   #controls button { padding:6px 12px; font-size:14px; margin-top:12px; }
   .legend { font-size:12px; margin-top:12px; text-align:left; }
   .legend span { display:inline-block; width:16px; height:16px; margin-right:4px; vertical-align:middle; }
-  svg { max-width:900px; flex:1; margin-top:40px; }
+  svg { max-width:1000px; flex:1; margin-top:60px; }
 </style>
 </head>
 <body>
@@ -45,7 +45,7 @@
     </ul>
   </nav>
 
-  <h1>Crystal Field Splitting Tool</h1>
+ <h1>Crystal Field Splitting Tool</h1>
 <div class="container">
 <div class="controls" id="controls">
 <label>Geometry <select id="geom">
@@ -75,7 +75,7 @@ Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
 <span style="background:#34a853; margin-left: 8px;"></span> Spin down
 </div>
 </div>
-<svg id="cftSVG" viewBox="0 0 700 500"></svg>
+<svg id="cftSVG" viewBox="0 0 1000 700"></svg>
 </div>
 <script>
 const svg=document.getElementById('cftSVG');
@@ -92,12 +92,12 @@ const unpairedOutput=document.getElementById('unpaired');
 
 function getLevels(geom,Delta){
   if(geom==='oh') return [
-    {label:'<i>t</i><sub>2g</sub>', g:3, E:-0.4*Delta},
-    {label:'<i>e</i><sub>g</sub>', g:2, E:0.6*Delta}
+    {label:'<tspan font-style="italic">t</tspan><tspan baseline-shift="sub">2g</tspan>', g:3, E:-0.4*Delta},
+    {label:'<tspan font-style="italic">e</tspan><tspan baseline-shift="sub">g</tspan>', g:2, E:0.6*Delta}
   ];
   else if(geom==='td'){const Dt=4/9*Delta; return [
-    {label:'<i>t</i><sub>2g</sub>', g:3, E:0.4*Dt},
-    {label:'<i>e</i><sub>g</sub>', g:2, E:-0.6*Dt}
+    {label:'<tspan font-style="italic">t</tspan><tspan baseline-shift="sub">2g</tspan>', g:3, E:0.4*Dt},
+    {label:'<tspan font-style="italic">e</tspan><tspan baseline-shift="sub">g</tspan>', g:2, E:-0.6*Dt}
   ];}
   else{
     const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
@@ -129,7 +129,7 @@ function renderCFT(){
   const levels=getLevels(G,D); const filled=fillElectrons(levels,n,P);
   svg.innerHTML='';
 
-  const marginTop=120,marginLeft=250,H=400,yScale=120;
+  const marginTop=150,marginLeft=250,H=400,yScale=120;
 
   // Y axis
   const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
@@ -144,8 +144,8 @@ function renderCFT(){
 
   // Energy label horizontal
   const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
-  yLabel.setAttribute('x',marginLeft-60); yLabel.setAttribute('y',marginTop-50);
-  yLabel.setAttribute('text-anchor','middle'); yLabel.setAttribute('font-size','16');
+  yLabel.setAttribute('x',marginLeft-30); yLabel.setAttribute('y',marginTop-40);
+  yLabel.setAttribute('text-anchor','start'); yLabel.setAttribute('font-size','16');
   yLabel.textContent='Energy (eV)'; svg.appendChild(yLabel);
 
   const groups={};
@@ -154,7 +154,7 @@ function renderCFT(){
 
   uniq.forEach(g=>{
     const y=marginTop+H/2-g.E*yScale;
-    const lineLength=150, spacing=50;
+    const lineLength=150, spacing=60;
 
     // Draw horizontal level
     const line=document.createElementNS('http://www.w3.org/2000/svg','line');
@@ -165,20 +165,20 @@ function renderCFT(){
     // Draw electrons horizontally
     g.arr.forEach((s,idx)=>{
       const x=marginLeft+15+idx*spacing;
-      if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-8); c1.setAttribute('r',10); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1);}
-      if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+8); c2.setAttribute('r',10); c2.setAttribute('fill','#34a853'); svg.appendChild(c2);}
+      if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-12); c1.setAttribute('r',12); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1);}
+      if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+12); c2.setAttribute('r',12); c2.setAttribute('fill','#34a853'); svg.appendChild(c2);}
     });
 
     // Draw level label
     const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
-    txt.setAttribute('x',marginLeft+lineLength+20); txt.setAttribute('y',y+5);
+    txt.setAttribute('x',marginLeft+lineLength+30); txt.setAttribute('y',y+6);
     txt.setAttribute('font-size','16'); txt.setAttribute('fill','#000');
     txt.innerHTML=g.label;
     svg.appendChild(txt);
 
     // Draw energy value
     const val=document.createElementNS('http://www.w3.org/2000/svg','text');
-    val.setAttribute('x',marginLeft-80); val.setAttribute('y',y+5);
+    val.setAttribute('x',marginLeft-100); val.setAttribute('y',y+6);
     val.setAttribute('font-size','14'); val.setAttribute('fill','#000');
     val.textContent=g.E.toFixed(2);
     svg.appendChild(val);
