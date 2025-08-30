@@ -11,62 +11,19 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
   <style>
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
-    #controls {
-      font-size: 14px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      width: 300px;
-    }
-    #controls label {
-      margin: 12px 0;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    #controls input[type=range], #controls input[type=number], #controls select {
-      width: 100%;
-      margin-top: 4px;
-    }
-    #controls span {
-      margin-left: 4px;
-    }
-    #controls button {
-      padding: 6px 12px;
-      font-size: 14px;
-      margin-top: 12px;
-    }
-    .legend {
-      font-size: 12px;
-      margin-top: 12px;
-      text-align: left;
-    }
-    .legend span {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      margin-right: 4px;
-      vertical-align: middle;
-    }
-    svg {
-      max-width: 600px;
-      flex: 1;
-      margin-top: 20px;
-    }
-  </style>
+  h1 { text-align:center; margin-bottom:20px; }
+  .container { display:flex; justify-content:center; align-items:flex-start; gap:40px; flex-wrap:wrap; }
+  #controls { font-size:14px; padding:12px; display:flex; flex-direction:column; align-items:flex-start; width:300px; }
+  #controls label { margin:12px 0; width:100%; display:flex; flex-direction:column; align-items:flex-start; }
+  #controls input[type=range], #controls input[type=number], #controls select { width:100%; margin-top:4px; }
+  #controls span { margin-left:4px; }
+  #controls button { padding:6px 12px; font-size:14px; margin-top:12px; }
+  .legend { font-size:12px; margin-top:12px; text-align:left; }
+  .legend span { display:inline-block; width:12px; height:12px; margin-right:4px; vertical-align:middle; }
+  svg { max-width:600px; flex:1; margin-top:40px; }
+  .orbital-label { font-style:italic; font-size:16px; }
+  .orbital-sub { font-size:10px; vertical-align:sub; }
+</style>
 </head>
 <body>
     <header>
@@ -91,146 +48,155 @@
   </nav>
 
   <h1>Crystal Field Splitting Tool</h1>
+<div class="container">
+<div class="controls" id="controls">
+<label>Geometry <select id="geom">
+<option value="oh">Octahedral</option>
+<option value="td">Tetrahedral</option>
+<option value="sp">Square Planar</option>
+</select></label>
+<label>Δ (splitting, eV)<br>
+<input id="delta" type="range" min="0" max="4" step="0.05" value="1.5">
+<span id="deltaVal">1.50</span> eV
+</label>
+<label>d-electron count<br>
+<input id="dcount" type="number" min="0" max="10" value="6">
+</label>
+<label>Pairing energy (eV)<br>
+<input id="pair" type="range" min="0" max="2" step="0.05" value="0.8">
+<span id="pairVal">0.80</span> eV
+</label>
+<div class="output">
+Spin state: <span id="spinState">—</span><br>
+CFSE: <span id="cfse">—</span><br>
+Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
+</div>
+<button id="downloadCF">Download Diagram</button>
+<div class="legend">
+<span style="background:#4285f4"></span> Spin up
+<span style="background:#34a853; margin-left: 8px;"></span> Spin down
+</div>
+</div>
+<svg id="cftSVG" viewBox="0 0 700 500"></svg>
+</div>
+<script>
+const svg=document.getElementById('cftSVG');
+const deltaInput=document.getElementById('delta');
+const deltaVal=document.getElementById('deltaVal');
+const geomInput=document.getElementById('geom');
+const dcountInput=document.getElementById('dcount');
+const pairInput=document.getElementById('pair');
+const spinStateOutput=document.getElementById('spinState');
+const cfseOutput=document.getElementById('cfse');
+const pairsOutput=document.getElementById('pairs');
+const unpairedOutput=document.getElementById('unpaired');
 
-  <div class="container">
-    <div class="controls" id="controls">
-      <label>Geometry <select id="geom">
-        <option value="oh">Octahedral</option>
-        <option value="td">Tetrahedral</option>
-        <option value="sp">Square Planar</option>
-      </select></label>
+function getLevels(geom,Delta){
+if(geom==='oh'){
+return[
+{label:'t<span class="orbital-sub">2</span>g', g:3, E:-0.4*Delta},
+{label:'e<span class="orbital-sub">g</span>', g:2, E:0.6*Delta}
+];
+}else if(geom==='td'){
+const Dt=4/9*Delta;
+return[
+{label:'e', g:2, E:-0.6*Dt},
+{label:'t2', g:3, E:0.4*Dt}
+];
+}else{
+const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
+return[
+{label:'dxz/yz', g:2, E:E[0]},
+{label:'dz2', g:1, E:E[1]},
+{label:'dxy', g:1, E:E[2]},
+{label:'dx2-y2', g:1, E:E[3]}
+];
+}}
 
-      <label>Δ (splitting, eV)<br>
-        <input id="delta" type="range" min="0" max="4" step="0.05" value="1.5">
-        <span id="deltaVal">1.50</span> eV
-      </label>
+function fillElectrons(levels,n,P){
+const subs=[];
+levels.forEach(L=>{for(let i=0;i<L.g;i++)subs.push({E:L.E,label:L.label,occ:0});});
+subs.sort((a,b)=>a.E-b.E);
+let rem=n;
+const highSpin=(Math.max(...levels.map(l=>l.E))-Math.min(...levels.map(l=>l.E)))<P;
+if(highSpin){while(rem>0){subs.sort((a,b)=>(a.occ-b.occ)||(a.E-b.E));subs[0].occ++;rem--;}}
+else{for(const s of subs){const add=Math.min(2,rem);s.occ+=add;rem-=add;if(rem<=0)break;}}
+let cfse=0,pairs=0,unpaired=0;
+subs.forEach(s=>{cfse+=s.occ*s.E;if(s.occ===2)pairs++;else if(s.occ===1)unpaired++;});
+return{subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
+}
 
-      <label>d-electron count<br>
-        <input id="dcount" type="number" min="0" max="10" value="6">
-      </label>
+function renderCFT(){
+const G=geomInput.value;const D=parseFloat(deltaInput.value);deltaVal.textContent=D.toFixed(2);
+const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;
+const levels=getLevels(G,D);const filled=fillElectrons(levels,n,P);
+svg.innerHTML='';
+const W=600,H=400,marginTop=80,marginLeft=150,yScale=80;
 
-      <label>Pairing energy (eV)<br>
-        <input id="pair" type="range" min="0" max="2" step="0.05" value="0.8">
-        <span id="pairVal">0.80</span> eV
-      </label>
+// Y axis
+const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
+yAxis.setAttribute('x1',marginLeft-50);yAxis.setAttribute('x2',marginLeft-50);
+yAxis.setAttribute('y1',marginTop);yAxis.setAttribute('y2',H+marginTop);
+yAxis.setAttribute('stroke','#000');yAxis.setAttribute('stroke-width','2');svg.appendChild(yAxis);
 
-      <div class="output">
-        Spin state: <span id="spinState">—</span><br>
-        CFSE: <span id="cfse">—</span><br>
-        Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
-      </div>
+// Arrow at top
+const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+arrow.setAttribute('points',`${marginLeft-55},${marginTop} ${marginLeft-45},${marginTop} ${marginLeft-50},${marginTop-10}`);
+arrow.setAttribute('fill','#000');svg.appendChild(arrow);
 
-      <button id="downloadCF">Download Diagram</button>
+// Y axis label
+const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
+yLabel.setAttribute('x',marginLeft-70);yLabel.setAttribute('y',marginTop-20);
+yLabel.setAttribute('text-anchor','middle');
+yLabel.setAttribute('transform',`rotate(-90,${marginLeft-70},${marginTop-20})`);
+yLabel.textContent='Energy (eV)';svg.appendChild(yLabel);
 
-      <div class="legend">
-        <span style="background:#4285f4"></span> Spin up
-        <span style="background:#34a853; margin-left: 8px;"></span> Spin down
-      </div>
-    </div>
+const groups={};
+filled.subs.forEach(s=>{groups[s.label]=groups[s.label]||[];groups[s.label].push(s);});
+const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
 
-    <svg id="cftSVG" viewBox="0 0 600 400"></svg>
-  </div>
+uniq.forEach((g,i)=>{
+const y=marginTop + H/2 - g.E*yScale;
+const spacing=40;
+g.arr.forEach((s,idx)=>{
+const x1=marginLeft;
+const x2=marginLeft+100;
+// horizontal line
+const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+line.setAttribute('x1',x1);line.setAttribute('x2',x2);line.setAttribute('y1',y);line.setAttribute('y2',y);
+line.setAttribute('stroke','#000');line.setAttribute('stroke-width','2');svg.appendChild(line);
+// electrons
+if(s.occ>=1){const c1=document.createElementNS('http://www.w3.org/2000/svg','circle');c1.setAttribute('cx',x1+15);c1.setAttribute('cy',y-5);c1.setAttribute('r',6);c1.setAttribute('fill','#4285f4');svg.appendChild(c1);}
+if(s.occ>=2){const c2=document.createElementNS('http://www.w3.org/2000/svg','circle');c2.setAttribute('cx',x1+15);c2.setAttribute('cy',y+5);c2.setAttribute('r',6);c2.setAttribute('fill','#34a853');svg.appendChild(c2);}
+});
+// orbital label
+const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+text.setAttribute('x',marginLeft+110);text.setAttribute('y',y+5);
+text.setAttribute('class','orbital-label');
+text.innerHTML=g.label;
+svg.appendChild(text);
+// energy label
+const eText=document.createElementNS('http://www.w3.org/2000/svg','text');
+eText.setAttribute('x',marginLeft-55);eText.setAttribute('y',y+5);
+eText.textContent=g.E.toFixed(2);
+svg.appendChild(eText);
+});
+spinStateOutput.textContent=filled.spin;
+cfseOutput.textContent=filled.cfse.toFixed(2);
+pairsOutput.textContent=filled.pairs;
+unpairedOutput.textContent=filled.unpaired;
+}
 
-  <script>
-    const svg = document.getElementById('cftSVG');
-    const deltaInput = document.getElementById('delta');
-    const deltaVal = document.getElementById('deltaVal');
-    const geomInput = document.getElementById('geom');
-    const dcountInput = document.getElementById('dcount');
-    const pairInput = document.getElementById('pair');
-    const spinStateOutput = document.getElementById('spinState');
-    const cfseOutput = document.getElementById('cfse');
-    const pairsOutput = document.getElementById('pairs');
-    const unpairedOutput = document.getElementById('unpaired');
+[geomInput,deltaInput,dcountInput,pairInput].forEach(el=>el.addEventListener('input',renderCFT));
+renderCFT();
 
-    function getLevels(geom, Delta) {
-      if (geom === 'oh') {
-        return [
-          { label: 't<sub>2g</sub>', g: 3, E: -0.4 * Delta },
-          { label: 'e<sub>g</sub>', g: 2, E: 0.6 * Delta }
-        ];
-      } else if (geom === 'td') {
-        const Dt = 4/9*Delta;
-        return [
-          { label: 'e', g: 2, E: -0.6*Dt },
-          { label: 't2', g: 3, E: 0.4*Dt }
-        ];
-      } else {
-        const E = [-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
-        return [
-          { label: 'dxz/yz', g: 2, E: E[0] },
-          { label: 'dz2', g: 1, E: E[1] },
-          { label: 'dxy', g: 1, E: E[2] },
-          { label: 'dx2-y2', g: 1, E: E[3] }
-        ];
-      }
-    }
-
-    function fillElectrons(levels, n, P) {
-      const subs = [];
-      levels.forEach(L => { for(let i=0;i<L.g;i++) subs.push({E:L.E,label:L.label,occ:0}); });
-      subs.sort((a,b)=>a.E-b.E);
-      let rem = n;
-      const highSpin = (Math.max(...levels.map(l=>l.E)) - Math.min(...levels.map(l=>l.E))) < P;
-      if(highSpin){
-        while(rem>0){ subs.sort((a,b)=> (a.occ-b.occ)||(a.E-b.E)); subs[0].occ++; rem--; }
-      } else {
-        for(const s of subs){ const add = Math.min(2, rem); s.occ+=add; rem-=add; if(rem<=0) break; }
-      }
-      let cfse=0, pairs=0, unpaired=0;
-      subs.forEach(s=>{ cfse+=s.occ*s.E; if(s.occ===2) pairs++; else if(s.occ===1) unpaired++; });
-      return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
-    }
-
-    function renderCFT(){
-      const G = geomInput.value; const D = parseFloat(deltaInput.value); deltaVal.textContent = D.toFixed(2);
-      const n = parseInt(dcountInput.value)||0; const P = parseFloat(pairInput.value)||0;
-      const levels = getLevels(G,D); const filled = fillElectrons(levels,n,P);
-      svg.innerHTML='';
-      const W=600,H=400,marginTop=50,yScale=80;
-      const zero = document.createElementNS('http://www.w3.org/2000/svg','line');
-      zero.setAttribute('x1',50); zero.setAttribute('x2',550); zero.setAttribute('y1',marginTop); zero.setAttribute('y2',marginTop);
-      zero.setAttribute('stroke','#ccc'); svg.appendChild(zero);
-      const groups = {};
-      filled.subs.forEach(s=>{ groups[s.label]=groups[s.label]||[]; groups[s.label].push(s); });
-      const uniq = Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
-      uniq.forEach((g,i)=>{
-        const y = marginTop + H/2 - g.E*yScale;
-        const spacing = 40;
-        g.arr.forEach((s,idx)=>{
-          const x1 = 100 + idx*spacing;
-          const x2 = x1 + 30;
-          const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-          line.setAttribute('x1',x1); line.setAttribute('x2',x2); line.setAttribute('y1',y); line.setAttribute('y2',y);
-          line.setAttribute('stroke','#000'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
-          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',(x1+x2)/2-5); c1.setAttribute('cy',y); c1.setAttribute('r',6); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
-          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',(x1+x2)/2+5); c2.setAttribute('cy',y); c2.setAttribute('r',6); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
-        });
-        const label = document.createElementNS('http://www.w3.org/2000/svg','text');
-        label.setAttribute('x',60); label.setAttribute('y',y+5);
-        label.innerHTML = g.label;
-        svg.appendChild(label);
-        const eLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
-        eLabel.setAttribute('x',550); eLabel.setAttribute('y',y+5);
-        eLabel.textContent = g.E.toFixed(2);
-        svg.appendChild(eLabel);
-      });
-      spinStateOutput.textContent = filled.spin;
-      cfseOutput.textContent = filled.cfse.toFixed(2);
-      pairsOutput.textContent = filled.pairs;
-      unpairedOutput.textContent = filled.unpaired;
-    }
-
-    [geomInput, deltaInput, dcountInput, pairInput].forEach(el=>el.addEventListener('input',renderCFT));
-    renderCFT();
-
-    document.getElementById('downloadCF').addEventListener('click',()=>{
-      const s = new XMLSerializer().serializeToString(svg);
-      const blob = new Blob([s],{type:'image/svg+xml'});
-      const url = URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
-    });
-  </script>
+document.getElementById('downloadCF').addEventListener('click',()=>{
+const s=new XMLSerializer().serializeToString(svg);
+const blob=new Blob([s],{type:'image/svg+xml'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');a.href=url;a.download='crystal_field.svg';a.click();URL.revokeObjectURL(url);
+});
+</script>
     <footer>
         <div class="container">
             <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
