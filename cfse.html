@@ -102,12 +102,12 @@
 
     function getLevels(geom, Delta) {
       if (geom === 'oh') return [
-        { label: 't<tspan baseline-shift="sub">2</tspan>g', g: 3, E: -0.4*Delta },
-        { label: 'e<tspan baseline-shift="sub">g</tspan>', g:2, E:0.6*Delta }
+        { label: '<tspan font-style="italic">t</tspan><tspan baseline-shift="sub" font-size="8">2</tspan><tspan baseline-shift="sub" font-size="8">g</tspan>', g: 3, E: -0.4*Delta },
+        { label: '<tspan font-style="italic">e</tspan><tspan baseline-shift="sub" font-size="8">g</tspan>', g:2, E:0.6*Delta }
       ];
       if (geom === 'td') { const Dt=4/9*Delta; return [
-        {label:'e<tspan baseline-shift="sub">g</tspan>', g:2, E:-0.6*Dt},
-        {label:'t<tspan baseline-shift="sub">2</tspan>',g:3,E:0.4*Dt}
+        {label:'<tspan font-style="italic">e</tspan><tspan baseline-shift="sub" font-size="8">g</tspan>', g:2, E:-0.6*Dt},
+        {label:'<tspan font-style="italic">t</tspan><tspan baseline-shift="sub" font-size="8">2</tspan>',g:3,E:0.4*Dt}
       ];}
       const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
       return [
