@@ -86,6 +86,7 @@ const deltaVal=document.getElementById('deltaVal');
 const geomInput=document.getElementById('geom');
 const dcountInput=document.getElementById('dcount');
 const pairInput=document.getElementById('pair');
+const pairVal=document.getElementById('pairVal');
 const spinStateOutput=document.getElementById('spinState');
 const cfseOutput=document.getElementById('cfse');
 const pairsOutput=document.getElementById('pairs');
@@ -101,7 +102,7 @@ return[
 const Dt=4/9*Delta;
 return[
 {label:'e', g:2, E:-0.6*Dt},
-{label:'t2', g:3, E:0.4*Dt}
+{label:'t<span class="orbital-sub">2</span>', g:3, E:0.4*Dt}
 ];
 }else{
 const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
@@ -128,27 +129,26 @@ return{subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
 
 function renderCFT(){
 const G=geomInput.value;const D=parseFloat(deltaInput.value);deltaVal.textContent=D.toFixed(2);
-const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;
+const n=parseInt(dcountInput.value)||0;const P=parseFloat(pairInput.value)||0;pairVal.textContent=P.toFixed(2);
 const levels=getLevels(G,D);const filled=fillElectrons(levels,n,P);
 svg.innerHTML='';
-const W=600,H=400,marginTop=80,marginLeft=150,yScale=80;
+const W=700,H=400,marginTop=100,marginLeft=200,yScale=80;
 
 // Y axis
 const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
-yAxis.setAttribute('x1',marginLeft-50);yAxis.setAttribute('x2',marginLeft-50);
+yAxis.setAttribute('x1',marginLeft-80);yAxis.setAttribute('x2',marginLeft-80);
 yAxis.setAttribute('y1',marginTop);yAxis.setAttribute('y2',H+marginTop);
 yAxis.setAttribute('stroke','#000');yAxis.setAttribute('stroke-width','2');svg.appendChild(yAxis);
 
 // Arrow at top
 const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-arrow.setAttribute('points',`${marginLeft-55},${marginTop} ${marginLeft-45},${marginTop} ${marginLeft-50},${marginTop-10}`);
+arrow.setAttribute('points',`${marginLeft-85},${marginTop} ${marginLeft-75},${marginTop} ${marginLeft-80},${marginTop-10}`);
 arrow.setAttribute('fill','#000');svg.appendChild(arrow);
 
-// Y axis label
+// Y axis label horizontal
 const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
-yLabel.setAttribute('x',marginLeft-70);yLabel.setAttribute('y',marginTop-20);
+yLabel.setAttribute('x',marginLeft-50);yLabel.setAttribute('y',marginTop-30);
 yLabel.setAttribute('text-anchor','middle');
-yLabel.setAttribute('transform',`rotate(-90,${marginLeft-70},${marginTop-20})`);
 yLabel.textContent='Energy (eV)';svg.appendChild(yLabel);
 
 const groups={};
@@ -157,30 +157,33 @@ const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})
 
 uniq.forEach((g,i)=>{
 const y=marginTop + H/2 - g.E*yScale;
-const spacing=40;
+const spacing=25;
 g.arr.forEach((s,idx)=>{
-const x1=marginLeft;
+const x1=marginLeft + idx*spacing;
 const x2=marginLeft+100;
-// horizontal line
 const line=document.createElementNS('http://www.w3.org/2000/svg','line');
 line.setAttribute('x1',x1);line.setAttribute('x2',x2);line.setAttribute('y1',y);line.setAttribute('y2',y);
 line.setAttribute('stroke','#000');line.setAttribute('stroke-width','2');svg.appendChild(line);
-// electrons
-if(s.occ>=1){const c1=document.createElementNS('http://www.w3.org/2000/svg','circle');c1.setAttribute('cx',x1+15);c1.setAttribute('cy',y-5);c1.setAttribute('r',6);c1.setAttribute('fill','#4285f4');svg.appendChild(c1);}
-if(s.occ>=2){const c2=document.createElementNS('http://www.w3.org/2000/svg','circle');c2.setAttribute('cx',x1+15);c2.setAttribute('cy',y+5);c2.setAttribute('r',6);c2.setAttribute('fill','#34a853');svg.appendChild(c2);}
+if(s.occ>=1){const c1=document.createElementNS('http://www.w3.org/2000/svg','circle');c1.setAttribute('cx',x1+10);c1.setAttribute('cy',y-5);c1.setAttribute('r',6);c1.setAttribute('fill','#4285f4');svg.appendChild(c1);}
+if(s.occ>=2){const c2=document.createElementNS('http://www.w3.org/2000/svg','circle');c2.setAttribute('cx',x1+25);c2.setAttribute('cy',y-5);c2.setAttribute('r',6);c2.setAttribute('fill','#34a853');svg.appendChild(c2);}
 });
-// orbital label
-const text=document.createElementNS('http://www.w3.org/2000/svg','text');
-text.setAttribute('x',marginLeft+110);text.setAttribute('y',y+5);
-text.setAttribute('class','orbital-label');
-text.innerHTML=g.label;
-svg.appendChild(text);
-// energy label
-const eText=document.createElementNS('http://www.w3.org/2000/svg','text');
-eText.setAttribute('x',marginLeft-55);eText.setAttribute('y',y+5);
-eText.textContent=g.E.toFixed(2);
-svg.appendChild(eText);
+// Orbital label
+const labelText=document.createElementNS('http://www.w3.org/2000/svg','text');
+labelText.setAttribute('x',marginLeft-60);
+labelText.setAttribute('y',y+5);
+labelText.setAttribute('text-anchor','end');
+labelText.setAttribute('font-style','italic');
+labelText.innerHTML=g.label;
+svg.appendChild(labelText);
+// Energy value
+const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
+energyText.setAttribute('x',marginLeft-85);
+energyText.setAttribute('y',y+5);
+energyText.setAttribute('text-anchor','end');
+energyText.textContent=g.E.toFixed(2);
+svg.appendChild(energyText);
 });
+
 spinStateOutput.textContent=filled.spin;
 cfseOutput.textContent=filled.cfse.toFixed(2);
 pairsOutput.textContent=filled.pairs;
