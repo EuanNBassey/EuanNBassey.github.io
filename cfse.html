@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CFSE - Euan N. Bassey</title>
+    <title>About - Euan N. Bassey</title>
     <link rel="stylesheet" href="style.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -12,26 +12,33 @@
     
 </head>
 <body>
-    <header>
+  <header>
         <div class="container">
         </div>
     </header>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li class="dropdown">
-        <a href="#">Tools ▼</a>
-        <ul class="dropdown-menu">
-          <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
-          <li><a href="curieweiss.html">Curie-Weiss</a></li>
-          <li><a href="unitconv.html">Unit Conversion</a></li>
-          <li><a href="testing_cfse.html">CFSE</a></li>
-        </ul>
-      </li>
-    </ul>
-  </nav>
+
+    <!-- Navigation Section -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
   <div class="container">
     <h1>Crystal Field Splitting Tool</h1>
@@ -43,25 +50,17 @@
           <option value="sp">Square Planar</option>
         </select>
       </label>
-      <p style="text-align:justify;">  </p>
-      <p style="text-align:justify;">  </p>
       <label>Δ (splitting, eV)
         <input id="delta" type="range" min="0" max="4" step="0.05" value="1.5">
       </label>
       <span id="deltaVal">1.50</span> eV
-      <p style="text-align:justify;">  </p>
-      <p style="text-align:justify;">  </p>
       <label>d-electron count
         <input id="dcount" type="number" min="0" max="10" value="6">
       </label>
-      <p style="text-align:justify;">  </p>
-      <p style="text-align:justify;">  </p>
       <label>Pairing energy (eV)
-        <input id="pair" type="range" min="0" max="4" step="0.05" value="0.8">
+        <input id="pair" type="range" min="0" max="2" step="0.05" value="0.8">
       </label>
-      <span id="pairVal">1.50</span> eV
-      <p style="text-align:justify;">  </p>
-      <p style="text-align:justify;">  </p>
+      <span id="pairVal">0.80</span> eV
       <div class="output">
         Spin state: <span id="spinState">—</span><br>
         CFSE: <span id="cfse">—</span><br>
@@ -80,6 +79,7 @@
     const geomInput = document.getElementById('geom');
     const dcountInput = document.getElementById('dcount');
     const pairInput = document.getElementById('pair');
+    const pairVal = document.getElementById('pairVal');
     const spinStateOutput = document.getElementById('spinState');
     const cfseOutput = document.getElementById('cfse');
     const pairsOutput = document.getElementById('pairs');
@@ -107,7 +107,7 @@
 
     function renderCFT(){
       const G=geomInput.value; const D=parseFloat(deltaInput.value); deltaVal.textContent=D.toFixed(2);
-      const n=parseInt(dcountInput.value)||0; const P=parseFloat(pairInput.value)||0;
+      const n=parseInt(dcountInput.value)||0; const P=parseFloat(pairInput.value)||0; pairVal.textContent=P.toFixed(2);
       const levels=getLevels(G,D); const filled=fillElectrons(levels,n,P);
       svg.innerHTML='';
       const W=700,H=450,yScale=120;
@@ -151,7 +151,7 @@
       const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
     });
   </script>
-     <footer>
+  <footer>
         <div class="container">
             <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
         </div>
