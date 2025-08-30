@@ -87,7 +87,7 @@
     <svg id="cftSVG" viewBox="0 0 700 450"></svg>
   </div>
 
-  <script>
+   <script>
     const svg = document.getElementById('cftSVG');
     const deltaInput = document.getElementById('delta');
     const deltaVal = document.getElementById('deltaVal');
@@ -101,8 +101,8 @@
     const unpairedOutput = document.getElementById('unpaired');
 
     function getLevels(geom, Delta) {
-      if (geom === 'oh') return [{ label: 't2g', g: 3, E: -0.4*Delta },{ label: 'eg', g:2, E:0.6*Delta }];
-      if (geom === 'td') { const Dt=4/9*Delta; return [{label:'e', g:2,E:-0.6*Dt},{label:'t2',g:3,E:0.4*Dt}]; }
+      if (geom === 'oh') return [{ label: 't<sub>2</sub>g', g: 3, E: -0.4*Delta },{ label: 'e<sub>g</sub>', g:2, E:0.6*Delta }];
+      if (geom === 'td') { const Dt=4/9*Delta; return [{label:'e<sub>', g:2,E:-0.6*Dt},{label:'t<sub>2</sub>',g:3,E:0.4*Dt}]; }
       const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
       return [{label:'dxz/yz',g:2,E:E[0]},{label:'dz2',g:1,E:E[1]},{label:'dxy',g:1,E:E[2]},{label:'dx2-y2',g:1,E:E[3]}];
     }
@@ -134,20 +134,21 @@
       const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
       uniq.forEach((g,i)=>{
         const y=H/2 - g.E*yScale;
-        const spacing=40;
+        const spacing=30;
         g.arr.forEach((s,idx)=>{
           const x=150 + idx*spacing;
           const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-          line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-15); line.setAttribute('y2',y+15);
+          line.setAttribute('x1',x); line.setAttribute('x2',x); line.setAttribute('y1',y-12); line.setAttribute('y2',y+12);
           line.setAttribute('stroke','#333'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
-          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-5); c1.setAttribute('r',6); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
-          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+5); c2.setAttribute('r',6); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
+          if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-4); c1.setAttribute('r',5); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1); }
+          if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+4); c2.setAttribute('r',5); c2.setAttribute('fill','#34a853'); svg.appendChild(c2); }
         });
         const text=document.createElementNS('http://www.w3.org/2000/svg','text');
-        text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','14'); text.textContent=g.label;
+        text.setAttribute('x',50); text.setAttribute('y',y+5); text.setAttribute('fill','#333'); text.setAttribute('font-size','12');
+        text.innerHTML = g.label; // use innerHTML to allow subscript formatting
         svg.appendChild(text);
         const energyText=document.createElementNS('http://www.w3.org/2000/svg','text');
-        energyText.setAttribute('x',650); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','14'); energyText.textContent=g.E.toFixed(2)+' eV';
+        energyText.setAttribute('x',650); energyText.setAttribute('y',y+5); energyText.setAttribute('fill','#333'); energyText.setAttribute('font-size','12'); energyText.textContent=g.E.toFixed(2)+' eV';
         svg.appendChild(energyText);
       });
       spinStateOutput.textContent=filled.spin;
