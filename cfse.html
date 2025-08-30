@@ -95,14 +95,14 @@ const unpairedOutput=document.getElementById('unpaired');
 function getLevels(geom,Delta){
 if(geom==='oh'){
 return[
-{label:'t<span class="orbital-sub">2</span>g', g:3, E:-0.4*Delta},
-{label:'e<span class="orbital-sub">g</span>', g:2, E:0.6*Delta}
+{label:'<i>t</i><sub>2g</sub>', g:3, E:-0.4*Delta},
+{label:'<i>e</i><sub>g</sub>', g:2, E:0.6*Delta}
 ];
 }else if(geom==='td'){
 const Dt=4/9*Delta;
 return[
-{label:'e', g:2, E:-0.6*Dt},
-{label:'t<span class="orbital-sub">2</span>', g:3, E:0.4*Dt}
+{label:'<i>e</i>', g:2, E:-0.6*Dt},
+{label:'<i>t</i><sub>2</sub>', g:3, E:0.4*Dt}
 ];
 }else{
 const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
