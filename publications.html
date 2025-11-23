@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publications - Euan N. Bassey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <div class="container">
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section>
+        <div class="container">
+            <h2>Publications</h2>
+            <p>Here, you'll find my publications (newest first). Enjoy! </p>
+            <ul id="publications-list">Loading publications...</ul>
+        </div>
+    </section>
+
+    <script>
+        const zoteroGroupID = "5846342";  // Replace with your actual Zotero Group ID
+        const zoteroAPI = `https://api.zotero.org/groups/${zoteroGroupID}/items?format=json`;
+
+        fetch(zoteroAPI)
+        .then(response => response.json())
+        .then(data => {
+            let publicationsList = document.getElementById("publications-list");
+            publicationsList.innerHTML = ""; // Clear loading text
+            if (data.length === 0) {
+                publicationsList.innerHTML = "<li>No publications found.</li>";
+                return;
+            }
+
+            // Sort publications by year (newest first)
+            data.sort((a, b) => {
+                const yearA = a.data.date ? parseInt(a.data.date.split("-")[0]) : 0;
+                const yearB = b.data.date ? parseInt(b.data.date.split("-")[0]) : 0;
+                return yearB - yearA; // Sort in descending order of year
+            });
+
+            data.forEach((item, index) => {
+                if (item.data.title) {
+                    // Format author names with initials
+                    let authors = item.data.creators.map(c => {
+                        if (c.lastName && c.firstName) {
+                            let initials = c.firstName.split(" ").map(n => n[0]).join(".") + "."; // Convert to initials
+                            let fullName = `${initials} ${c.lastName}`;
+                            return c.lastName.includes("Bassey") ? `<u>${fullName}</u>` : fullName; // Underline your name
+                        }
+                        return c.lastName;
+                    }).join(", ");
+
+                    // Format volume, issue, and pages (hide missing elements)
+                    let volume = item.data.volume ? `<strong>${item.data.volume}</strong>` : "";
+                    let pages = item.data.pages ? `, ${item.data.pages}` : "";
+                    let journalInfo = item.data.publicationTitle ? `<em>${item.data.publicationTitle}</em>` : "N/A";
+                    let year = item.data.date ? `(${item.data.date.split("-")[0]})` : ""; // Extract only the year
+
+                    // Create the clickable link for the article title (use DOI or URL)
+                    let articleLink = item.data.url ? item.data.url : (item.data.DOI ? `https://doi.org/${item.data.DOI}` : "#");
+
+                    let li = document.createElement("li");
+                    li.innerHTML = `<strong>${index + 1}. <a href="${articleLink}" target="_blank">${item.data.title}</a></strong><br>
+                        ${authors}<br>
+                        ${journalInfo} ${volume}${pages} ${year}<br>`;
+                    li.style.marginBottom = "20px"; // Adds space between publications
+                    publicationsList.appendChild(li);
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching publications:", error);
+            document.getElementById("publications-list").innerHTML = "<li>Error loading publications.</li>";
+        });
+</script>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XRD Converter - Euan N. Bassey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <div class="container"></div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="cv.html">CV</a></li>
+                <li><a href="publications.html">Publications</a></li>
+                <li><a href="talks.html">Talks</a></li>
+                <li class="dropdown">
+                    <a href="#">Tools ▼</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                        <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                        <li><a href="unitconv.html">Unit Conversion</a></li>
+                        <li><a href="cfse.html">CFSE</a></li>
+                        <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+<div class="container">
+    <section>
+        <h2>XRD Utilities</h2>
+        <h3>d‑Spacing, 2θ, and Q Conversions</h3>
+        <p>Enter any value below and the calculator updates the others automatically.</p>
+
+        <div id="controls">
+            <label>Wavelength (Å): </label>
+            <input type="number" id="lambda" value="1.5406" step="0.0001"><br><br>
+
+            <label>2θ (degrees): </label>
+            <input type="number" id="twoTheta" step="0.01"><br><br>
+
+            <label>d‑spacing (Å): </label>
+            <input type="number" id="dspacing" step="0.0001"><br><br>
+
+            <label>Q (Å⁻¹): </label>
+            <input type="number" id="qvalue" step="0.01"><br><br>
+
+            <button onclick="fromTwoTheta()">From 2θ</button>
+            <button onclick="fromD()">From d</button>
+            <button onclick="fromQ()">From Q</button>
+        </div>
+
+        <h3>Compute d, 2θ, and Q from Lattice Parameters & hkl</h3>
+        <p>Enter lattice parameters and Miller indices. Select the crystal system and compute d, 2θ, and Q.</p>
+
+        <div id="controls">
+            <label>a (Å): </label><input id="a" type="number" step="0.0001"><br><br>
+            <label>b (Å): </label><input id="b" type="number" step="0.0001"><br><br>
+            <label>c (Å): </label><input id="c" type="number" step="0.0001"><br><br>
+            <label>α (deg): </label><input id="alpha" type="number" step="0.01"><br><br>
+            <label>β (deg): </label><input id="beta" type="number" step="0.01"><br><br>
+            <label>γ (deg): </label><input id="gamma" type="number" step="0.01"><br><br>
+
+            <label>h: </label><input id="h" type="number"><br><br>
+            <label>k: </label><input id="k" type="number"><br><br>
+            <label>l: </label><input id="l" type="number"><br><br>
+
+            <label>Crystal system: </label>
+            <select id="system">
+                <option value="cubic">Cubic</option>
+                <option value="tetragonal">Tetragonal</option>
+                <option value="orthorhombic">Orthorhombic</option>
+                <option value="hexagonal">Hexagonal</option>
+                <option value="trigonal">Trigonal</option>
+                <option value="monoclinic">Monoclinic</option>
+                <option value="triclinic">Triclinic</option>
+            </select><br><br>
+
+            <button onclick="fromLattice()">Compute from Lattice</button>
+        </div>
+    <!-- </section>
+
+        <section id="structureViewer" style="margin-top:50px;">
+        <h2>Structure Viewer</h2>
+        <p>Upload a CIF to view the crystal structure. You can rotate, zoom, and inspect atoms.</p>
+        <input type="file" id="cifFile" accept=".cif"><br><br>
+        <div style="display:flex; gap:20px; align-items:flex-start;">
+            <div id="viewer" style="flex:1; height:500px; border:1px solid #ccc;"></div>
+            <div id="legend" style="min-width:120px; font-size:14px; line-height:1.4;"></div>
+        </div>
+    </section> -->
+</div>
+</section>
+    
+</div>
+
+<script>
+function fromTwoTheta(){
+    const lambda=parseFloat(document.getElementById('lambda').value);
+    const tt=parseFloat(document.getElementById('twoTheta').value)*Math.PI/180;
+    const d=lambda/(2*Math.sin(tt/2));
+    document.getElementById('dspacing').value=d.toFixed(5);
+    const Q=2*Math.PI/d;
+    document.getElementById('qvalue').value=Q.toFixed(4);
+}
+function fromD(){
+    const lambda=parseFloat(document.getElementById('lambda').value);
+    const d=parseFloat(document.getElementById('dspacing').value);
+    const tt=2*Math.asin(lambda/(2*d))*180/Math.PI;
+    document.getElementById('twoTheta').value=tt.toFixed(4);
+    const Q=2*Math.PI/d;
+    document.getElementById('qvalue').value=Q.toFixed(4);
+}
+function fromQ(){
+    const Q=parseFloat(document.getElementById('qvalue').value);
+    const d=2*Math.PI/Q;
+    document.getElementById('dspacing').value=d.toFixed(5);
+    const lambda=parseFloat(document.getElementById('lambda').value);
+    const tt=2*Math.asin(lambda/(2*d))*180/Math.PI;
+    document.getElementById('twoTheta').value=tt.toFixed(4);
+}
+function fromLattice(){
+    const h=parseFloat(document.getElementById('h').value), k=parseFloat(document.getElementById('k').value), l=parseFloat(document.getElementById('l').value);
+    const a=parseFloat(document.getElementById('a').value), b=parseFloat(document.getElementById('b').value), c=parseFloat(document.getElementById('c').value);
+    const alpha=parseFloat(document.getElementById('alpha').value)*Math.PI/180, beta=parseFloat(document.getElementById('beta').value)*Math.PI/180, gamma=parseFloat(document.getElementById('gamma').value)*Math.PI/180;
+    const system=document.getElementById('system').value;
+
+    let d;
+    if(system==='cubic'){
+        d=a/Math.sqrt(h*h+k*k+l*l);
+    } else if(system==='tetragonal'){
+        d=1/Math.sqrt((h*h+k*k)/(a*a)+l*l/(c*c));
+    } else if(system==='orthorhombic'){
+        d=1/Math.sqrt(h*h/(a*a)+k*k/(b*b)+l*l/(c*c));
+    } else if(system==='hexagonal'||system==='trigonal'){
+        d=1/Math.sqrt((4/3)*(h*h+h*k+k*k)/(a*a)+l*l/(c*c));
+    } else if(system==='monoclinic'){
+        d=1/Math.sqrt((h*h*Math.sin(beta)**2)/(a*a)+k*k/(b*b)+(l*l*Math.sin(beta)**2)/(c*c)-(2*h*l*Math.cos(beta))/(a*c));
+    } else if(system==='triclinic'){
+        const v=a*b*c*Math.sqrt(1+2*Math.cos(alpha)*Math.cos(beta)*Math.cos(gamma)-Math.cos(alpha)**2-Math.cos(beta)**2-Math.cos(gamma)**2);
+        const g11=a*a, g22=b*b, g33=c*c;
+        const g12=a*b*Math.cos(gamma), g23=b*c*Math.cos(alpha), g13=a*c*Math.cos(beta);
+        const gstar11=(g22*g33-g23*g23)/v/v;
+        const gstar22=(g11*g33-g13*g13)/v/v;
+        const gstar33=(g11*g22-g12*g12)/v/v;
+        const gstar12=(g13*g23-g12*g33)/v/v;
+        const gstar13=(g12*g23-g13*g22)/v/v;
+        const gstar23=(g12*g13-g11*g23)/v/v;
+        d=1/Math.sqrt(gstar11*h*h+gstar22*k*k+gstar33*l*l+2*gstar12*h*k+2*gstar13*h*l+2*gstar23*k*l);
+    }
+
+    document.getElementById('dspacing').value=d.toFixed(5);
+    const lambda=parseFloat(document.getElementById('lambda').value);
+    document.getElementById('twoTheta').value=(2*Math.asin(lambda/(2*d))*180/Math.PI).toFixed(4);
+    document.getElementById('qvalue').value=(2*Math.PI/d).toFixed(4);
+}
+
+// // CIF upload + 3Dmol viewer with “ball” representation + legend
+// const viewer = $3Dmol.createViewer('viewer', {backgroundColor:'white'});
+
+// document.getElementById('cifFile').addEventListener('change', function(evt){
+//     const file = evt.target.files[0];
+//     if(!file) return;
+
+//     const reader = new FileReader();
+//     reader.onload = function(e){
+//         viewer.clear();
+//         const model = viewer.addModel(e.target.result, 'cif');
+
+//         // Ball + stick style, color by element
+//         viewer.setStyle({}, {sphere:{scale:0.4}, stick:{radius:0.15, colorscheme:'element'}});
+        
+//         // Legend
+//         const atoms = model.selectedAtoms({});
+//         const elements = [...new Set(atoms.map(a=>a.elem))];
+//         let legendHtml = '<strong>Legend</strong><br>';
+//         elements.forEach(el => {
+//             const color = $3Dmol.elementColors[el] || '#888';
+//             legendHtml += `<div style="display:flex; align-items:center; margin-bottom:4px;">
+//                 <div style="width:12px; height:12px; background:${color}; border:1px solid #000; margin-right:6px;"></div>${el}
+//             </div>`;
+//         });
+//         document.getElementById('legend').innerHTML = legendHtml;
+
+//         viewer.zoomTo();
+//         viewer.render();
+//     };
+//     reader.readAsText(file);
+// });
+
+//     <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js">
+// const viewer = $3Dmol.createViewer('viewer', {backgroundColor:'white'});
+
+// // Helper: parse fractional coords + symmetry
+// function parseCIF(text) {
+//     const lines = text.split(/\r?\n/);
+//     let atoms = [], syms = [];
+//     let a,b,c,alpha,beta,gamma;
+//     let inAtoms=false, atomFields=[];
+
+//     for(let line of lines){
+//         line = line.trim();
+//         if(line.startsWith('_cell_length_a')) a = parseFloat(line.split(/\s+/).pop());
+//         if(line.startsWith('_cell_length_b')) b = parseFloat(line.split(/\s+/).pop());
+//         if(line.startsWith('_cell_length_c')) c = parseFloat(line.split(/\s+/).pop());
+//         if(line.startsWith('_cell_angle_alpha')) alpha = parseFloat(line.split(/\s+/).pop());
+//         if(line.startsWith('_cell_angle_beta')) beta = parseFloat(line.split(/\s+/).pop());
+//         if(line.startsWith('_cell_angle_gamma')) gamma = parseFloat(line.split(/\s+/).pop());
+
+//         if(line.startsWith('_symmetry_equiv_pos_as_xyz')) continue; // skip header line
+//         if(line.match(/^\s*["']?\w+["']?\s*$/)) continue;
+
+//         if(line.startsWith('loop_')){
+//             inAtoms=false;
+//         }
+//         if(line.startsWith('_atom_site_')){
+//             inAtoms=true;
+//             atomFields.push(line);
+//         }
+//         if(inAtoms && !line.startsWith('_') && line !== 'loop_'){
+//             const parts = line.split(/\s+/);
+//             const atom = {};
+//             atom.elem = parts[0];
+//             atom.x = parseFloat(parts[1]);
+//             atom.y = parseFloat(parts[2]);
+//             atom.z = parseFloat(parts[3]);
+//             atoms.push(atom);
+//         }
+
+//         if(line.startsWith('_symmetry_equiv_pos_as_xyz')){
+//             const idx = lines.indexOf(line)+1;
+//             for(let i=idx;i<lines.length;i++){
+//                 const l = lines[i].trim();
+//                 if(l==='' || l.startsWith('loop_') || l.startsWith('_')) break;
+//                 syms.push(l);
+//             }
+//         }
+//     }
+//     return {atoms, syms, a,b,c,alpha,beta,gamma};
+// }
+
+// // Convert fractional -> Cartesian
+// function fracToCart(x,y,z,a,b,c,alpha,beta,gamma){
+//     // Convert angles to radians
+//     alpha = alpha*Math.PI/180;
+//     beta = beta*Math.PI/180;
+//     gamma = gamma*Math.PI/180;
+//     const cosA = Math.cos(alpha), cosB = Math.cos(beta), cosG = Math.cos(gamma);
+//     const sinG = Math.sin(gamma);
+//     const volume = Math.sqrt(1 - cosA*cosA - cosB*cosB - cosG*cosG + 2*cosA*cosB*cosG);
+//     const cx = a*x + b*cosG*y + c*cosB*z;
+//     const cy = b*sinG*y + c*(cosA - cosB*cosG)/sinG*z;
+//     const cz = c*volume/sinG * z;
+//     return {x:cx, y:cy, z:cz};
+// }
+
+// // Apply a symmetry string like "x,-y+1/2,z+1/2"
+// function applySym(atom, sym){
+//     let x=atom.x, y=atom.y, z=atom.z;
+//     sym = sym.replace(/\s/g,'');
+//     sym = sym.replace(/-/g,'+-');
+//     let coords = sym.split(',');
+//     function evalCoord(expr,val){ return Function('x','y','z','return '+expr)(val.x,val.y,val.z);}
+//     return {
+//         x: evalCoord(coords[0], {x:x,y:y,z:z}),
+//         y: evalCoord(coords[1], {x:x,y:y,z:z}),
+//         z: evalCoord(coords[2], {x:x,y:y,z:z}),
+//         elem: atom.elem
+//     };
+// }
+
+// // Expand all atoms
+// function expandAtoms(parsed){
+//     const full = [];
+//     parsed.atoms.forEach(atom=>{
+//         parsed.syms.forEach(s=>{
+//             const newAtom = applySym(atom, s);
+//             const cart = fracToCart(newAtom.x,newAtom.y,newAtom.z,
+//                                     parsed.a,parsed.b,parsed.c,
+//                                     parsed.alpha,parsed.beta,parsed.gamma);
+//             full.push({elem:newAtom.elem, x:cart.x, y:cart.y, z:cart.z});
+//         });
+//     });
+//     return full;
+// }
+
+// // Generate XYZ string for 3Dmol.js
+// function atomsToXYZ(atoms){
+//     let s = atoms.length + '\nExpanded structure\n';
+//     atoms.forEach(a=>{
+//         s+=`${a.elem} ${a.x} ${a.y} ${a.z}\n`;
+//     });
+//     return s;
+// }
+
+// document.getElementById('cifFile').addEventListener('change', function(evt){
+//     const file = evt.target.files[0];
+//     if(!file) return;
+
+//     const reader = new FileReader();
+//     reader.onload = function(e){
+//         viewer.clear();
+//         const parsed = parseCIF(e.target.result);
+//         const expanded = expandAtoms(parsed);
+//         const xyzData = atomsToXYZ(expanded);
+
+//         const model = viewer.addModel(xyzData,'xyz');
+//         viewer.setStyle({}, {sphere:{scale:0.4}, stick:{radius:0.15, colorscheme:'element'}});
+
+//         // Legend
+//         const elements = [...new Set(expanded.map(a=>a.elem))];
+//         let legendHtml = '<strong>Legend</strong><br>';
+//         elements.forEach(el=>{
+//             const color = $3Dmol.elementColors[el]||'#888';
+//             legendHtml += `<div style="display:flex; align-items:center; margin-bottom:4px;">
+//                 <div style="width:12px; height:12px; background:${color}; border:1px solid #000; margin-right:6px;"></div>${el}
+//             </div>`;
+//         });
+//         document.getElementById('legend').innerHTML = legendHtml;
+
+//         // XYZ axes
+//         const axisLength = 5;
+//         viewer.addLine({start:{x:0,y:0,z:0}, end:{x:axisLength,y:0,z:0}, color:'red'});
+//         viewer.addLine({start:{x:0,y:0,z:0}, end:{x:0,y:axisLength,z:0}, color:'green'});
+//         viewer.addLine({start:{x:0,y:0,z:0}, end:{x:0,y:0,z:axisLength}, color:'blue'});
+
+//         viewer.zoomTo();
+//         viewer.render();
+//     };
+//     reader.readAsText(file);
+// });
+// </script>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+    </div>
+</footer>
+
+</body>
+</html>

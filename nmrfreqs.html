@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euan N. Bassey - NMR Freqs.</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        #plot {
+            margin: auto;
+            width: 80%; /* Adjust width */
+            height: 60%;
+            max-width: 1200px; /* Max width for larger screens */
+            max-height: 750px; /* Max width for larger screens */
+        }
+    </style>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <div class="container"></div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <h2>NMR Frequency: Interactive Plot</h2>
+    <p> Here you will find an interactive plot of the Larmor frequency of NMR-active nuclides under an applied magnetic field. </p>
+    <p>  </p>
+    <p> You can double-click on a spin in the legend to isolate a specific spin group, and hover over nuclides to get more detailed information. </p>
+    <p>  </p>
+    <p> If you prefer, there is also a <a href="Gyromagnetic_Ratios.csv" target="_blank">CSV</a> you can download to give you this information! </p>
+    <p> This is inspired by <a href="https://pages.nyu.edu/jerschow/NMRmap/NMRmap_deployed.html">Alexej Jerschow's excellent plot</a> </p>
+    <p> -------------------- </p>
+    <label for="nucleusInput">Nuclide:</label>
+    <input type="text" id="nucleusInput" value="1H">
+    <p> -------------------- </p>
+    <label for="magField">Magnetic Field (T): </label>
+    <input type="number" id="magField" value="7" step="0.1">
+    <button onclick="handleUpdate()">Get Info and/or Update Plot</button>    
+    <p> -------------------- </p>
+
+    <div class="result" id="result"></div>
+
+    <div id="plot"></div>
+    
+    <div class="content-container">
+        <div id="plot"></div>
+
+    <script>
+        // Gyromagnetic ratios (MHz/T) for different nuclides
+        const nuclides = [
+            {name: '1H', gamma: 42.57746460132430, spin: 0.5 },
+{name: '2H', gamma: 6.535904639, spin: 1 },
+{name: '3He', gamma: -32.43603205, spin: 0.5 },
+{name: '3H', gamma: 45.41483118028370, spin: 0.5 },
+{name: '6Li', gamma: 6.266200673, spin: 1 },
+{name: '7Li', gamma: 16.54845000000000, spin: 1.5 },
+{name: '9Be', gamma: -5.983700649, spin: 1.5 },
+{name: '10B', gamma: 4.575195318, spin: 3 },
+{name: '11B', gamma: 13.66297000000000, spin: 1.5 },
+{name: '13C', gamma: 10.70839020506340, spin: 0.5 },
+{name: '14N', gamma: 3.077706459, spin: 1 },
+{name: '15N', gamma: -4.317268817, spin: 0.5 },
+{name: '17O', gamma: -5.774268659, spin: 2.5 },
+{name: '19F', gamma: 40.07757016369700, spin: 0.5 },
+{name: '21Ne', gamma: -3.363071271, spin: 1.5 },
+{name: '23Na', gamma: 11.26952278792250, spin: 1.5 },
+{name: '25Mg', gamma: -2.608342616, spin: 2.5 },
+{name: '27Al', gamma: 11.10307854843700, spin: 2.5 },
+{name: '29Si', gamma: -8.46545, spin: 0.5 },
+{name: '31P', gamma: 17.25144000000000, spin: 0.5 },
+{name: '33S', gamma: 3.271716334, spin: 1.5 },
+{name: '35Cl', gamma: 4.17654, spin: 1.5 },
+{name: '37Cl', gamma: 3.47653283, spin: 1.5 },
+{name: '39K', gamma: 1.989532282, spin: 1.5 },
+{name: '40K', gamma: -2.473729365, spin: 4 },
+{name: '41K', gamma: 1.091914318, spin: 1.5 },
+{name: '43Ca', gamma: -2.869675032, spin: 3.5 },
+{name: '45Sc', gamma: 10.35908000000000, spin: 3.5 },
+{name: '47Ti', gamma: -2.40404, spin: 2.5 },
+{name: '49Ti', gamma: -2.404751613, spin: 3.5 },
+{name: '50V', gamma: 4.250471488, spin: 6 },
+{name: '51V', gamma: 11.21327743103380, spin: 3.5 },
+{name: '53Cr', gamma: -2.41152, spin: 1.5 },
+{name: '55Mn', gamma: 10.57624385581420, spin: 2.5 },
+{name: '57Fe', gamma: 1.381560399, spin: 0.5 },
+{name: '59Co', gamma: 10.07769000000000, spin: 3.5 },
+{name: '61Ni', gamma: -3.81144, spin: 1.5 },
+{name: '63Cu', gamma: 11.31876532731510, spin: 1.5 },
+{name: '65Cu', gamma: 12.10269891500850, spin: 1.5 },
+{name: '67Zn', gamma: 2.668535015, spin: 2.5 },
+{name: '69Ga', gamma: 10.24776396876680, spin: 1.5 },
+{name: '71Ga', gamma: 13.02073645775120, spin: 1.5 },
+{name: '73Ge', gamma: -1.489738014, spin: 4.5 },
+{name: '75As', gamma: 7.315015832, spin: 1.5 },
+{name: '77Se', gamma: 8.157311538, spin: 0.5 },
+{name: '79Br', gamma: 10.70415668357710, spin: 1.5 },
+{name: '81Br', gamma: 11.53838323328760, spin: 1.5 },
+{name: '83Kr', gamma: -1.64423, spin: 4.5 },
+{name: '85Rb', gamma: 4.126426125, spin: 2.5 },
+{name: '87Sr', gamma: -1.852468045, spin: 4.5 },
+{name: '87Rb', gamma: 13.98399000000000, spin: 1.5 },
+{name: '89Y', gamma: -2.094924685, spin: 0.5 },
+{name: '91Zr', gamma: -3.974783295, spin: 2.5 },
+{name: '93Nb', gamma: 10.45234000000000, spin: 4.5 },
+{name: '95Mo', gamma: -2.7868, spin: 2.5 },
+{name: '97Mo', gamma: -2.84569, spin: 2.5 },
+{name: '99Ru', gamma: -1.95601, spin: 2.5 },
+{name: '99Tc', gamma: 9.62251, spin: 4.5 },
+{name: '101Ru', gamma: -2.19156, spin: 2.5 },
+{name: '103Rh', gamma: -1.34772, spin: 0.5 },
+{name: '105Pd', gamma: -1.95761, spin: 2.5 },
+{name: '107Ag', gamma: -1.733070006, spin: 0.5 },
+{name: '109Ag', gamma: -1.992397071, spin: 0.5 },
+{name: '111Cd', gamma: -9.069142038, spin: 0.5 },
+{name: '113In', gamma: 9.36547, spin: 4.5 },
+{name: '113Cd', gamma: -9.487098834, spin: 0.5 },
+{name: '115In', gamma: 9.38569, spin: 4.5 },
+{name: '115Sn', gamma: -14.0077, spin: 0.5 },
+{name: '117Sn', gamma: -15.26103327, spin: 0.5 },
+{name: '119Sn', gamma: -15.96595, spin: 0.5 },
+{name: '121Sb', gamma: 10.25515000000000, spin: 2.5 },
+{name: '123Sb', gamma: 5.55323, spin: 3.5 },
+{name: '123Te', gamma: -11.23491, spin: 0.5 },
+{name: '125Te', gamma: -13.54542256, spin: 0.5 },
+{name: '127I', gamma: 8.577767066, spin: 2.5 },
+{name: '129Xe', gamma: -11.86039, spin: 0.5 },
+{name: '131Xe', gamma: 3.515860017, spin: 1.5 },
+{name: '133Cs', gamma: 5.623342027, spin: 3.5 },
+{name: '135Ba', gamma: 4.25819, spin: 1.5 },
+{name: '137Ba', gamma: 4.763427869, spin: 1.5 },
+{name: '138La', gamma: 5.661523298, spin: 5 },
+{name: '139La', gamma: 6.061145444, spin: 3.5 },
+{name: '141Pr', gamma: 13.03590000000000, spin: 2.5 },
+{name: '143Nd', gamma: -2.31889, spin: 3.5 },
+{name: '145Nd', gamma: -1.42921, spin: 3.5 },
+{name: '147Sm', gamma: -1.77458, spin: 3.5 },
+{name: '149Sm', gamma: -1.46295, spin: 3.5 },
+{name: '151Eu', gamma: 10.58540000000000, spin: 2.5 },
+{name: '153Eu', gamma: 4.67422, spin: 2.5 },
+{name: '155Gd', gamma: -1.307171379, spin: 1.5 },
+{name: '157Gd', gamma: -1.71394, spin: 1.5 },
+{name: '159Tb', gamma: 10.23525000000000, spin: 1.5 },
+{name: '161Dy', gamma: -1.46438, spin: 0.5 },
+{name: '163Dy', gamma: 2.05151, spin: 1 },
+{name: '165Ho', gamma: 9.08775, spin: 0.5 },
+{name: '167Er', gamma: -1.227991794, spin: 0.5 },
+{name: '169Tm', gamma: -3.53006, spin: 1 },
+{name: '171Yb', gamma: 7.52612, spin: 1.5 },
+{name: '173Yb', gamma: -2.07299, spin: 1.5 },
+{name: '175Lu', gamma: 4.8625, spin: 3 },
+{name: '176Lu', gamma: 3.45112, spin: 1.5 },
+{name: '177Hf', gamma: 1.72842, spin: 0.5 },
+{name: '179Hf', gamma: -1.0856, spin: 1 },
+{name: '181Ta', gamma: 5.16267, spin: 0.5 },
+{name: '183W', gamma: 1.79564973, spin: 2.5 },
+{name: '185Re', gamma: 9.71752, spin: 0.5 },
+{name: '187Os', gamma: 0.985630647, spin: 1.5 },
+{name: '187Re', gamma: 9.817, spin: 1.5 },
+{name: '189Os', gamma: 3.353601552, spin: 2.5 },
+{name: '191Ir', gamma: 0.76585, spin: 2.5 },
+{name: '193Ir', gamma: 0.8319, spin: 0.5 },
+{name: '195Pt', gamma: 9.29226, spin: 0.5 },
+{name: '197Au', gamma: 0.752898374, spin: 1.5 },
+{name: '199Hg', gamma: 7.712314317, spin: 1.5 },
+{name: '201Hg', gamma: -2.846915876, spin: 1.5 },
+{name: '203Tl', gamma: 24.73161181836180, spin: 1.5 },
+{name: '205Tl', gamma: 24.97488014887780, spin: 4 },
+{name: '207Pb', gamma: 8.881577937, spin: 1.5 },
+{name: '209Bi', gamma: 6.96303, spin: 3.5 },
+{name: '235U', gamma: -0.82761, spin: 3.5 }
+                         ];
+// Define colors for different spin values
+const spinColors = {
+    0.5: '#a6cee3', 1: '#1f78b4', 1.5: '#b2df8a', 
+    2: '#33a02c', 2.5: '#fb9a99', 3: '#e31a1c', 
+    3.5: '#fdbf6f', 4: '#ff7f00', 4.5: '#cab2d6', 
+    5: '#6a3d9a', 6: 'black'
+};
+        
+function updatePlot() {
+    let B = parseFloat(document.getElementById("magField").value);
+    let selectedNucleus = document.getElementById("nucleusInput").value.trim().toUpperCase();
+
+    // Group nuclides by spin
+    let spinGroups = {};
+    nuclides.forEach(nuclide => {
+        let spinKey = nuclide.spin;
+        if (!spinGroups[spinKey]) {
+            spinGroups[spinKey] = [];
+        }
+        spinGroups[spinKey].push(nuclide);
+    });
+
+    let traces = [];
+    let spinKeys = Object.keys(spinGroups).map(Number).sort((a, b) => a - b);
+    
+    let highlightTrace = null; // Will store the highlighted nucleus if found
+
+    spinKeys.forEach(spin => {
+        let group = spinGroups[spin];
+        let x = group.map((_, i) => i + 1);
+        let y = group.map(nuclide => Math.abs(nuclide.gamma * B));
+        let labels = group.map(n => n.name);
+
+        let trace = {
+            x: x, 
+            y: y, 
+            text: labels,
+            mode: 'markers+text',
+            type: 'scatter',
+            textposition: 'top center',
+            marker: { color: spinColors[spin] || 'black', size: 8 },
+            name: `I = ${spin}`,
+            legendgroup: `spin_${spin}`,  // Unique legend group for each spin
+            showlegend: true
+        };
+
+        traces.push(trace);
+
+        // Check for user-selected nucleus
+        group.forEach((nuclide, index) => {
+            if (nuclide.name.toUpperCase() === selectedNucleus) {
+                highlightTrace = {
+                    x: [index + 1], 
+                    y: [Math.abs(nuclide.gamma * B)], 
+                    text: [nuclide.name], 
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    textposition: 'top center',
+                    marker: { color: 'red', size: 12, symbol: 'x' },
+                    name: `Selected: ${nuclide.name}`,
+                    legendgroup: 'highlight',  // Separate from spin groups
+                    showlegend: true
+                };
+            }
+        });
+    });
+
+    // Add highlight trace if applicable
+    if (highlightTrace) {
+        traces.push(highlightTrace);
+    }
+
+    let layout = {
+        title: `NMR Frequency at ${B} T`,
+        xaxis: { title: "Nuclide Index" },
+        yaxis: { title: "Frequency (MHz)" },
+        showlegend: true
+    };
+
+    Plotly.newPlot('plot', traces, layout);
+}
+
+// Initialize plot
+updatePlot();
+</script>
+
+    <!-- Move the script to the bottom of the body -->
+    <script>
+
+        // Add an event listener to the button
+
+        function getNMRInfo() {
+            let B = parseFloat(document.getElementById("magField").value);
+            const nucleus = document.getElementById('nucleusInput').value.trim().toUpperCase();
+
+            const resultDiv = document.getElementById('result');
+            
+            // Ensure that the magnetic field is valid
+            if (isNaN(B) || B <= 0) {
+                resultDiv.innerHTML = "Please enter a valid magnetic field strength.";
+                return;
+            }
+
+            // Search for the nucleus in the nuclides array (case insensitive)
+            const nuclide = nuclides.find(item => item.name.toUpperCase() === nucleus);
+
+            if (nuclide) {
+                const { gamma, spin } = nuclide;
+                const resonantFrequency = gamma * B;  // Calculate resonant frequency
+
+                resultDiv.innerHTML = `
+                    Gamma (γ): ${gamma} MHz/T <br>
+                    Spin: ${spin} <br>
+                    Resonant Frequency: ${resonantFrequency.toFixed(2)} MHz (for B0 = ${B} T)
+                `;
+            } else {
+                resultDiv.innerHTML = `No data found for nucleus ${nucleus}. Please check the input.`;
+            }
+        }
+    </script>
+
+    <script>
+        function handleUpdate() {
+            getNMRInfo();
+            updatePlot();
+        }
+    </script>
+        
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

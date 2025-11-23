@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Units - Euan N. Bassey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        input, select, button {
+            margin: 10px;
+            padding: 8px;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <div class="container">
+        </div>
+    </header>
+
+    <!-- Navigation Section -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+<body>
+    <h2>Energy/Frequency/Wavelength Converter</h2>
+    <label for="value">Enter Value:</label>
+    <input type="number" id="value" step="any">
+    <select id="prefix">
+        <option value="1">(None)</option>
+        <option value="1e-9">Nano (n)</option>
+        <option value="1e-6">Micro (µ)</option>
+        <option value="1e-3">Milli (m)</option>
+        <option value="1e3">Kilo (k)</option>
+        <option value="1e6">Mega (M)</option>
+        <option value="1e9">Giga (G)</option>
+    </select>
+    <select id="unit">
+        <option value="J">Joule (J)</option>
+        <option value="K">Kelvin (K)</option>
+        <option value="eV">Electron Volt (eV)</option>
+        <option value="cm-1">Wavenumber (cm⁻¹)</option>
+        <option value="m">Wavelength (m)</option>
+        <option value="Hz">Hertz (Hz)</option>
+    </select>
+    <br>
+    <label for="outputPrefix">Convert To:</label>
+    <select id="outputPrefix">
+        <option value="1">(None)</option>
+        <option value="1e-9">Nano (n)</option>
+        <option value="1e-6">Micro (µ)</option>
+        <option value="1e-3">Milli (m)</option>
+        <option value="1e3">Kilo (k)</option>
+        <option value="1e6">Mega (M)</option>
+        <option value="1e9">Giga (G)</option>
+    </select>
+    <select id="outputUnit">
+        <option value="J">Joule (J)</option>
+        <option value="K">Kelvin (K)</option>
+        <option value="eV">Electron Volt (eV)</option>
+        <option value="cm-1">Wavenumber (cm⁻¹)</option>
+        <option value="m">Wavelength (m)</option>
+        <option value="Hz">Hertz (Hz)</option>
+    </select>
+    <button onclick="convert()">Convert</button>
+    <div id="output"></div>
+
+    <script>
+        const h = 6.62607015e-34; // Planck's constant (J·s)
+        const kB = 1.380649e-23;  // Boltzmann's constant (J/K)
+        const c = 299792458;       // Speed of light (m/s)
+        const eV_to_J = 1.602176634e-19;
+        const cm1_to_J = h * c * 100;
+
+        function convert() {
+            let value = parseFloat(document.getElementById('value').value);
+            let prefixFactor = parseFloat(document.getElementById('prefix').value);
+            let unit = document.getElementById('unit').value;
+            let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
+            let outputUnit = document.getElementById('outputUnit').value;
+            let value_J = value * prefixFactor;
+
+            if (unit === "J") value_J *= 1;
+            if (unit === "K") value_J *= kB;
+            if (unit === "eV") value_J *= eV_to_J;
+            if (unit === "cm-1") value_J *= cm1_to_J;
+            if (unit === "m") value_J = h * c / value_J;
+            if (unit === "Hz") value_J = h * value_J;
+
+            let convertedValue;
+            if (outputUnit === "J") convertedValue = value_J;
+            if (outputUnit === "K") convertedValue = value_J / kB;
+            if (outputUnit === "eV") convertedValue = value_J / eV_to_J;
+            if (outputUnit === "cm-1") convertedValue = value_J / cm1_to_J;
+            if (outputUnit === "m") convertedValue = h * c / value_J;
+            if (outputUnit === "Hz") convertedValue = value_J / h;
+
+            convertedValue /= outputPrefixFactor;
+
+            document.getElementById('output').innerHTML = `<h3>Converted Value:</h3><p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit}</p>`;
+        }
+    </script>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

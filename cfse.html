@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CFSE - Euan N. Bassey</title>
+  <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+  <style>
+  h1 { text-align:center; margin-bottom:20px; }
+  .container { display:flex; justify-content:center; align-items:flex-start; gap:40px; flex-wrap:wrap; }
+  #controls { font-size:14px; padding:12px; display:flex; flex-direction:column; align-items:flex-start; width:300px; }
+  #controls label { margin:12px 0; width:100%; display:flex; flex-direction:column; align-items:flex-start; }
+  #controls input[type=range], #controls input[type=number], #controls select { width:100%; margin-top:4px; }
+  #controls span { margin-left:4px; }
+  #controls button { padding:6px 12px; font-size:14px; margin-top:12px; }
+  .legend { font-size:12px; margin-top:12px; text-align:left; }
+  .legend span { display:inline-block; width:16px; height:16px; margin-right:4px; vertical-align:middle; }
+  svg { max-width:1000px; flex:1; margin-top:60px; }
+</style>
+</head>
+<body>
+    <header>
+        <div class="container">
+        </div>
+    </header>
+  <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+ <h1>Crystal Field Splitting Tool</h1>
+<div class="container">
+<div class="controls" id="controls">
+<label>Geometry <select id="geom">
+<option value="oh">Octahedral</option>
+<option value="td">Tetrahedral</option>
+<option value="sp">Square Planar</option>
+</select></label>
+<label>Δ (splitting, eV)<br>
+<input id="delta" type="range" min="0" max="8" step="0.05" value="1.5">
+<span id="deltaVal">1.50</span> eV
+</label>
+<label>d-electron count<br>
+<input id="dcount" type="number" min="0" max="10" value="6">
+</label>
+<label>Pairing energy (eV)<br>
+<input id="pair" type="range" min="0" max="8" step="0.05" value="0.75">
+<span id="pairVal">0.80</span> eV
+</label>
+<div class="output">
+Spin state: <span id="spinState">—</span><br>
+CFSE: <span id="cfse">—</span><br>
+Pairs: <span id="pairs">—</span> | Unpaired: <span id="unpaired">—</span>
+</div>
+<button id="downloadCF">Download Diagram</button>
+<div class="legend">
+<span style="background:#4285f4"></span> Spin up
+<span style="background:#34a853; margin-left: 8px;"></span> Spin down
+</div>
+</div>
+<svg id="cftSVG" viewBox="0 0 1000 700"></svg>
+</div>
+<script>
+const svg=document.getElementById('cftSVG');
+const deltaInput=document.getElementById('delta');
+const deltaVal=document.getElementById('deltaVal');
+const geomInput=document.getElementById('geom');
+const dcountInput=document.getElementById('dcount');
+const pairInput=document.getElementById('pair');
+const pairVal=document.getElementById('pairVal');
+const spinStateOutput=document.getElementById('spinState');
+const cfseOutput=document.getElementById('cfse');
+const pairsOutput=document.getElementById('pairs');
+const unpairedOutput=document.getElementById('unpaired');
+
+function getLevels(geom,Delta){
+  if(geom==='oh') return [
+    {label:'<tspan font-style="italic">t</tspan><tspan baseline-shift="sub">2g</tspan>', g:3, E:-0.4*Delta},
+    {label:'<tspan font-style="italic">e</tspan><tspan baseline-shift="sub">g</tspan>', g:2, E:0.6*Delta}
+  ];
+  else if(geom==='td'){const Dt=4/9*Delta; return [
+    {label:'<tspan font-style="italic">t</tspan><tspan baseline-shift="sub">2</tspan>', g:3, E:0.4*Dt},
+    {label:'<tspan font-style="italic">e</tspan>', g:2, E:-0.6*Dt}
+  ];}
+  else{
+    const E=[-0.35,-0.15,0.05,0.45].map(x=>x*Delta);
+    return [
+      {label:'<tspan font-style="italic">d</tspan><tspan font-style="italic" baseline-shift="sub">xz, yz</tspan>', g:2, E:E[0]},
+      {label:'<tspan font-style="italic">d</tspan><tspan font-style="italic" baseline-shift="sub">z2</tspan>', g:1, E:E[1]},
+      {label:'<tspan font-style="italic">d</tspan><tspan font-style="italic" baseline-shift="sub">xy</tspan>', g:1, E:E[2]},
+      {label:'<tspan font-style="italic">d</tspan><tspan font-style="italic" baseline-shift="sub">x2-y2</tspan>', g:1, E:E[3]}
+    ];
+  }
+}
+
+function fillElectrons(levels,n,P){
+  const subs=[];
+  levels.forEach(L=>{for(let i=0;i<L.g;i++)subs.push({E:L.E,label:L.label,occ:0});});
+  subs.sort((a,b)=>a.E-b.E);
+  let rem=n;
+  const highSpin=(Math.max(...levels.map(l=>l.E))-Math.min(...levels.map(l=>l.E)))<P;
+  if(highSpin){while(rem>0){subs.sort((a,b)=>(a.occ-b.occ)||(a.E-b.E));subs[0].occ++;rem--;}}
+  else{for(const s of subs){const add=Math.min(2,rem);s.occ+=add;rem-=add;if(rem<=0)break;}}
+  let cfse=0,pairs=0,unpaired=0;
+  subs.forEach(s=>{cfse+=s.occ*s.E;if(s.occ===2)pairs++;else if(s.occ===1)unpaired++;});
+  return {subs,cfse,pairs,unpaired,spin:highSpin?'High Spin':'Low Spin'};
+}
+
+function renderCFT(){
+  const G=geomInput.value; const D=parseFloat(deltaInput.value); deltaVal.textContent=D.toFixed(2);
+  const n=parseInt(dcountInput.value)||0; const P=parseFloat(pairInput.value)||0; pairVal.textContent=P.toFixed(2);
+  const levels=getLevels(G,D); const filled=fillElectrons(levels,n,P);
+  svg.innerHTML='';
+
+  const marginTop=80,marginLeft=150,H=700,yScale=50;
+
+  // Y axis
+  const yAxis=document.createElementNS('http://www.w3.org/2000/svg','line');
+  yAxis.setAttribute('x1',marginLeft-60); yAxis.setAttribute('x2',marginLeft-60);
+  yAxis.setAttribute('y1',marginTop-20); yAxis.setAttribute('y2',marginTop+H);
+  yAxis.setAttribute('stroke','#000'); yAxis.setAttribute('stroke-width','2'); svg.appendChild(yAxis);
+
+  // Arrow
+  const arrow=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  arrow.setAttribute('points',`${marginLeft-65},${marginTop-20} ${marginLeft-55},${marginTop-20} ${marginLeft-60},${marginTop-30}`);
+  arrow.setAttribute('fill','#000'); svg.appendChild(arrow);
+
+  // Energy label horizontal
+  const yLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
+  yLabel.setAttribute('x',marginLeft-30); yLabel.setAttribute('y',marginTop-40);
+  yLabel.setAttribute('text-anchor','start'); yLabel.setAttribute('font-size','16');
+  yLabel.textContent='Energy (eV)'; svg.appendChild(yLabel);
+
+  const groups={};
+  filled.subs.forEach(s=>{groups[s.label]=groups[s.label]||[]; groups[s.label].push(s);});
+  const uniq=Object.keys(groups).map(k=>({label:k,E:groups[k][0].E,arr:groups[k]})).sort((a,b)=>a.E-b.E);
+
+  uniq.forEach(g=>{
+    const y=marginTop+H/2-g.E*yScale;
+    const lineLength=150, spacing=60;
+
+    // Draw horizontal level
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',marginLeft); line.setAttribute('x2',marginLeft+lineLength);
+    line.setAttribute('y1',y); line.setAttribute('y2',y);
+    line.setAttribute('stroke','#000'); line.setAttribute('stroke-width','2'); svg.appendChild(line);
+
+    // Draw electrons horizontally
+    g.arr.forEach((s,idx)=>{
+      const x=marginLeft+15+idx*spacing;
+      if(s.occ>=1){ const c1=document.createElementNS('http://www.w3.org/2000/svg','circle'); c1.setAttribute('cx',x); c1.setAttribute('cy',y-12); c1.setAttribute('r',12); c1.setAttribute('fill','#4285f4'); svg.appendChild(c1);}
+      if(s.occ>=2){ const c2=document.createElementNS('http://www.w3.org/2000/svg','circle'); c2.setAttribute('cx',x); c2.setAttribute('cy',y+12); c2.setAttribute('r',12); c2.setAttribute('fill','#34a853'); svg.appendChild(c2);}
+    });
+
+    // Draw level label
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',marginLeft+lineLength+30); txt.setAttribute('y',y+6);
+    txt.setAttribute('font-size','16'); txt.setAttribute('fill','#000');
+    txt.innerHTML=g.label;
+    svg.appendChild(txt);
+
+    // Draw energy value
+    const val=document.createElementNS('http://www.w3.org/2000/svg','text');
+    val.setAttribute('x',marginLeft-100); val.setAttribute('y',y+6);
+    val.setAttribute('font-size','14'); val.setAttribute('fill','#000');
+    val.textContent=g.E.toFixed(2);
+    svg.appendChild(val);
+  });
+
+  spinStateOutput.textContent=filled.spin;
+  cfseOutput.textContent=filled.cfse.toFixed(2);
+  pairsOutput.textContent=filled.pairs;
+  unpairedOutput.textContent=filled.unpaired;
+}
+
+[geomInput,deltaInput,dcountInput,pairInput].forEach(el=>el.addEventListener('input',renderCFT));
+renderCFT();
+
+document.getElementById('downloadCF').addEventListener('click',()=>{
+  const s=new XMLSerializer().serializeToString(svg);
+  const blob=new Blob([s],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='crystal_field.svg'; a.click(); URL.revokeObjectURL(url);
+});
+</script>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

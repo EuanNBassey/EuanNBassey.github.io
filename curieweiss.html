@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euan N. Bassey - Curie-Weiss</title>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+    body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+    #plot {
+      margin: auto;
+      width: 80%; /* Adjust width */
+      height: 60%;
+      max-width: 1200px; /* Max width for larger screens */
+      max-height: 750px; /* Max width for larger screens */
+    }
+    .input-section {
+      margin-bottom: 20px;
+    }
+    .input-section label {
+      margin-right: 10px;
+    }
+    .additional-curves {
+      margin-bottom: 20px;
+    }
+    .curve-input {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <div class="container"></div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+  <h1>Interactive Curie-Weiss Law Plot</h1>
+  
+  <div class="input-section">
+    <label for="temp-min">Temperature Min (Tmin):</label>
+    <input type="number" id="temp-min" value="10" step="10" />
+  </div>
+
+  <div class="input-section">
+    <label for="temp-max">Temperature Max (Tmax):</label>
+    <input type="number" id="temp-max" value="350" step="10" />
+  </div>
+
+  <div class="input-section">
+    <button onclick="updatePlot()">Update Plot</button>
+    <button onclick="setYAxisMinToZero()">Set Y-Axis Min to Zero</button>
+  </div>
+
+  <h3>Base Curve:</h3>
+  <div class="input-section">
+    <label for="spin">Spin (S):</label>
+    <input type="number" id="spin" value="0.5" step="0.5" />
+  </div>
+
+  <div class="input-section">
+    <label for="weiss-constant">Weiss Constant (θ):</label>
+    <input type="number" id="weiss-constant" value="-20" step="5" />
+  </div>
+
+  <div class="input-section">
+    <label for="base-weight">Weight for Base Curve:</label>
+    <input type="number" id="base-weight" value="1" step="0.01" min="0" max="1" />
+  </div>
+
+  <h3>Additional Curves:</h3>
+  <div class="additional-curves" id="additional-curves"></div>
+
+  <div class="input-section">
+    <button onclick="addCurve()">+</button>
+    <button onclick="removeCurve()">-</button>
+  </div>
+
+  <div id="plot"></div>
+
+  <script>
+    // Constants
+    const muB = 9.2740100657e-24; // Bohr magneton (J/T)
+    const kB = 1.380649e-23; // Boltzmann constant (J/K)
+
+    let curveCount = 0;
+    const maxCurves = 4;
+    const curves = [];
+
+    // Function to add a new curve input
+    function addCurve() {
+      if (curveCount < maxCurves) {
+        curveCount++;
+        const curveDiv = document.createElement('div');
+        curveDiv.classList.add('curve-input');
+        curveDiv.innerHTML = `
+          <label for="spin-${curveCount}">Spin (S) for Curve ${curveCount}:</label>
+          <input type="number" id="spin-${curveCount}" value="0.5" step="0.5" />
+          <label for="weiss-constant-${curveCount}">Weiss Constant (θ) for Curve ${curveCount}:</label>
+          <input type="number" id="weiss-constant-${curveCount}" value="-20" step="5" />
+          <label for="weight-${curveCount}">Weight (Fraction) for Curve ${curveCount}:</label>
+          <input type="number" id="weight-${curveCount}" value="1" step="0.01" min="0" max="1" />
+        `;
+        document.getElementById('additional-curves').appendChild(curveDiv);
+      }
+    }
+
+    // Function to remove the most recent curve input
+    function removeCurve() {
+      if (curveCount > 0) {
+        const curveDiv = document.getElementById('additional-curves').lastElementChild;
+        document.getElementById('additional-curves').removeChild(curveDiv);
+        curveCount--;
+      }
+    }
+
+    // Function to update the plot
+    function updatePlot() {
+      const spinBase = parseFloat(document.getElementById('spin').value);
+      const weissConstantBase = parseFloat(document.getElementById('weiss-constant').value);
+      const baseWeight = parseFloat(document.getElementById('base-weight').value);
+      const tempMin = parseFloat(document.getElementById('temp-min').value);
+      const tempMax = parseFloat(document.getElementById('temp-max').value);
+
+      // Generate temperature range
+      const temperatures = Array.from({length: tempMax - tempMin + 1}, (_, i) => tempMin + i);
+
+      // Function to calculate susceptibility
+      function calculateSusceptibility(spin, weissConstant) {
+        const muEff = Math.sqrt(spin * (spin + 1)) * muB;
+        const curieConstant = (muEff ** 2) / (3 * kB);
+        return temperatures.map(T => curieConstant / (T - weissConstant));
+      }
+
+      // Base curve susceptibility (weighted by baseWeight)
+      const susceptibilityBase = calculateSusceptibility(spinBase, weissConstantBase).map(val => val * baseWeight);
+
+      // Additional curves
+      let allSusceptibilities = [susceptibilityBase];
+      let sumSusceptibility = [...susceptibilityBase];
+
+      for (let i = 1; i <= curveCount; i++) {
+        const spin = parseFloat(document.getElementById(`spin-${i}`).value);
+        const weissConstant = parseFloat(document.getElementById(`weiss-constant-${i}`).value);
+        const weight = parseFloat(document.getElementById(`weight-${i}`).value); // Get the weight for this curve
+        const susceptibility = calculateSusceptibility(spin, weissConstant);
+
+        // Apply the weight to the susceptibility
+        const weightedSusceptibility = susceptibility.map(value => value * weight);
+        allSusceptibilities.push(weightedSusceptibility);
+
+        // Add weighted susceptibility to the sum
+        sumSusceptibility = sumSusceptibility.map((value, idx) => value + weightedSusceptibility[idx]);
+      }
+
+      // Create traces for all curves
+      const traces = [];
+      traces.push({
+        x: temperatures,
+        y: susceptibilityBase,
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: {color: 'blue'},
+        name: 'Base Curve'
+      });
+
+      for (let i = 1; i <= curveCount; i++) {
+        const susceptibility = allSusceptibilities[i];
+        traces.push({
+          x: temperatures,
+          y: susceptibility,
+          type: 'scatter',
+          mode: 'lines+markers',
+          marker: {color: `rgb(${i * 50}, ${100 + i * 50}, 255)`},
+          name: `Curve ${i}`
+        });
+      }
+
+      // Add sum of all curves
+      traces.push({
+        x: temperatures,
+        y: sumSusceptibility,
+        type: 'scatter',
+        mode: 'lines',
+        marker: {color: 'red'},
+        name: 'Sum of Curves'
+      });
+
+      // Plot the results using Plotly
+      const layout = {
+        title: 'Curie-Weiss Law: Magnetic Susceptibility vs Temperature',
+        xaxis: {title: 'Temperature (K)'},
+        yaxis: {title: 'Magnetic Susceptibility (χ)'}
+      };
+
+      Plotly.newPlot('plot', traces, layout);
+    }
+
+    // Function to set the Y-axis min to zero
+function setYAxisMinToZero() {
+  const layout = {
+    yaxis: {
+      range: [0, null], 
+      title: 'Magnetic Susceptibility (χ)'
+    }
+  };
+  Plotly.relayout('plot', layout);
+}
+
+    // Initial plot rendering
+    updatePlot();
+  </script>
+<footer>
+        <div class="container">
+            <p>&copy; 2025 Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
