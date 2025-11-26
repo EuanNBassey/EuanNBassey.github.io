@@ -38,6 +38,20 @@ function getValues() {
 }
 
 function solveFor(target) {
+  let g = parseFloat(gval.value);
+  let freqVal = parseFloat(freq.value) * 1e9;
+  let B = parseFloat(bfield.value) * conv[bunits.value];
+
+  if (target === 'g') g = (h * freqVal) / (muB * B);
+  if (target === 'freq') freqVal = (muB * g * B) / h;
+  if (target === 'B') B = (h * freqVal) / (muB * g);
+
+  gval.value = g.toFixed(5);
+  freq.value = (freqVal / 1e9).toFixed(5);
+  bfield.value = (B / conv[bunits.value]).toFixed(3);
+
+  updateDiagram();
+}(target) {
   let { g, freq, B } = getValues();
 
   if (target === 'g') g = (h * freq) / (muB * B);
