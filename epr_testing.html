@@ -13,57 +13,37 @@
 <body>
 <h2>EPR Resonance Calculator</h2>
 <label>g-value: <input id="gval" type="number" value="2.0023" step="0.0001"></label><br><br>
-<label>Frequency (GHz): <input id="freq" type="number" value="9.5" step="0.01"></label><br><br>
-<label>Magnetic Field: <input id="bfield" type="number" value="340" step="1"></label>
+<label>Frequency (GHz): <input id="freq_in" type="number" value="9.5" step="0.01"></label><br><br>
+<label>Magnetic Field: <input id="bfield_in" type="number" value="340" step="1"></label>
 <select id="bunits">
   <option value="mT">mT</option>
   <option value="G">G</option>
   <option value="T">T</option>
 </select><br><br>
-<button onclick="solveFor('g')">Solve g</button>
-<button onclick="solveFor('freq')">Solve ν</button>
-<button onclick="solveFor('B')">Solve B</button>
+<button onclick="solveG()">Solve g</button>
+<button onclick="solveFreq()">Solve ν</button>
+<button onclick="solveB()">Solve B</button>
 
 <script>
 const muB = 9.2740100783e-24;
 const h = 6.62607015e-34;
 const conv = { mT: 1e-3, G: 1e-4, T: 1.0 };
 
-function getValues() {
+function getVals() {
   return {
-    g: parseFloat(gval.value),
-    freq: parseFloat(freq.value) * 1e9,
-    B: parseFloat(bfield.value) * conv[bunits.value]
+    g: parseFloat(document.getElementById('gval').value),
+    freq: parseFloat(document.getElementById('freq_in').value) * 1e9,
+    B: parseFloat(document.getElementById('bfield_in').value) * conv[document.getElementById('bunits').value]
   };
 }
-
-function solveFor(target) {
-  let g = parseFloat(gval.value);
-  let freqVal = parseFloat(freq.value) * 1e9;
-  let B = parseFloat(bfield.value) * conv[bunits.value];
-
-  if (target === 'g') g = (h * freqVal) / (muB * B);
-  if (target === 'freq') freqVal = (muB * g * B) / h;
-  if (target === 'B') B = (h * freqVal) / (muB * g);
-
-  gval.value = g.toFixed(5);
-  freq.value = (freqVal / 1e9).toFixed(5);
-  bfield.value = (B / conv[bunits.value]).toFixed(3);
-
-  updateDiagram();
-}(target) {
-  let { g, freq, B } = getValues();
-
-  if (target === 'g') g = (h * freq) / (muB * B);
-  if (target === 'freq') freq = (muB * g * B) / h;
-  if (target === 'B') B = (h * freq) / (muB * g);
-
-  gval.value = g.toFixed(5);
-  freq.value = (freq / 1e9).toFixed(5);
-  bfield.value = (B / conv[bunits.value]).toFixed(3);
-
-  updateDiagram();
+function pushVals(g,freq,B){
+  document.getElementById('gval').value = g.toFixed(5);
+  document.getElementById('freq_in').value = (freq/1e9).toFixed(5);
+  document.getElementById('bfield_in').value = (B/conv[document.getElementById('bunits').value]).toFixed(3);
 }
+function solveG(){ let v=getVals(); let g=(h*v.freq)/(muB*v.B); pushVals(g,v.freq,v.B); updateDiagram(); }
+function solveFreq(){ let v=getVals(); let freq=(muB*v.g*v.B)/h; pushVals(v.g,freq,v.B); updateDiagram(); }
+function solveB(){ let v=getVals(); let B=(h*v.freq)/(muB*v.g); pushVals(v.g,v.freq,B); updateDiagram(); }
 </script>
 
 <hr>
@@ -74,61 +54,50 @@ function solveFor(target) {
 
 <script>
 function energiesS1(B, g, D, E) {
-  const muB = 9.2740100783e-24;
-  const h = 6.62607015e-34;
-
   let H = [
     [ D/3 + E, 0, muB*g*B ],
     [ 0, -2*D/3, 0 ],
     [ muB*g*B, 0, D/3 - E ]
   ];
-
-  function eig3(M) {
-    let a = M[0][0], b = M[0][1], c = M[0][2];
-    let d = M[1][0], e = M[1][1], f = M[1][2];
-    let g1 = M[2][0], h1 = M[2][1], i = M[2][2];
-    let trace = a + e + i;
-    let p1 = b*d + c*g1 + f*h1;
-    let q = a*e + a*i + e*i - p1;
-    let r = a*(e*i - f*h1) - b*(d*i - f*g1) + c*(d*h1 - e*g1);
-    let coeff = [1, -trace, q, -r];
-    function cuberoot(x){return x>=0?Math.cbrt(x):-Math.cbrt(-x);} 
-    let A = coeff[1], Bc=coeff[2], Cc=coeff[3];
+  function eig3(M){
+    let a=M[0][0], b=M[0][1], c=M[0][2];
+    let d=M[1][0], e=M[1][1], f=M[1][2];
+    let g1=M[2][0], h1=M[2][1], i=M[2][2];
+    let A=-(a+e+i);
+    let Bc=a*e+a*i+e*i-(b*d+c*g1+f*h1);
+    let Cc=a*(e*i-f*h1)-b*(d*i-f*g1)+c*(d*h1-e*g1);
+    function cr(x){return x>=0?Math.cbrt(x):-Math.cbrt(-x);} 
     let Q=(3*Bc-A*A)/9, R=(9*A*Bc-27*Cc-2*A*A*A)/54;
     let Dd=Q*Q*Q+R*R;
-    if(Dd>=0){let S=cuberoot(R+Math.sqrt(Dd));let T=cuberoot(R-Math.sqrt(Dd));return [S+T-A/3, -(S+T)/2-A/3, -(S+T)/2-A/3];}
+    if(Dd>=0){let S=cr(R+Math.sqrt(Dd));let T=cr(R-Math.sqrt(Dd));return [S+T-A/3, -(S+T)/2-A/3, -(S+T)/2-A/3];}
     let th=Math.acos(R/Math.sqrt(-Q*Q*Q));return [2*Math.sqrt(-Q)*Math.cos(th/3)-A/3,2*Math.sqrt(-Q)*Math.cos((th+2*Math.PI)/3)-A/3,2*Math.sqrt(-Q)*Math.cos((th+4*Math.PI)/3)-A/3];
   }
-
   return eig3(H);
 }
 
 function updateDiagram() {
-  let g = parseFloat(gval.value);
-  let D = parseFloat(Dval.value) * 1e9;
-  let E = parseFloat(Eval.value) * 1e9;
+  let g = parseFloat(document.getElementById('gval').value);
+  let D = parseFloat(document.getElementById('Dval').value) * 1e9;
+  let E = parseFloat(document.getElementById('Eval').value) * 1e9;
 
   let Bvals = [...Array(200).keys()].map(i => i * 0.01);
-  let levels = [[], [], []];
+  let L1=[],L2=[],L3=[];
 
   for (let B of Bvals) {
-    let evals = energiesS1(B, g, D, E).sort((a,b)=>a-b);
-    levels[0].push(evals[0]);
-    levels[1].push(evals[1]);
-    levels[2].push(evals[2]);
+    let ev = energiesS1(B,g,D,E).sort((a,b)=>a-b);
+    L1.push(ev[0]); L2.push(ev[1]); L3.push(ev[2]);
   }
 
-  Plotly.newPlot('diagram', [
-    {x: Bvals, y: levels[0], mode:'lines', name:'Level 1'},
-    {x: Bvals, y: levels[1], mode:'lines', name:'Level 2'},
-    {x: Bvals, y: levels[2], mode:'lines', name:'Level 3'}
-  ], {
-    title:'S = 1 Zeeman + ZFS (Exact Diagonalization)',
+  Plotly.newPlot('diagram',[
+    {x:Bvals,y:L1,mode:'lines',name:'Level 1'},
+    {x:Bvals,y:L2,mode:'lines',name:'Level 2'},
+    {x:Bvals,y:L3,mode:'lines',name:'Level 3'}
+  ],{
     xaxis:{title:'Magnetic Field (T)'},
-    yaxis:{title:'Energy (J)'}
+    yaxis:{title:'Energy (J)'},
+    title:'S = 1 Zeeman + ZFS Diagram'
   });
 }
-
 updateDiagram();
 </script>
 </body>
