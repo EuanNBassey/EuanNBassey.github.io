@@ -3,117 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>EPR • ZFS • Superexchange Toolkit</title>
+  <title>EPR Resonance + Energy vs Field</title>
   <style>
-    :root{--card:#ffffff;--bg:#0f1724;--muted:#94a3b8;--accent:#7c3aed}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#071027 0%, #07142a 60%); color:#e6eef6; margin:0; padding:24px}
-    .container{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    :root{--bg:#071027;--card:#071a2b;--muted:#9fb0c8;--accent:#7c3aed}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#071027 0%, #07142a 60%); color:#e6eef6; margin:0; padding:20px}
+    .wrap{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
     h1{margin:0;font-size:20px}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-    .card{background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
+    .card{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type=number], input[type=text], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    input[type=number], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
     .row{display:flex;gap:8px}
     button{background:var(--accent);border:none;color:white;padding:8px 12px;border-radius:8px;cursor:pointer}
-    small{color:var(--muted)}
     pre{background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;overflow:auto}
-    canvas{width:100%;height:220px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
-    .wide{grid-column:1/-1}
+    canvas{width:100%;height:360px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
     .muted{color:var(--muted)}
-    .flex-between{display:flex;justify-content:space-between;align-items:center}
-    .badge{background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;font-size:13px}
+    .small{font-size:13px}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <div class="badge">Toolkit</div>
-      <h1>EPR • ZFS • Superexchange — interactive tools for solid‑state chemistry</h1>
+      <h1>EPR Resonance — compute g, B, or ν and plot energy levels vs field</h1>
     </header>
 
     <div class="grid">
-      <!-- EPR Resonance Calculator -->
       <section class="card">
-        <div class="flex-between"><strong>EPR Resonance Calculator</strong><small class="muted">g, ν ↔ B₀</small></div>
-        <p class="muted">Use the EPR resonance condition hν = g μB B to convert between microwave frequency, g-value, and resonance field (in mT or Gauss).</p>
+        <strong>Resonance calculator</strong>
+        <p class="muted small">Use the resonance condition hν = g μB B. Fill any two values to compute the third. Frequency in GHz, field in mT.</p>
 
-        <label>Microwave frequency (GHz)</label>
-        <input id="epr_freq" type="number" step="0.001" value="9.5">
+        <label>Microwave frequency ν (GHz)</label>
+        <input id="freq" type="number" step="0.0001" placeholder="e.g. 9.5">
 
         <label>g-value</label>
-        <input id="epr_g" type="number" step="0.001" value="2.0023">
+        <input id="gval" type="number" step="0.0001" placeholder="e.g. 2.0023">
 
-        <label>Resonance field (mT)</label>
-        <input id="epr_field" type="number" step="0.001" placeholder="leave blank to compute from ν and g">
+        <label>Resonance field B (mT)</label>
+        <input id="field" type="number" step="0.0001" placeholder="e.g. 340.0">
 
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="computeEPRFromFreq()">Compute Field from ν & g</button>
-          <button onclick="computeGFromField()">Compute g from ν & B</button>
-          <button onclick="clearEPR()" style="background:#334155">Clear</button>
+          <button onclick="computeMissing()">Compute missing</button>
+          <button onclick="clearCalc()" style="background:#334155">Clear</button>
         </div>
 
         <div style="margin-top:10px">
-          <pre id="epr_output">Ready — enter frequency and g, then click "Compute Field".</pre>
+          <pre id="calc_out">Enter any two of frequency, g, and field, then click Compute missing.</pre>
         </div>
+
+        <hr style="margin:12px 0;border-color:rgba(255,255,255,0.04)">
+
+        <strong>Unit conversions / options</strong>
+        <label>Output units</label>
+        <select id="units">
+          <option value="mT">mT (millitesla)</option>
+          <option value="T">T (tesla)</option>
+          <option value="G">G (gauss)</option>
+        </select>
+        <div style="margin-top:8px"><small class="muted">Constants: h = Planck, μB = Bohr magneton. Isotropic g assumed.</small></div>
       </section>
 
-      <!-- ZFS Diagrammer -->
       <section class="card">
-        <div class="flex-between"><strong>ZFS Diagrammer</strong><small class="muted">D & E → Energy levels</small></div>
-        <p class="muted">Enter axial (D) and rhombic (E) zero-field splitting parameters (in cm⁻¹ or cm^-1 units). The tool diagonalizes the spin Hamiltonian H = D [S_z² - S(S+1)/3] + E (S_x² - S_y²) and shows energy levels and possible Δm = ±1 transitions.</p>
+        <strong>Energy levels vs Field (Zeeman)</strong>
+        <p class="muted small">Simple Zeeman Hamiltonian H = g μB B S_z. Choose spin S and plot energy levels E_m(B). Energies shown in GHz and cm⁻¹. You can overlay transition energies (Δm = ±1) and mark the resonance field for the current microwave frequency.</p>
 
-        <label>Spin S (e.g., 1, 3/2, 2)</label>
-        <input id="zfs_S" type="number" step="0.5" value="1">
+        <label>Spin S (e.g., 1/2, 1, 3/2, 2)</label>
+        <input id="spinS" type="number" step="0.5" value="1/2">
 
-        <label>D (cm⁻¹)</label>
-        <input id="zfs_D" type="number" step="0.001" value="0.5">
+        <label>g-value (for energy plot)</label>
+        <input id="g_plot" type="number" step="0.0001" value="2.0023">
 
-        <label>E (cm⁻¹)</label>
-        <input id="zfs_E" type="number" step="0.001" value="0.05">
-
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="computeZFS()">Compute & Draw</button>
-          <button onclick="clearZFS()" style="background:#334155">Clear</button>
-        </div>
-
-        <div style="margin-top:12px">
-          <canvas id="zfs_canvas" width="800" height="240"></canvas>
-          <pre id="zfs_output" style="margin-top:8px">Energy levels will appear above. Click compute.</pre>
-        </div>
-      </section>
-
-      <!-- Superexchange predictor -->
-      <section class="card">
-        <div class="flex-between"><strong>Superexchange Predictor</strong><small class="muted">Goodenough–Kanamori heuristics</small></div>
-        <p class="muted">Input M–O–M angle and (optionally) d‑electron counts. This predictor uses simple Goodenough–Kanamori rules to suggest whether FM or AFM coupling is favored and provides a short explanation.</p>
-
-        <label>M–O–M angle (degrees)</label>
-        <input id="sup_angle" type="number" step="0.1" value="180">
-
-        <label>d-electrons on M1</label>
-        <input id="sup_d1" type="number" step="1" value="5">
-
-        <label>d-electrons on M2</label>
-        <input id="sup_d2" type="number" step="1" value="5">
-
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="computeSuperexchange()">Predict</button>
-          <button onclick="clearSuper()" style="background:#334155">Clear</button>
+        <div class="row" style="margin-top:8px">
+          <button onclick="drawEnergyPlot()">Draw energy vs B</button>
+          <button onclick="clearPlot()" style="background:#334155">Clear</button>
         </div>
 
         <div style="margin-top:10px">
-          <pre id="sup_output">Enter angle and d-electron counts and click Predict.</pre>
-        </div>
-      </section>
-
-      <!-- Wide footer: download & notes -->
-      <section class="card wide">
-        <div class="flex-between"><strong>Notes & Download</strong><small class="muted">Self-contained single-file app</small></div>
-        <p class="muted">This single HTML file contains lightweight JS routines for quick, qualitative estimates and visualizations. Use it as a teaching/quick-calculation tool — for publication-quality analysis use dedicated quantum chemistry / spectroscopy software.</p>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="downloadHTML()">Download HTML file</button>
-          <button onclick="resetAll()" style="background:#334155">Reset</button>
+          <canvas id="energy_canvas" width="720" height="360"></canvas>
+          <pre id="plot_out">Plot not drawn yet.</pre>
         </div>
       </section>
 
@@ -121,228 +88,111 @@
   </div>
 
 <script>
-// Constants
-const h = 6.62607015e-34; // J*s
+// Physical constants
+const h = 6.62607015e-34; // J s
+const hbar = h/(2*Math.PI);
 const muB = 9.2740100783e-24; // J/T
 const c = 299792458; // m/s
 const kB = 1.380649e-23;
+const cm_inv_J = 1.0/(h*c*100); // 1 J = ... cm^-1? Actually E (cm^-1) = E_J / (h*c*100) ?? We'll compute properly below.
 
-// ----- EPR -----
-function computeEPRFromFreq(){
-  const freqGHz = parseFloat(document.getElementById('epr_freq').value);
-  const g = parseFloat(document.getElementById('epr_g').value);
-  if(!freqGHz || !g){ document.getElementById('epr_output').textContent = 'Provide frequency and g.'; return; }
-  const nu = freqGHz*1e9; // Hz
-  const B_T = (h*nu)/(g*muB); // Tesla
-  const B_mT = B_T*1e3;
-  const B_Gauss = B_T*1e4;
-  document.getElementById('epr_field').value = B_mT.toFixed(3);
-  document.getElementById('epr_output').textContent = `ν = ${freqGHz} GHz, g = ${g}\nResonance field: ${B_T.toExponential(5)} T (${B_mT.toFixed(3)} mT, ${B_Gauss.toFixed(1)} G)`;
+function computeMissing(){
+  const freq_in = document.getElementById('freq').value;
+  const g_in = document.getElementById('gval').value;
+  const field_in = document.getElementById('field').value;
+  const units = document.getElementById('units').value;
+  const filled = [freq_in!=="", g_in!=="", field_in!==""];
+  const nfilled = filled.filter(x=>x).length;
+  if(nfilled<2){ document.getElementById('calc_out').textContent = 'Please fill any two fields (ν and g, or ν and B, or g and B).'; return; }
+  let freqGHz = freq_in!==""? parseFloat(freq_in): null;
+  let g = g_in!==""? parseFloat(g_in): null;
+  let B_mT = field_in!==""? parseFloat(field_in): null;
+  // compute missing
+  if(freqGHz===null){ // compute ν from g and B
+    const B_T = convertBtoT(B_mT, units);
+    const nu = (g*muB*B_T)/h; // Hz
+    freqGHz = nu/1e9;
+    document.getElementById('freq').value = freqGHz.toFixed(6);
+  } else if(g===null){ // compute g from ν and B
+    const B_T = convertBtoT(B_mT, units);
+    const nu = freqGHz*1e9;
+    g = (h*nu)/(muB*B_T);
+    document.getElementById('gval').value = g.toFixed(6);
+  } else if(B_mT===null){ // compute B from ν and g
+    const nu = freqGHz*1e9;
+    const B_T = (h*nu)/(g*muB);
+    // convert to chosen units and set field
+    const out = convertTtoB(B_T, units);
+    document.getElementById('field').value = out.toFixed(6);
+  }
+  // prepare output display in all units
+  const nu_Hz = freqGHz*1e9; const B_T_final = (h*nu_Hz)/(g*muB);
+  const B_mT_final = B_T_final*1e3; const B_G = B_T_final*1e4;
+  const outstr = `Computed values:\nν = ${freqGHz.toFixed(6)} GHz\ng = ${g.toFixed(6)}\nResonance field = ${B_T_final.toExponential(6)} T = ${B_mT_final.toFixed(4)} mT = ${B_G.toFixed(2)} G`;
+  document.getElementById('calc_out').textContent = outstr;
 }
-function computeGFromField(){
-  const freqGHz = parseFloat(document.getElementById('epr_freq').value);
-  const B_mT = parseFloat(document.getElementById('epr_field').value);
-  if(!freqGHz || !B_mT){ document.getElementById('epr_output').textContent = 'Provide frequency and field.'; return; }
-  const nu = freqGHz*1e9; const B_T = B_mT/1e3;
-  const g = (h*nu)/(muB*B_T);
-  document.getElementById('epr_g').value = g.toFixed(4);
-  document.getElementById('epr_output').textContent = `ν = ${freqGHz} GHz, B = ${B_mT} mT\nComputed g = ${g.toFixed(5)}`;
-}
-function clearEPR(){ document.getElementById('epr_output').textContent='Ready — enter frequency and g, then click "Compute Field".'; document.getElementById('epr_field').value=''; }
+function convertBtoT(val, units){ if(units==='T') return val; if(units==='mT') return val/1e3; if(units==='G') return val/1e4; return val; }
+function convertTtoB(T, units){ if(units==='T') return T; if(units==='mT') return T*1e3; if(units==='G') return T*1e4; return T*1e3; }
+function clearCalc(){ document.getElementById('freq').value=''; document.getElementById('gval').value=''; document.getElementById('field').value=''; document.getElementById('calc_out').textContent='Enter any two of frequency, g, and field, then click Compute missing.' }
 
-// ----- ZFS -----
-function spinMatrices(S){
+// Energy vs field plotting
+function drawEnergyPlot(){
+  const S = parseFloat(document.getElementById('spinS').value);
+  let gplot = parseFloat(document.getElementById('g_plot').value);
+  if(isNaN(S) || isNaN(gplot)){ document.getElementById('plot_out').textContent='Enter numeric spin S and g.'; return; }
+  const canvas = document.getElementById('energy_canvas'); const ctx = canvas.getContext('2d');
+  const w = canvas.width; const h = canvas.height; ctx.clearRect(0,0,w,h);
+  // m values
   const dim = Math.round(2*S+1);
-  const mvals = [];
-  for(let i=0;i<dim;i++){ mvals.push(S - i); }
-  // initialize zero matrices
-  const Sx = Array.from({length:dim},()=>Array(dim).fill(0));
-  const Sy = Array.from({length:dim},()=>Array(dim).fill(0));
-  const Sz = Array.from({length:dim},()=>Array(dim).fill(0));
-  for(let i=0;i<dim;i++){
-    Sz[i][i] = mvals[i];
-  }
-  for(let i=0;i<dim;i++){
-    for(let j=0;j<dim;j++){
-      // S+ has <m'|S+|m> = sqrt(S(S+1)-m(m+1)) with m' = m+1
-      const m = mvals[j];
-      if(Math.abs(mvals[i] - (m+1))<1e-9){
-        const val = Math.sqrt(S*(S+1) - m*(m+1));
-        Sx[i][j] = 0.5*val;
-        Sy[i][j] = -0.5*val*1j;
-      }
-      if(Math.abs(mvals[i] - (m-1))<1e-9){
-        const val = Math.sqrt(S*(S+1) - m*(m-1));
-        Sx[i][j] = Sx[i][j] + 0.5*val;
-        Sy[i][j] = Sy[i][j] + 0.5*val*1j;
-      }
-    }
-  }
-  // Note: mixing real and imaginary numbers is messy in JS arrays; we'll build H using numeric arrays by converting to complex using objects.
-  return {Sx:Sx,Sy:Sy,Sz:Sz, mvals:mvals};
-}
+  const mvals = []; for(let i=0;i<dim;i++) mvals.push(S - i);
+  // field range: 0 to Bmax chosen from resonance with 35 GHz? better: choose 0 to 2x field for X-band 9.5 GHz and g
+  // compute typical resonance field for 9.5 GHz
+  const nu0 = 9.5e9; const Bres = (h*nu0)/(gplot*muB); // T
+  const Bmax = Math.max(1.5*Bres, 0.1); // ensure nonzero
+  const Bmin = 0;
+  // sample fields
+  const npoints = 200;
+  const Bs = Array.from({length:npoints},(_,i)=>Bmin + (i/(npoints-1))*(Bmax-Bmin));
+  // compute energies E_m(B) = g μB B m  (J)
+  const energies = mvals.map(m=>Bs.map(B=>gplot*muB*B*m));
+  // convert to preferred units: GHz (E/h) and cm^-1 (E/(h*c*100))
+  const energies_GHz = energies.map(row=>row.map(EJ=>EJ/h/1e9));
+  const energies_cminv = energies.map(row=>row.map(EJ=>EJ/(h*c*100)));
+  // find global min/max for plotting
+  let Eflat = energies_GHz.flat(); const Emin = Math.min(...Eflat); const Emax = Math.max(...Eflat);
+  // draw axes
+  ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(50,20); ctx.lineTo(50,h-40); ctx.lineTo(w-20,h-40); ctx.stroke();
+  ctx.fillStyle='rgba(160,176,200,0.9)'; ctx.font='12px sans-serif';
+  // y-ticks
+  const yticks = 6; for(let i=0;i<=yticks;i++){ const y = 20 + (i/yticks)*(h-60); const val = (Emax - (i/yticks)*(Emax-Emin)).toFixed(3); ctx.fillText(val + ' GHz', 6, y+4); ctx.beginPath(); ctx.moveTo(46,y); ctx.lineTo(50,y); ctx.stroke(); }
+  // x-ticks
+  const xticks = 6; for(let i=0;i<=xticks;i++){ const x = 50 + (i/xticks)*(w-70); const Bval = (Bmin + (i/xticks)*(Bmax-Bmin)); ctx.fillText((Bval*1e3).toFixed(2) + ' mT', x-18, h-22); ctx.beginPath(); ctx.moveTo(x,h-40); ctx.lineTo(x,h-36); ctx.stroke(); }
 
-// Build complex matrices and diagonalize via numeric.js-like approach (we'll implement small diagonalization using numeric library-free method: use simple eigenvalue routine for Hermitian matrices via power iteration on shifted matrices — but that's heavy). Instead: for small dims (<=9) we can use mathjs? Not allowed. We'll implement numeric diagonalization using QR algorithm for symmetric real matrices by converting H to real symmetric representation (split complex into real matrix twice). Simpler: implement direct diagonalization using numeric.js is too long.
-
-// Alternate approach: For typical ZFS (D,E) the Hamiltonian for S small is real symmetric if expressed in |m> basis for Sx^2 etc; but Sx,Sy have imaginary parts. However H = D(Sz^2 - S(S+1)/3) + E(Sx^2 - Sy^2) yields real symmetric matrix for integer or half-integer S; we can compute matrix elements directly using ladder operators with resulting real numbers. We'll compute matrix elements explicitly using raising/lowering and keep numbers real.
-
-function computeZFS(){
-  const S = parseFloat(document.getElementById('zfs_S').value);
-  const D = parseFloat(document.getElementById('zfs_D').value);
-  const E = parseFloat(document.getElementById('zfs_E').value);
-  if(isNaN(S) || isNaN(D) || isNaN(E)){ document.getElementById('zfs_output').textContent='Enter numeric S, D, and E.'; return; }
-  const dim = Math.round(2*S+1);
-  const m = [];
-  for(let i=0;i<dim;i++) m.push(S - i);
-  // create H matrix (real) by evaluating operators on |m>
-  // Sz^2 term is diagonal
-  const H = Array.from({length:dim},()=>Array(dim).fill(0));
-  const S2 = S*(S+1);
-  for(let i=0;i<dim;i++){
-    H[i][i] += D*(m[i]*m[i] - S2/3.0);
-  }
-  // Sx^2 - Sy^2 = (1/2)(S+^2 + S-^2)
-  // We can compute matrix elements of S+^2 and S-^2 using ladder rules
-  function SplusSquared(iIndex, jIndex){
-    // <m_i|S+^2|m_j> nonzero only if m_i = m_j + 2
-    const mj = m[jIndex];
-    const mi = m[iIndex];
-    if(Math.abs(mi - (mj + 2))>1e-9) return 0;
-    // S+^2 |m> = sqrt((S(S+1)-m(m+1))*(S(S+1)-(m+1)(m+2))) |m+2>
-    const t1 = Math.sqrt( Math.max(0, S*(S+1) - mj*(mj+1)) );
-    const t2 = Math.sqrt( Math.max(0, S*(S+1) - (mj+1)*(mj+2)) );
-    return t1*t2;
-  }
-  function SminusSquared(iIndex,jIndex){
-    // <m_i|S-^2|m_j> nonzero only if m_i = m_j - 2
-    const mj = m[jIndex]; const mi = m[iIndex];
-    if(Math.abs(mi - (mj - 2))>1e-9) return 0;
-    const t1 = Math.sqrt( Math.max(0, S*(S+1) - mj*(mj-1)) );
-    const t2 = Math.sqrt( Math.max(0, S*(S+1) - (mj-1)*(mj-2)) );
-    return t1*t2;
-  }
-  // add E*(Sx^2 - Sy^2) = (E/2)*(S+^2 + S-^2)
-  for(let i=0;i<dim;i++){
-    for(let j=0;j<dim;j++){
-      const sp2 = SplusSquared(i,j);
-      const sm2 = SminusSquared(i,j);
-      H[i][j] += (E/2.0)*(sp2 + sm2);
-    }
-  }
-  // Now H is real symmetric; diagonalize using Jacobi eigen decomposition for small dim
-  const {eigvals, eigvecs} = jacobiEigenDecomposition(H);
-  // sort eigenvalues
-  const pairs = eigvals.map((v,i)=>({v,vec:eigvecs.map(row=>row[i])}));
-  pairs.sort((a,b)=>a.v-b.v);
-  const energies = pairs.map(p=>p.v);
-  // display energies (in cm^-1 units as input)
-  const out = energies.map((e,i)=>`Level ${i}: ${e.toFixed(6)} cm^-1`).join('\n');
-  document.getElementById('zfs_output').textContent = out;
-  drawZFSLevels(energies);
-}
-
-function clearZFS(){ const c=document.getElementById('zfs_canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); document.getElementById('zfs_output').textContent='Energy levels will appear above. Click compute.' }
-
-function drawZFSLevels(energies){
-  const canvas = document.getElementById('zfs_canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const w = canvas.width, h = canvas.height;
-  const pad = 40;
-  const minE = Math.min(...energies);
-  const maxE = Math.max(...energies);
-  const range = Math.max(1e-6, maxE - minE);
-  ctx.font = '12px sans-serif'; ctx.fillStyle='rgba(230,238,246,0.95)';
-  energies.forEach((E,i)=>{
-    const y = pad + (1 - (E - minE)/range)*(h - 2*pad);
-    ctx.strokeStyle='rgba(124,58,237,0.9)'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(80,y); ctx.lineTo(w-40,y); ctx.stroke();
-    ctx.fillText(`E${i} = ${E.toFixed(4)} cm^-1`, 12, y+4);
+  // draw energy lines
+  const palette = ['#7c3aed','#06b6d4','#10b981','#f97316','#ef4444','#a3e635'];
+  energies_GHz.forEach((Erow,idx)=>{
+    ctx.beginPath();
+    for(let i=0;i<Erow.length;i++){ const x = 50 + (i/(Erow.length-1))*(w-70); const y = 20 + (1 - (Erow[i]-Emin)/(Emax-Emin))*(h-60); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+    ctx.strokeStyle = palette[idx % palette.length]; ctx.lineWidth=2; ctx.stroke();
+    // label left-side
+    const y0 = 20 + (1 - (Erow[0]-Emin)/(Emax-Emin))*(h-60); ctx.fillText('m=' + mvals[idx], w-60, y0+4);
   });
-  // draw connectors for allowed Δm=±1 transitions as arrows between adjacent levels
-  ctx.strokeStyle='rgba(0,200,120,0.8)'; ctx.fillStyle='rgba(0,200,120,0.9)'; ctx.lineWidth=1.5;
-  for(let i=0;i<energies.length-1;i++){
-    const y1 = pad + (1 - (energies[i] - minE)/range)*(h - 2*pad);
-    const y2 = pad + (1 - (energies[i+1] - minE)/range)*(h - 2*pad);
-    const x = w-24;
-    ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
-    // small arrowheads
-    ctx.beginPath(); ctx.moveTo(x-6,(y1+y2)/2 - 4); ctx.lineTo(x,(y1+y2)/2); ctx.lineTo(x-6,(y1+y2)/2 + 4); ctx.fill();
-  }
-}
 
-// Jacobi eigenvalue algorithm for symmetric matrix
-function jacobiEigenDecomposition(A){
-  const n = A.length;
-  // copy
-  let a = Array.from({length:n},(_,i)=>A[i].slice());
-  let v = Array.from({length:n},()=>Array(n).fill(0)); for(let i=0;i<n;i++) v[i][i]=1;
-  const maxIter = 100;
-  for(let iter=0;iter<maxIter;iter++){
-    // find largest off-diagonal
-    let p=0,q=1; let maxv=0;
-    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++) if(Math.abs(a[i][j])>maxv){maxv=Math.abs(a[i][j]);p=i;q=j}
-    if(maxv<1e-12) break;
-    const app = a[p][p], aqq=a[q][q], apq=a[p][q];
-    const phi = 0.5*Math.atan2(2*apq, aqq - app);
-    const c = Math.cos(phi), s = Math.sin(phi);
-    // rotate
-    for(let i=0;i<n;i++){
-      const aip = a[i][p], aiq = a[i][q];
-      a[i][p] = c*aip - s*aiq; a[p][i] = a[i][p];
-      a[i][q] = s*aip + c*aiq; a[q][i] = a[i][q];
-    }
-    // update diagonal
-    a[p][p] = c*c*app - 2*s*c*apq + s*s*aqq;
-    a[q][q] = s*s*app + 2*s*c*apq + c*c*aqq;
-    a[p][q] = 0; a[q][p] = 0;
-    // update eigenvector matrix
-    for(let i=0;i<n;i++){
-      const vip = v[i][p], viq=v[i][q];
-      v[i][p] = c*vip - s*viq;
-      v[i][q] = s*vip + c*viq;
+  // overlay resonance line for current microwave frequency if set
+  const freq_in = document.getElementById('freq').value;
+  if(freq_in!==''){
+    const nu = parseFloat(freq_in)*1e9;
+    // For each pair of adjacent m -> m-1 transitions compute B where ΔE = hν → g μB B = hν/(Δm) ; For Δm=1, B_res = hν/(g μB)
+    const BresT = (h*nu)/(gplot*muB);
+    if(BresT<=Bmax*1.05){ // draw vertical line
+      const x = 50 + ((BresT - Bmin)/(Bmax-Bmin))*(w-70);
+      ctx.strokeStyle='rgba(255,230,0,0.9)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x,20); ctx.lineTo(x,h-40); ctx.stroke(); ctx.fillStyle='rgba(255,230,0,0.95)'; ctx.fillText('Resonance B = ' + (BresT*1e3).toFixed(3) + ' mT', x-60, 32);
     }
   }
-  const eigvals = a.map((row,i)=>row[i]);
-  return {eigvals:eigvals, eigvecs:v};
-}
 
-// ----- Superexchange Predictor -----
-function computeSuperexchange(){
-  const angle = parseFloat(document.getElementById('sup_angle').value);
-  const d1 = parseInt(document.getElementById('sup_d1').value);
-  const d2 = parseInt(document.getElementById('sup_d2').value);
-  if(isNaN(angle) || isNaN(d1) || isNaN(d2)){ document.getElementById('sup_output').textContent='Enter numeric angle and d-electron counts.'; return; }
-  let verdict = '';
-  // Basic GM rules
-  if(angle >= 150){ verdict = 'Strong AFM likely (180° superexchange favors antiferromagnetic coupling).'; }
-  else if(angle <= 100){ verdict = 'Ferromagnetic superexchange is possible (near 90° favors FM in many orbital arrangements).'; }
-  else { verdict = 'Intermediate angle — competition between FM and AFM; orbital occupancy matters.'; }
-  // refine using d-count
-  let note = '';
-  if((d1===5 && d2===5) || (d1===4 && d2===4 && angle>140)){
-    note = 'Both centers are near half-filled d-shells → AFM stronger due to virtual hopping (superexchange).';
-  } else if((d1===0 || d1===10) || (d2===0 || d2===10)){
-    note = 'One center is empty/full → weak coupling expected (little superexchange).';
-  } else if((d1<=2 && d2<=2) && angle<110){
-    note = 'Both are less-than-half-filled with near-90° angle → FM can be favored via orthogonal orbital exchange.'
-  } else {
-    note = 'No decisive rule from simple d-counts; consider orbital symmetry (eg t2g/eg), bridging ligand, and detailed electronic structure.'
-  }
-  const confidence = Math.abs(angle-180) < 20 || Math.abs(angle-90) < 10 ? 'medium' : 'low';
-  const explanation = `Angle = ${angle}°, d(M1)=${d1}, d(M2)=${d2}\nPrediction: ${verdict}\nReasoning: ${note}\nConfidence: ${confidence}`;
-  document.getElementById('sup_output').textContent = explanation;
+  document.getElementById('plot_out').textContent = `Plotted E_m(B) for S=${S}, g=${gplot}. Field range 0 → ${(Bmax*1e3).toFixed(3)} mT. Energies shown in GHz.`;
 }
-function clearSuper(){ document.getElementById('sup_output').textContent='Enter angle and d-electron counts and click Predict.' }
-
-// ----- Download / Reset -----
-function downloadHTML(){
-  const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download='epr_zfs_superexchange_toolkit.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-function resetAll(){ clearEPR(); clearZFS(); clearSuper(); document.getElementById('epr_freq').value='9.5'; document.getElementById('epr_g').value='2.0023'; document.getElementById('zfs_S').value='1'; document.getElementById('zfs_D').value='0.5'; document.getElementById('zfs_E').value='0.05'; document.getElementById('sup_angle').value='180'; document.getElementById('sup_d1').value='5'; document.getElementById('sup_d2').value='5'; }
+function clearPlot(){ const c=document.getElementById('energy_canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); document.getElementById('plot_out').textContent='Plot not drawn yet.' }
 
 </script>
 </body>
