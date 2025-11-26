@@ -1,107 +1,106 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>EPR Tools</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPR Resonance + ZFS Diagram</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body{font-family:Arial;margin:20px;color:#eee;background:#0c1020}
-    .card{background:#11182e;padding:16px;border-radius:10px;margin-bottom:20px}
-    input{width:100%;padding:6px;margin-bottom:8px;border-radius:6px;border:1px solid #445}
-    button{padding:8px 12px;border-radius:6px;border:none;background:#6a5acd;color:#fff;cursor:pointer}
-    #energy_plot{width:100%;height:420px}
-    pre{background:#0003;padding:8px;border-radius:6px}
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { display: flex; gap: 30px; }
+    .panel { width: 320px; }
+    input { width: 100px; }
   </style>
 </head>
 <body>
-
-<div class="card">
-  <h2>Resonance Calculator</h2>
-  <label>Frequency ν (GHz)</label>
-  <input id="freq" type="number" step="0.0001">
-
-  <label>g value</label>
-  <input id="gval" type="number" step="0.0001">
-
-  <label>Magnetic field B (mT)</label>
-  <input id="field" type="number" step="0.0001">
-
-  <button onclick="computeMissing()">Compute</button>
-  <button onclick="clearCalc()" style="background:#555">Clear</button>
-  <pre id="calc_out">Enter any two values.</pre>
-</div>
-
-<div class="card">
-  <h2>Energy Level Diagram (Zeeman)</h2>
-  <label>Spin S</label>
-  <input id="spinS" type="number" value="0.5" step="0.5">
-
-  <label>g value</label>
-  <input id="g_plot" type="number" value="2.0023" step="0.0001">
-
-  <button onclick="drawEnergyPlot()">Draw</button>
-  <button onclick="clearPlot()" style="background:#555">Clear</button>
-
-  <div id="energy_plot"></div>
-  <pre id="plot_out">Plot not drawn.</pre>
+<h2>EPR Resonance Calculator (with Unit Selection)</h2>
+<div class="panel">
+  <label>g-value: <input id="gval" type="number" value="2.0023" step="0.0001"></label><br><br>
+  <label>Frequency (GHz): <input id="freq" type="number" value="9.5" step="0.01"></label><br><br>
+  <label>Magnetic Field: <input id="bfield" type="number" value="340" step="1"></label>
+  <select id="bunits">
+    <option value="mT">mT</option>
+    <option value="G">G</option>
+    <option value="T">T</option>
+  </select><br><br>
+  <button onclick="solveFor('g')">Solve g</button>
+  <button onclick="solveFor('freq')">Solve ν</button>
+  <button onclick="solveFor('B')">Solve B</button>
 </div>
 
 <script>
-const h = 6.62607015e-34;
 const muB = 9.2740100783e-24;
+const h = 6.62607015e-34;
+const conv = { mT: 1e-3, G: 1e-4, T: 1.0 };
 
-function computeMissing(){
-  let f = document.getElementById('freq').value;
-  let g = document.getElementById('gval').value;
-  let B = document.getElementById('field').value;
+function solveFor(target) {
+  let g = parseFloat(gval.value);
+  let freq = parseFloat(freq.value) * 1e9;
+  let B = parseFloat(bfield.value) * conv[bunits.value];
 
-  f = f===""?null:parseFloat(f);
-  g = g===""?null:parseFloat(g);
-  B = B===""?null:parseFloat(B);
-
-  const filled = [f,g,B].filter(x=>x!==null).length;
-  if(filled < 2){ document.getElementById('calc_out').textContent="Need any two."; return; }
-
-  if(f===null){ f = (g*muB*(B/1000))/h / 1e9; document.getElementById('freq').value=f.toFixed(6); }
-  else if(g===null){ g = (h*(f*1e9))/ (muB*(B/1000)); document.getElementById('gval').value=g.toFixed(6); }
-  else if(B===null){ B = (h*(f*1e9))/(g*muB)*1000; document.getElementById('field').value=B.toFixed(6); }
-
-  document.getElementById('calc_out').textContent = `ν=${f} GHz, g=${g}, B=${B} mT`;
+  if (target === 'g') {
+    g = (h * freq) / (muB * B);
+    gval.value = g.toFixed(5);
+  }
+  else if (target === 'freq') {
+    freq = (muB * g * B) / h;
+    freq.value = (freq / 1e9).toFixed(5);
+  }
+  else if (target === 'B') {
+    B = (h * freq) / (muB * g);
+    let newB = B / conv[bunits.value];
+    bfield.value = newB.toFixed(3);
+  }
+  updateDiagram();
 }
+</script>
 
-function clearCalc(){
-  document.getElementById('freq').value="";
-  document.getElementById('gval').value="";
-  document.getElementById('field').value="";
-  document.getElementById('calc_out').textContent="Enter any two values.";
-}
+<hr>
 
-function drawEnergyPlot(){
-  const S = parseFloat(document.getElementById('spinS').value);
-  const g = parseFloat(document.getElementById('g_plot').value);
+<h2>Zeeman + ZFS Energy Diagram (S = 1)</h2>
+<div>
+  <label>D (GHz): <input id="Dval" type="number" value="2.5" step="0.01"></label>
+  <label>E (GHz): <input id="Eval" type="number" value="0" step="0.01"></label>
+</div>
+<div id="diagram" style="width:800px; height:500px;"></div>
 
-  const mvals = []; for(let m=S; m>=-S; m-=1) mvals.push(m);
+<script>
+function updateDiagram() {
+  let g = parseFloat(gval.value);
+  let D = parseFloat(Dval.value) * 1e9;
+  let E = parseFloat(Eval.value) * 1e9;
 
-  const Bvals = [...Array(200).keys()].map(i=>i*0.01);
-  const energy = mvals.map(m=>Bvals.map(B=>(g*muB*B*m)/h/1e9));
+  let Bvals = [...Array(200).keys()].map(i => i * 0.01); // 0–2 T
 
-  const traces = energy.map((row,i)=>({
-    x: Bvals.map(B=>B*1000),
-    y: row,
-    mode:'lines',
-    name:`m=${mvals[i]}`
-  }));
+  const muB = 9.2740100783e-24;
+  const h = 6.62607015e-34;
 
-  Plotly.newPlot('energy_plot', traces, {
-    xaxis:{title:'B (mT)'},
-    yaxis:{title:'Energy (GHz)'}
+  let Ems1 = [], Em0 = [], Eps1 = [];
+
+  for (let B of Bvals) {
+    // S = 1 Hamiltonian (approx high-field):
+    let Ze = muB * g * B;
+    let ED = D/3;
+
+    Ems1.push(-Ze + ED - E);
+    Em0.push(-2*ED);
+    Eps1.push(Ze + ED + E);
+  }
+
+  let data = [
+    { x: Bvals, y: Ems1, name: "m = –1", mode: "lines" },
+    { x: Bvals, y: Em0,  name: "m = 0",  mode: "lines" },
+    { x: Bvals, y: Eps1, name: "m = +1", mode: "lines" }
+  ];
+
+  Plotly.newPlot("diagram", data, {
+    xaxis: { title: "Magnetic Field (T)" },
+    yaxis: { title: "Energy (J)" },
+    title: "S = 1 Zeeman + ZFS Diagram",
   });
-
-  document.getElementById('plot_out').textContent = "Plot generated.";
 }
 
-function clearPlot(){ Plotly.purge('energy_plot'); document.getElementById('plot_out').textContent="Plot cleared."; }
+updateDiagram();
 </script>
 
 </body>
