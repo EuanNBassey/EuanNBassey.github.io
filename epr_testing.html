@@ -79,7 +79,7 @@
         </div>
 
         <div style="margin-top:10px">
-          <canvas id="energy_canvas" width="720" height="360"></canvas>
+          <div id="energy_plot" style="width:100%;height:360px"></div>
           <pre id="plot_out">Plot not drawn yet.</pre>
         </div>
       </section>
@@ -128,71 +128,72 @@ function computeMissing(){
   // prepare output display in all units
   const nu_Hz = freqGHz*1e9; const B_T_final = (h*nu_Hz)/(g*muB);
   const B_mT_final = B_T_final*1e3; const B_G = B_T_final*1e4;
-  const outstr = `Computed values:\nν = ${freqGHz.toFixed(6)} GHz\ng = ${g.toFixed(6)}\nResonance field = ${B_T_final.toExponential(6)} T = ${B_mT_final.toFixed(4)} mT = ${B_G.toFixed(2)} G`;
+  const outstr = `Computed values:
+ν = ${freqGHz.toFixed(6)} GHz
+g = ${g.toFixed(6)}
+Resonance field = ${B_T_final.toExponential(6)} T = ${B_mT_final.toFixed(4)} mT = ${B_G.toFixed(2)} G`;
   document.getElementById('calc_out').textContent = outstr;
 }
 function convertBtoT(val, units){ if(units==='T') return val; if(units==='mT') return val/1e3; if(units==='G') return val/1e4; return val; }
 function convertTtoB(T, units){ if(units==='T') return T; if(units==='mT') return T*1e3; if(units==='G') return T*1e4; return T*1e3; }
 function clearCalc(){ document.getElementById('freq').value=''; document.getElementById('gval').value=''; document.getElementById('field').value=''; document.getElementById('calc_out').textContent='Enter any two of frequency, g, and field, then click Compute missing.' }
 
-// Energy vs field plotting
+// Energy vs field plotting using Plotly
 function drawEnergyPlot(){
   const S = parseFloat(document.getElementById('spinS').value);
-  let gplot = parseFloat(document.getElementById('g_plot').value);
-  if(isNaN(S) || isNaN(gplot)){ document.getElementById('plot_out').textContent='Enter numeric spin S and g.'; return; }
-  const canvas = document.getElementById('energy_canvas'); const ctx = canvas.getContext('2d');
-  const w = canvas.width; const h = canvas.height; ctx.clearRect(0,0,w,h);
-  // m values
+  const gplot = parseFloat(document.getElementById('g_plot').value);
+  if(isNaN(S) || isNaN(gplot)){
+    document.getElementById('plot_out').textContent='Enter numeric spin S and g.';
+    return;
+  }
+
   const dim = Math.round(2*S+1);
   const mvals = []; for(let i=0;i<dim;i++) mvals.push(S - i);
-  // field range: 0 to Bmax chosen from resonance with 35 GHz? better: choose 0 to 2x field for X-band 9.5 GHz and g
-  // compute typical resonance field for 9.5 GHz
-  const nu0 = 9.5e9; const Bres = (h*nu0)/(gplot*muB); // T
-  const Bmax = Math.max(1.5*Bres, 0.1); // ensure nonzero
+
+  const nu0 = 9.5e9;
+  const Bres = (h*nu0)/(gplot*muB);
+  const Bmax = Math.max(1.5*Bres, 0.1);
   const Bmin = 0;
-  // sample fields
-  const npoints = 200;
+  const npoints = 300;
   const Bs = Array.from({length:npoints},(_,i)=>Bmin + (i/(npoints-1))*(Bmax-Bmin));
-  // compute energies E_m(B) = g μB B m  (J)
-  const energies = mvals.map(m=>Bs.map(B=>gplot*muB*B*m));
-  // convert to preferred units: GHz (E/h) and cm^-1 (E/(h*c*100))
-  const energies_GHz = energies.map(row=>row.map(EJ=>EJ/h/1e9));
-  const energies_cminv = energies.map(row=>row.map(EJ=>EJ/(h*c*100)));
-  // find global min/max for plotting
-  let Eflat = energies_GHz.flat(); const Emin = Math.min(...Eflat); const Emax = Math.max(...Eflat);
-  // draw axes
-  ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(50,20); ctx.lineTo(50,h-40); ctx.lineTo(w-20,h-40); ctx.stroke();
-  ctx.fillStyle='rgba(160,176,200,0.9)'; ctx.font='12px sans-serif';
-  // y-ticks
-  const yticks = 6; for(let i=0;i<=yticks;i++){ const y = 20 + (i/yticks)*(h-60); const val = (Emax - (i/yticks)*(Emax-Emin)).toFixed(3); ctx.fillText(val + ' GHz', 6, y+4); ctx.beginPath(); ctx.moveTo(46,y); ctx.lineTo(50,y); ctx.stroke(); }
-  // x-ticks
-  const xticks = 6; for(let i=0;i<=xticks;i++){ const x = 50 + (i/xticks)*(w-70); const Bval = (Bmin + (i/xticks)*(Bmax-Bmin)); ctx.fillText((Bval*1e3).toFixed(2) + ' mT', x-18, h-22); ctx.beginPath(); ctx.moveTo(x,h-40); ctx.lineTo(x,h-36); ctx.stroke(); }
 
-  // draw energy lines
-  const palette = ['#7c3aed','#06b6d4','#10b981','#f97316','#ef4444','#a3e635'];
-  energies_GHz.forEach((Erow,idx)=>{
-    ctx.beginPath();
-    for(let i=0;i<Erow.length;i++){ const x = 50 + (i/(Erow.length-1))*(w-70); const y = 20 + (1 - (Erow[i]-Emin)/(Emax-Emin))*(h-60); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
-    ctx.strokeStyle = palette[idx % palette.length]; ctx.lineWidth=2; ctx.stroke();
-    // label left-side
-    const y0 = 20 + (1 - (Erow[0]-Emin)/(Emax-Emin))*(h-60); ctx.fillText('m=' + mvals[idx], w-60, y0+4);
-  });
+  const energies = mvals.map(m=>Bs.map(B=>gplot*muB*B*m/h/1e9));
 
-  // overlay resonance line for current microwave frequency if set
+  const traces = energies.map((row,idx)=>({
+    x: Bs.map(B=>B*1e3),
+    y: row,
+    mode: 'lines',
+    name: 'm='+mvals[idx],
+    line: {width:2}
+  }));
+
   const freq_in = document.getElementById('freq').value;
   if(freq_in!==''){
     const nu = parseFloat(freq_in)*1e9;
-    // For each pair of adjacent m -> m-1 transitions compute B where ΔE = hν → g μB B = hν/(Δm) ; For Δm=1, B_res = hν/(g μB)
     const BresT = (h*nu)/(gplot*muB);
-    if(BresT<=Bmax*1.05){ // draw vertical line
-      const x = 50 + ((BresT - Bmin)/(Bmax-Bmin))*(w-70);
-      ctx.strokeStyle='rgba(255,230,0,0.9)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x,20); ctx.lineTo(x,h-40); ctx.stroke(); ctx.fillStyle='rgba(255,230,0,0.95)'; ctx.fillText('Resonance B = ' + (BresT*1e3).toFixed(3) + ' mT', x-60, 32);
-    }
+    traces.push({
+      x:[BresT*1e3, BresT*1e3],
+      y:[Math.min(...energies.flat()), Math.max(...energies.flat())],
+      mode:'lines',
+      name:'Resonance',
+      line:{dash:'dash'}
+    });
   }
 
-  document.getElementById('plot_out').textContent = `Plotted E_m(B) for S=${S}, g=${gplot}. Field range 0 → ${(Bmax*1e3).toFixed(3)} mT. Energies shown in GHz.`;
+  Plotly.newPlot('energy_plot', traces, {
+    xaxis:{title:'Magnetic field (mT)'},
+    yaxis:{title:'Energy (GHz)'},
+    margin:{l:50,r:10,b:40,t:20},
+    hovermode:'closest'
+  });
+
+  document.getElementById('plot_out').textContent = `Interactive Zeeman diagram plotted for S=${S}, g=${gplot}.`;
 }
-function clearPlot(){ const c=document.getElementById('energy_canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); document.getElementById('plot_out').textContent='Plot not drawn yet.' }
+
+function clearPlot(){
+  Plotly.purge('energy_plot');
+  document.getElementById('plot_out').textContent='Plot not drawn yet.';
+}(){ const c=document.getElementById('energy_canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); document.getElementById('plot_out').textContent='Plot not drawn yet.' }
 
 </script>
 </body>
