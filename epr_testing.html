@@ -3,199 +3,106 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>EPR Resonance + Energy vs Field</title>
-  <style>
-    :root{--bg:#071027;--card:#071a2b;--muted:#9fb0c8;--accent:#7c3aed}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#071027 0%, #07142a 60%); color:#e6eef6; margin:0; padding:20px}
-    .wrap{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-    h1{margin:0;font-size:20px}
-    .grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
-    .card{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type=number], select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-    .row{display:flex;gap:8px}
-    button{background:var(--accent);border:none;color:white;padding:8px 12px;border-radius:8px;cursor:pointer}
-    pre{background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;overflow:auto}
-    canvas{width:100%;height:360px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
-    .muted{color:var(--muted)}
-    .small{font-size:13px}
-  </style>
+  <title>EPR Tools</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body{font-family:Arial;margin:20px;color:#eee;background:#0c1020}
+    .card{background:#11182e;padding:16px;border-radius:10px;margin-bottom:20px}
+    input{width:100%;padding:6px;margin-bottom:8px;border-radius:6px;border:1px solid #445}
+    button{padding:8px 12px;border-radius:6px;border:none;background:#6a5acd;color:#fff;cursor:pointer}
+    #energy_plot{width:100%;height:420px}
+    pre{background:#0003;padding:8px;border-radius:6px}
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>EPR Resonance — compute g, B, or ν and plot energy levels vs field</h1>
-    </header>
 
-    <div class="grid">
-      <section class="card">
-        <strong>Resonance calculator</strong>
-        <p class="muted small">Use the resonance condition hν = g μB B. Fill any two values to compute the third. Frequency in GHz, field in mT.</p>
+<div class="card">
+  <h2>Resonance Calculator</h2>
+  <label>Frequency ν (GHz)</label>
+  <input id="freq" type="number" step="0.0001">
 
-        <label>Microwave frequency ν (GHz)</label>
-        <input id="freq" type="number" step="0.0001" placeholder="e.g. 9.5">
+  <label>g value</label>
+  <input id="gval" type="number" step="0.0001">
 
-        <label>g-value</label>
-        <input id="gval" type="number" step="0.0001" placeholder="e.g. 2.0023">
+  <label>Magnetic field B (mT)</label>
+  <input id="field" type="number" step="0.0001">
 
-        <label>Resonance field B (mT)</label>
-        <input id="field" type="number" step="0.0001" placeholder="e.g. 340.0">
+  <button onclick="computeMissing()">Compute</button>
+  <button onclick="clearCalc()" style="background:#555">Clear</button>
+  <pre id="calc_out">Enter any two values.</pre>
+</div>
 
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="computeMissing()">Compute missing</button>
-          <button onclick="clearCalc()" style="background:#334155">Clear</button>
-        </div>
+<div class="card">
+  <h2>Energy Level Diagram (Zeeman)</h2>
+  <label>Spin S</label>
+  <input id="spinS" type="number" value="0.5" step="0.5">
 
-        <div style="margin-top:10px">
-          <pre id="calc_out">Enter any two of frequency, g, and field, then click Compute missing.</pre>
-        </div>
+  <label>g value</label>
+  <input id="g_plot" type="number" value="2.0023" step="0.0001">
 
-        <hr style="margin:12px 0;border-color:rgba(255,255,255,0.04)">
+  <button onclick="drawEnergyPlot()">Draw</button>
+  <button onclick="clearPlot()" style="background:#555">Clear</button>
 
-        <strong>Unit conversions / options</strong>
-        <label>Output units</label>
-        <select id="units">
-          <option value="mT">mT (millitesla)</option>
-          <option value="T">T (tesla)</option>
-          <option value="G">G (gauss)</option>
-        </select>
-        <div style="margin-top:8px"><small class="muted">Constants: h = Planck, μB = Bohr magneton. Isotropic g assumed.</small></div>
-      </section>
-
-      <section class="card">
-        <strong>Energy levels vs Field (Zeeman)</strong>
-        <p class="muted small">Simple Zeeman Hamiltonian H = g μB B S_z. Choose spin S and plot energy levels E_m(B). Energies shown in GHz and cm⁻¹. You can overlay transition energies (Δm = ±1) and mark the resonance field for the current microwave frequency.</p>
-
-        <label>Spin S (e.g., 1/2, 1, 3/2, 2)</label>
-        <input id="spinS" type="number" step="0.5" value="1/2">
-
-        <label>g-value (for energy plot)</label>
-        <input id="g_plot" type="number" step="0.0001" value="2.0023">
-
-        <div class="row" style="margin-top:8px">
-          <button onclick="drawEnergyPlot()">Draw energy vs B</button>
-          <button onclick="clearPlot()" style="background:#334155">Clear</button>
-        </div>
-
-        <div style="margin-top:10px">
-          <div id="energy_plot" style="width:100%;height:360px"></div>
-          <pre id="plot_out">Plot not drawn yet.</pre>
-        </div>
-      </section>
-
-    </div>
-  </div>
+  <div id="energy_plot"></div>
+  <pre id="plot_out">Plot not drawn.</pre>
+</div>
 
 <script>
-// Physical constants
-const h = 6.62607015e-34; // J s
-const hbar = h/(2*Math.PI);
-const muB = 9.2740100783e-24; // J/T
-const c = 299792458; // m/s
-const kB = 1.380649e-23;
-const cm_inv_J = 1.0/(h*c*100); // 1 J = ... cm^-1? Actually E (cm^-1) = E_J / (h*c*100) ?? We'll compute properly below.
+const h = 6.62607015e-34;
+const muB = 9.2740100783e-24;
 
 function computeMissing(){
-  const freq_in = document.getElementById('freq').value;
-  const g_in = document.getElementById('gval').value;
-  const field_in = document.getElementById('field').value;
-  const units = document.getElementById('units').value;
-  const filled = [freq_in!=="", g_in!=="", field_in!==""];
-  const nfilled = filled.filter(x=>x).length;
-  if(nfilled<2){ document.getElementById('calc_out').textContent = 'Please fill any two fields (ν and g, or ν and B, or g and B).'; return; }
-  let freqGHz = freq_in!==""? parseFloat(freq_in): null;
-  let g = g_in!==""? parseFloat(g_in): null;
-  let B_mT = field_in!==""? parseFloat(field_in): null;
-  // compute missing
-  if(freqGHz===null){ // compute ν from g and B
-    const B_T = convertBtoT(B_mT, units);
-    const nu = (g*muB*B_T)/h; // Hz
-    freqGHz = nu/1e9;
-    document.getElementById('freq').value = freqGHz.toFixed(6);
-  } else if(g===null){ // compute g from ν and B
-    const B_T = convertBtoT(B_mT, units);
-    const nu = freqGHz*1e9;
-    g = (h*nu)/(muB*B_T);
-    document.getElementById('gval').value = g.toFixed(6);
-  } else if(B_mT===null){ // compute B from ν and g
-    const nu = freqGHz*1e9;
-    const B_T = (h*nu)/(g*muB);
-    // convert to chosen units and set field
-    const out = convertTtoB(B_T, units);
-    document.getElementById('field').value = out.toFixed(6);
-  }
-  // prepare output display in all units
-  const nu_Hz = freqGHz*1e9; const B_T_final = (h*nu_Hz)/(g*muB);
-  const B_mT_final = B_T_final*1e3; const B_G = B_T_final*1e4;
-  const outstr = `Computed values:
-ν = ${freqGHz.toFixed(6)} GHz
-g = ${g.toFixed(6)}
-Resonance field = ${B_T_final.toExponential(6)} T = ${B_mT_final.toFixed(4)} mT = ${B_G.toFixed(2)} G`;
-  document.getElementById('calc_out').textContent = outstr;
-}
-function convertBtoT(val, units){ if(units==='T') return val; if(units==='mT') return val/1e3; if(units==='G') return val/1e4; return val; }
-function convertTtoB(T, units){ if(units==='T') return T; if(units==='mT') return T*1e3; if(units==='G') return T*1e4; return T*1e3; }
-function clearCalc(){ document.getElementById('freq').value=''; document.getElementById('gval').value=''; document.getElementById('field').value=''; document.getElementById('calc_out').textContent='Enter any two of frequency, g, and field, then click Compute missing.' }
+  let f = document.getElementById('freq').value;
+  let g = document.getElementById('gval').value;
+  let B = document.getElementById('field').value;
 
-// Energy vs field plotting using Plotly
+  f = f===""?null:parseFloat(f);
+  g = g===""?null:parseFloat(g);
+  B = B===""?null:parseFloat(B);
+
+  const filled = [f,g,B].filter(x=>x!==null).length;
+  if(filled < 2){ document.getElementById('calc_out').textContent="Need any two."; return; }
+
+  if(f===null){ f = (g*muB*(B/1000))/h / 1e9; document.getElementById('freq').value=f.toFixed(6); }
+  else if(g===null){ g = (h*(f*1e9))/ (muB*(B/1000)); document.getElementById('gval').value=g.toFixed(6); }
+  else if(B===null){ B = (h*(f*1e9))/(g*muB)*1000; document.getElementById('field').value=B.toFixed(6); }
+
+  document.getElementById('calc_out').textContent = `ν=${f} GHz, g=${g}, B=${B} mT`;
+}
+
+function clearCalc(){
+  document.getElementById('freq').value="";
+  document.getElementById('gval').value="";
+  document.getElementById('field').value="";
+  document.getElementById('calc_out').textContent="Enter any two values.";
+}
+
 function drawEnergyPlot(){
   const S = parseFloat(document.getElementById('spinS').value);
-  const gplot = parseFloat(document.getElementById('g_plot').value);
-  if(isNaN(S) || isNaN(gplot)){
-    document.getElementById('plot_out').textContent='Enter numeric spin S and g.';
-    return;
-  }
+  const g = parseFloat(document.getElementById('g_plot').value);
 
-  const dim = Math.round(2*S+1);
-  const mvals = []; for(let i=0;i<dim;i++) mvals.push(S - i);
+  const mvals = []; for(let m=S; m>=-S; m-=1) mvals.push(m);
 
-  const nu0 = 9.5e9;
-  const Bres = (h*nu0)/(gplot*muB);
-  const Bmax = Math.max(1.5*Bres, 0.1);
-  const Bmin = 0;
-  const npoints = 300;
-  const Bs = Array.from({length:npoints},(_,i)=>Bmin + (i/(npoints-1))*(Bmax-Bmin));
+  const Bvals = [...Array(200).keys()].map(i=>i*0.01);
+  const energy = mvals.map(m=>Bvals.map(B=>(g*muB*B*m)/h/1e9));
 
-  const energies = mvals.map(m=>Bs.map(B=>gplot*muB*B*m/h/1e9));
-
-  const traces = energies.map((row,idx)=>({
-    x: Bs.map(B=>B*1e3),
+  const traces = energy.map((row,i)=>({
+    x: Bvals.map(B=>B*1000),
     y: row,
-    mode: 'lines',
-    name: 'm='+mvals[idx],
-    line: {width:2}
+    mode:'lines',
+    name:`m=${mvals[i]}`
   }));
 
-  const freq_in = document.getElementById('freq').value;
-  if(freq_in!==''){
-    const nu = parseFloat(freq_in)*1e9;
-    const BresT = (h*nu)/(gplot*muB);
-    traces.push({
-      x:[BresT*1e3, BresT*1e3],
-      y:[Math.min(...energies.flat()), Math.max(...energies.flat())],
-      mode:'lines',
-      name:'Resonance',
-      line:{dash:'dash'}
-    });
-  }
-
   Plotly.newPlot('energy_plot', traces, {
-    xaxis:{title:'Magnetic field (mT)'},
-    yaxis:{title:'Energy (GHz)'},
-    margin:{l:50,r:10,b:40,t:20},
-    hovermode:'closest'
+    xaxis:{title:'B (mT)'},
+    yaxis:{title:'Energy (GHz)'}
   });
 
-  document.getElementById('plot_out').textContent = `Interactive Zeeman diagram plotted for S=${S}, g=${gplot}.`;
+  document.getElementById('plot_out').textContent = "Plot generated.";
 }
 
-function clearPlot(){
-  Plotly.purge('energy_plot');
-  document.getElementById('plot_out').textContent='Plot not drawn yet.';
-}(){ const c=document.getElementById('energy_canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); document.getElementById('plot_out').textContent='Plot not drawn yet.' }
-
+function clearPlot(){ Plotly.purge('energy_plot'); document.getElementById('plot_out').textContent="Plot cleared."; }
 </script>
+
 </body>
 </html>
