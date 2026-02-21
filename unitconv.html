@@ -127,19 +127,19 @@
             let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
             let outputUnit = document.getElementById('outputUnit').value;
         
-            // Convert input to Joules
             let value_J = value * prefixFactor;
         
+            // Convert input to Joules
             switch(unit) {
                 case "J": value_J *= 1; break;
-                case "Jmol": value_J *= 1 / N_A; break;   // J/mol → J
+                case "Jmol": value_J *= 1 / N_A; break;
                 case "K": value_J *= kB; break;
                 case "eV": value_J *= eV_to_J; break;
                 case "cm-1": value_J *= cm1_to_J; break;
                 case "m": value_J = h * c / value_J; break;
                 case "Hz": value_J = h * value_J; break;
-                case "Eh": value_J *= Eh_to_J; break;    // Hartree → J
-                case "calmol": value_J *= cal_to_J / N_A; break; // cal/mol → J
+                case "Eh": value_J *= Eh_to_J; break;
+                case "calmol": value_J *= cal_to_J / N_A; break;
             }
         
             // Convert Joules to output unit
@@ -165,9 +165,29 @@
             if (unitText === "calmol") unitText = "cal/mol";
             if (unitText === "Eh") unitText = "Eh";
         
+            // Format value: for very large/small numbers use exponential, else fixed 6 decimals
+            let formattedValue;
+            if (Math.abs(convertedValue) < 1e-3 || Math.abs(convertedValue) > 1e6) {
+                formattedValue = convertedValue.toExponential(6);
+            } else {
+                formattedValue = convertedValue.toFixed(6);
+            }
+        
+            // Output with spacing
             document.getElementById('output').innerHTML = `
-                <h3>Converted Value:</h3>
-                <p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${unitText}</p>`;
+                <div style="
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: #f0f8ff;
+                    border-radius: 8px;
+                    display: inline-block;
+                    font-size: 1.2em;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                ">
+                    <strong>Converted Value:</strong><br>
+                    ${formattedValue} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${unitText}
+                </div>
+            `;
         }
     </script>
     <footer>
