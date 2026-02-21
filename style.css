@@ -116,39 +116,31 @@ footer a:hover {
     height: 100%;
 }
 
+/* Header reset */
 header {
-    position: relative; /* Needed to position text over image */
     margin: 0;
     padding: 0;
+    display: block;
 }
 
+/* Banner image fully responsive */
 .banner {
     width: 100%;
     height: auto;
     display: block;
+    vertical-align: top; /* remove tiny inline gaps */
 }
 
-/* Overlay text */
-.header-text {
-    position: absolute;
-    top: 50%;           /* Vertical center */
-    left: 50%;          /* Horizontal center */
-    transform: translate(-50%, -50%); /* Perfect centering */
-    text-align: center;
-    color: white;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.7); /* makes text readable over image */
-    width: 90%;         /* Keep some margin on sides */
-}
-
-/* Title and tagline styling */
-.header-text h1 {
-    font-size: 2.5em;
-    margin: 0.2em 0;
-}
-
-.header-text p {
-    font-size: 1.2em;
+/* Remove any default body margin/padding */
+body {
     margin: 0;
+    padding: 0;
+}
+
+/* Nav right under banner, no extra space */
+nav {
+    margin: 0;
+    padding: 0;
 }
 
 /* Responsive adjustments for small screens */
@@ -159,11 +151,6 @@ header {
     .header-text p {
         font-size: 1em;
     }
-}
-
-nav {
-    margin-top: 0;
-    padding-top: 0;
 }
 
 #controls {
