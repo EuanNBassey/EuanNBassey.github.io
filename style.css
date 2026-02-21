@@ -120,25 +120,16 @@ footer a:hover {
 header {
     margin: 0;
     padding: 0;
-    display: block;
 }
 
-/* Banner image fully responsive */
 .banner {
+    display: block;      /* removes inline spacing issues */
     width: 100%;
-    height: auto;
-    display: block;
-    vertical-align: top; /* remove tiny inline gaps */
+    height: auto;        /* keeps aspect ratio */
+    vertical-align: top; /* fixes tiny gaps in some browsers */
 }
 
-/* Remove any default body margin/padding */
-body {
-    margin: 0;
-    padding: 0;
-}
-
-/* Nav right under banner, no extra space */
-nav {
+body, nav {
     margin: 0;
     padding: 0;
 }
