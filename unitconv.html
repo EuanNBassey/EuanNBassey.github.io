@@ -76,12 +76,14 @@
     </select>
     <select id="unit">
         <option value="J">Joule (J)</option>
-        <option value="Jmol">Joule per mole (J/mol)</option> 
+        <option value="Jmol">Joule per mole (J/mol)</option>
         <option value="K">Kelvin (K)</option>
         <option value="eV">Electron Volt (eV)</option>
         <option value="cm-1">Wavenumber (cm⁻¹)</option>
         <option value="m">Wavelength (m)</option>
         <option value="Hz">Hertz (Hz)</option>
+        <option value="Eh">Hartree (Eh)</option>
+        <option value="calmol">cal/mol</option>
     </select>
     <br>
     <label for="outputPrefix">Convert To:</label>
@@ -96,57 +98,76 @@
     </select>
     <select id="outputUnit">
         <option value="J">Joule (J)</option>
-        <option value="Jmol">Joule per mole (J/mol)</option> 
+        <option value="Jmol">Joule per mole (J/mol)</option>
         <option value="K">Kelvin (K)</option>
         <option value="eV">Electron Volt (eV)</option>
         <option value="cm-1">Wavenumber (cm⁻¹)</option>
         <option value="m">Wavelength (m)</option>
         <option value="Hz">Hertz (Hz)</option>
+        <option value="Eh">Hartree (Eh)</option>      <!-- NEW -->
+        <option value="calmol">cal/mol</option>       <!-- NEW -->
     </select>
     <button onclick="convert()">Convert</button>
     <div id="output"></div>
 
     <script>
-        const h = 6.62607015e-34; // Planck's constant (J·s)
-        const kB = 1.380649e-23;  // Boltzmann's constant (J/K)
-        const c = 299792458;       // Speed of light (m/s)
-        const eV_to_J = 1.602176634e-19;
-        const cm1_to_J = h * c * 100;
-
-        const N_A = 6.02214076e23; // Avogadro's number
-
+        const h = 6.62607015e-34;       // Planck constant (J·s)
+        const kB = 1.380649e-23;        // Boltzmann constant (J/K)
+        const c = 299792458;             // speed of light (m/s)
+        const eV_to_J = 1.602176634e-19; // eV to Joules
+        const cm1_to_J = h * c * 100;    // cm^-1 to Joules
+        const N_A = 6.02214076e23;       // Avogadro's number
+        const Eh_to_J = 4.3597447222071e-18; // Hartree to Joules
+        const cal_to_J = 4.184;          // cal to J
+        
         function convert() {
             let value = parseFloat(document.getElementById('value').value);
             let prefixFactor = parseFloat(document.getElementById('prefix').value);
             let unit = document.getElementById('unit').value;
             let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
             let outputUnit = document.getElementById('outputUnit').value;
-            let value_J = value * prefixFactor; // convert input to joules
         
-            // Convert input unit to Joules
-            if (unit === "J") value_J *= 1;
-            if (unit === "K") value_J *= kB;
-            if (unit === "eV") value_J *= eV_to_J;
-            if (unit === "cm-1") value_J *= cm1_to_J;
-            if (unit === "m") value_J = h * c / value_J;
-            if (unit === "Hz") value_J = h * value_J;
-            if (unit === "Jmol") value_J *= 1 / N_A; // input is per mole → convert to J
+            // Convert input to Joules
+            let value_J = value * prefixFactor;
+        
+            switch(unit) {
+                case "J": value_J *= 1; break;
+                case "Jmol": value_J *= 1 / N_A; break;   // J/mol → J
+                case "K": value_J *= kB; break;
+                case "eV": value_J *= eV_to_J; break;
+                case "cm-1": value_J *= cm1_to_J; break;
+                case "m": value_J = h * c / value_J; break;
+                case "Hz": value_J = h * value_J; break;
+                case "Eh": value_J *= Eh_to_J; break;    // Hartree → J
+                case "calmol": value_J *= cal_to_J / N_A; break; // cal/mol → J
+            }
         
             // Convert Joules to output unit
             let convertedValue;
-            if (outputUnit === "J") convertedValue = value_J;
-            if (outputUnit === "Jmol") convertedValue = value_J * N_A; // multiply by Avogadro
-            if (outputUnit === "K") convertedValue = value_J / kB;
-            if (outputUnit === "eV") convertedValue = value_J / eV_to_J;
-            if (outputUnit === "cm-1") convertedValue = value_J / cm1_to_J;
-            if (outputUnit === "m") convertedValue = h * c / value_J;
-            if (outputUnit === "Hz") convertedValue = value_J / h;
+            switch(outputUnit) {
+                case "J": convertedValue = value_J; break;
+                case "Jmol": convertedValue = value_J * N_A; break;
+                case "K": convertedValue = value_J / kB; break;
+                case "eV": convertedValue = value_J / eV_to_J; break;
+                case "cm-1": convertedValue = value_J / cm1_to_J; break;
+                case "m": convertedValue = h * c / value_J; break;
+                case "Hz": convertedValue = value_J / h; break;
+                case "Eh": convertedValue = value_J / Eh_to_J; break;
+                case "calmol": convertedValue = value_J * N_A / cal_to_J; break;
+            }
         
+            // Apply output prefix
             convertedValue /= outputPrefixFactor;
+        
+            // Pretty-print unit names
+            let unitText = outputUnit;
+            if (unitText === "Jmol") unitText = "J/mol";
+            if (unitText === "calmol") unitText = "cal/mol";
+            if (unitText === "Eh") unitText = "Eh";
         
             document.getElementById('output').innerHTML = `
                 <h3>Converted Value:</h3>
-                <p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit.replace("Jmol","J/mol")}</p>`;
+                <p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${unitText}</p>`;
         }
     </script>
     <footer>
