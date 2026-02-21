@@ -35,28 +35,6 @@ header p {
     margin-top: 10px;
 }
 
-/* Navigation styles 
-nav {
-    background-color: #333;
-    padding: 10px 0;
-    text-align: center;
-}
-
-nav ul {
-    list-style-type: none;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
-
-nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.2em;
-} */
-
 /* Section styles */
 section {
     margin: 40px 0;
@@ -111,29 +89,19 @@ footer a:hover {
 }
 
 .about-img {
-    float: left; /* Floats the image to the left */
-    margin-right: 20px; /* Creates a gap between the image and text */
-    margin-bottom: 20px; /* Optional: Adds space below the image */
-    width: 300px; /* Keep the original dimensions */
-    height: auto; /* Ensures aspect ratio is maintained */
-    display: block; /* Ensures proper wrapping */
-}
-
-#about p {
-    overflow: hidden; /* Ensures the section properly wraps around the image */
+    float: none;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 20px auto;
 }
 
 .home-img {
-    float: left; /* Floats the image to the left */
-    margin-right: 20px; /* Creates a gap between the image and text */
-    margin-bottom: 10px; /* Optional: Adds space below the image */
-    width: 800px; /* Keep the original dimensions */
-    height: auto; /* Ensures aspect ratio is maintained */
-    display: block; /* Ensures proper wrapping */
-}
-
-#home p {
-    overflow: hidden; /* Ensures the section properly wraps around the image */
+    float: none;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 20px auto;
 }
 
 .video-container {
@@ -221,6 +189,16 @@ nav ul li a {
     font-size: 1.2em;
 }
 
+nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 8px 12px;
+}
+
 /* Dropdown menu styles */
 .dropdown-menu {
     display: none;
@@ -261,13 +239,8 @@ nav ul li a {
 /* Fix for 3Dmol viewer positioning */
 
 /* Container for the whole structure viewer section */
-#structureViewer {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 50px;
-    position: relative;
-    clear: both;
+#structureViewerInner {
+    flex-direction: row;
 }
 
 /* Inner flex container for viewer and legend */
@@ -313,4 +286,66 @@ nav ul li a {
     margin-bottom: 10px;
 }
 
+@media (max-width: 768px) {
 
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    header {
+        height: 180px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    section h2 {
+        font-size: 1.8em;
+    }
+
+    section h3 {
+        font-size: 1.3em;
+    }
+
+    section p,
+    section ul li {
+        font-size: 1em;
+    }
+
+    /* Stack 3D viewer and legend vertically */
+    #structureViewerInner {
+        flex-direction: column;
+    }
+
+    #viewer {
+        height: 350px;
+    }
+
+    #legend {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    /* Controls full width */
+    #controls {
+        width: 100%;
+    }
+
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.plotly-graph-div {
+    width: 100% !important;
+}
+
+@media (max-width: 768px) {
+    .dropdown-menu {
+        position: static;
+    }
+}
