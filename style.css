@@ -19,6 +19,11 @@ body {
     padding: 20px;
 }
 
+header {
+    margin: 0;
+    padding: 0;
+}
+
 /* Header styles */
 header h1 {
     font-size: 3em;
