@@ -19,11 +19,6 @@ body {
     padding: 20px;
 }
 
-header {
-    margin: 0;
-    padding: 0;
-}
-
 /* Header styles */
 header h1 {
     font-size: 3em;
@@ -121,10 +116,20 @@ footer a:hover {
     height: 100%;
 }
 
+header {
+    margin: 0;
+    padding: 0;
+}
+
 .banner {
     width: 100%;         /* Make the image take full width */
     height: auto;        /* Keep the aspect ratio */
     display: block;      /* Remove any extra spacing */
+}
+
+nav {
+    margin-top: 0;
+    padding-top: 0;
 }
 
 #controls {
