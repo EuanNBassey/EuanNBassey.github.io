@@ -20,12 +20,6 @@ body {
 }
 
 /* Header styles */
-header {
-    background: url('banner-image.png') no-repeat center center;
-    background-size: cover;
-    height: 300px; /* Adjust as needed */
-}
-
 header h1 {
     font-size: 3em;
 }
