@@ -76,6 +76,7 @@
     </select>
     <select id="unit">
         <option value="J">Joule (J)</option>
+        <option value="Jmol">Joule per mole (J/mol)</option> 
         <option value="K">Kelvin (K)</option>
         <option value="eV">Electron Volt (eV)</option>
         <option value="cm-1">Wavenumber (cm⁻¹)</option>
@@ -95,6 +96,7 @@
     </select>
     <select id="outputUnit">
         <option value="J">Joule (J)</option>
+        <option value="Jmol">Joule per mole (J/mol)</option> 
         <option value="K">Kelvin (K)</option>
         <option value="eV">Electron Volt (eV)</option>
         <option value="cm-1">Wavenumber (cm⁻¹)</option>
@@ -111,32 +113,40 @@
         const eV_to_J = 1.602176634e-19;
         const cm1_to_J = h * c * 100;
 
+        const N_A = 6.02214076e23; // Avogadro's number
+
         function convert() {
             let value = parseFloat(document.getElementById('value').value);
             let prefixFactor = parseFloat(document.getElementById('prefix').value);
             let unit = document.getElementById('unit').value;
             let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
             let outputUnit = document.getElementById('outputUnit').value;
-            let value_J = value * prefixFactor;
-
+            let value_J = value * prefixFactor; // convert input to joules
+        
+            // Convert input unit to Joules
             if (unit === "J") value_J *= 1;
             if (unit === "K") value_J *= kB;
             if (unit === "eV") value_J *= eV_to_J;
             if (unit === "cm-1") value_J *= cm1_to_J;
             if (unit === "m") value_J = h * c / value_J;
             if (unit === "Hz") value_J = h * value_J;
-
+            if (unit === "Jmol") value_J *= 1 / N_A; // input is per mole → convert to J
+        
+            // Convert Joules to output unit
             let convertedValue;
             if (outputUnit === "J") convertedValue = value_J;
+            if (outputUnit === "Jmol") convertedValue = value_J * N_A; // multiply by Avogadro
             if (outputUnit === "K") convertedValue = value_J / kB;
             if (outputUnit === "eV") convertedValue = value_J / eV_to_J;
             if (outputUnit === "cm-1") convertedValue = value_J / cm1_to_J;
             if (outputUnit === "m") convertedValue = h * c / value_J;
             if (outputUnit === "Hz") convertedValue = value_J / h;
-
+        
             convertedValue /= outputPrefixFactor;
-
-            document.getElementById('output').innerHTML = `<h3>Converted Value:</h3><p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit}</p>`;
+        
+            document.getElementById('output').innerHTML = `
+                <h3>Converted Value:</h3>
+                <p>${convertedValue.toExponential(6)} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${outputUnit.replace("Jmol","J/mol")}</p>`;
         }
     </script>
     <footer>
