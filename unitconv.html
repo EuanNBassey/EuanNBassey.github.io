@@ -62,134 +62,148 @@
         </div>
     </nav>
 <body>
-    <h2>Energy/Frequency/Wavelength Converter</h2>
-    <label for="value">Enter Value:</label>
-    <input type="number" id="value" step="any">
-    <select id="prefix">
-        <option value="1">(None)</option>
-        <option value="1e-9">Nano (n)</option>
-        <option value="1e-6">Micro (µ)</option>
-        <option value="1e-3">Milli (m)</option>
-        <option value="1e3">Kilo (k)</option>
-        <option value="1e6">Mega (M)</option>
-        <option value="1e9">Giga (G)</option>
-    </select>
-    <select id="unit">
-        <option value="J">Joule (J)</option>
-        <option value="Jmol">Joule per mole (J/mol)</option>
-        <option value="K">Kelvin (K)</option>
-        <option value="eV">Electron Volt (eV)</option>
-        <option value="cm-1">Wavenumber (cm⁻¹)</option>
-        <option value="m">Wavelength (m)</option>
-        <option value="Hz">Hertz (Hz)</option>
-        <option value="Eh">Hartree (Eh)</option>
-        <option value="calmol">cal/mol</option>
-    </select>
-    <br>
-    <label for="outputPrefix">Convert To:</label>
-    <select id="outputPrefix">
-        <option value="1">(None)</option>
-        <option value="1e-9">Nano (n)</option>
-        <option value="1e-6">Micro (µ)</option>
-        <option value="1e-3">Milli (m)</option>
-        <option value="1e3">Kilo (k)</option>
-        <option value="1e6">Mega (M)</option>
-        <option value="1e9">Giga (G)</option>
-    </select>
-    <select id="outputUnit">
-        <option value="J">Joule (J)</option>
-        <option value="Jmol">Joule per mole (J/mol)</option>
-        <option value="K">Kelvin (K)</option>
-        <option value="eV">Electron Volt (eV)</option>
-        <option value="cm-1">Wavenumber (cm⁻¹)</option>
-        <option value="m">Wavelength (m)</option>
-        <option value="Hz">Hertz (Hz)</option>
-        <option value="Eh">Hartree (Eh)</option>      <!-- NEW -->
-        <option value="calmol">cal/mol</option>       <!-- NEW -->
-    </select>
-    <button onclick="convert()">Convert</button>
-    <div id="output"></div>
+    <section id="converter">
+    <div class="container">
+        <h2>Energy / Frequency / Wavelength Converter</h2>
 
-    <script>
-        const h = 6.62607015e-34;       // Planck constant (J·s)
-        const kB = 1.380649e-23;        // Boltzmann constant (J/K)
-        const c = 299792458;             // speed of light (m/s)
-        const eV_to_J = 1.602176634e-19; // eV to Joules
-        const cm1_to_J = h * c * 100;    // cm^-1 to Joules
-        const N_A = 6.02214076e23;       // Avogadro's number
-        const Eh_to_J = 4.3597447222071e-18; // Hartree to Joules
-        const cal_to_J = 4.184;          // cal to J
-        
-        function convert() {
-            let value = parseFloat(document.getElementById('value').value);
-            let prefixFactor = parseFloat(document.getElementById('prefix').value);
-            let unit = document.getElementById('unit').value;
-            let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
-            let outputUnit = document.getElementById('outputUnit').value;
-        
-            let value_J = value * prefixFactor;
-        
-            // Convert input to Joules
-            switch(unit) {
-                case "J": value_J *= 1; break;
-                case "Jmol": value_J *= 1 / N_A; break;
-                case "K": value_J *= kB; break;
-                case "eV": value_J *= eV_to_J; break;
-                case "cm-1": value_J *= cm1_to_J; break;
-                case "m": value_J = h * c / value_J; break;
-                case "Hz": value_J = h * value_J; break;
-                case "Eh": value_J *= Eh_to_J; break;
-                case "calmol": value_J *= cal_to_J / N_A; break;
-            }
-        
-            // Convert Joules to output unit
-            let convertedValue;
-            switch(outputUnit) {
-                case "J": convertedValue = value_J; break;
-                case "Jmol": convertedValue = value_J * N_A; break;
-                case "K": convertedValue = value_J / kB; break;
-                case "eV": convertedValue = value_J / eV_to_J; break;
-                case "cm-1": convertedValue = value_J / cm1_to_J; break;
-                case "m": convertedValue = h * c / value_J; break;
-                case "Hz": convertedValue = value_J / h; break;
-                case "Eh": convertedValue = value_J / Eh_to_J; break;
-                case "calmol": convertedValue = value_J * N_A / cal_to_J; break;
-            }
-        
-            // Apply output prefix
-            convertedValue /= outputPrefixFactor;
-        
-            // Pretty-print unit names
-            let unitText = outputUnit;
-            if (unitText === "Jmol") unitText = "J/mol";
-            if (unitText === "calmol") unitText = "cal/mol";
-            if (unitText === "Eh") unitText = "Eh";
-        
-            // Format value: for very large/small numbers use exponential, else fixed 6 decimals
-            let formattedValue;
-            if (Math.abs(convertedValue) < 1e-3 || Math.abs(convertedValue) > 1e6) {
-                formattedValue = convertedValue.toExponential(6);
-            } else {
-                formattedValue = convertedValue.toFixed(6);
-            }
-        
-            // Output with spacing
-            document.getElementById('output').innerHTML = `
-                <div style="
-                    margin-top: 20px;
-                    padding: 15px;
-                    background-color: #f0f8ff;
-                    border-radius: 8px;
-                    display: inline-block;
-                    font-size: 1.2em;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                ">
-                    <strong>Converted Value:</strong><br>
-                    ${formattedValue} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${unitText}
-                </div>
-            `;
-        }
-    </script>
+        <div id="converterInputs">
+            <label for="value">Enter Value:</label><br>
+            <input type="number" id="value" step="any">
+
+            <select id="prefix">
+                <option value="1">(None)</option>
+                <option value="1e-9">Nano (n)</option>
+                <option value="1e-6">Micro (µ)</option>
+                <option value="1e-3">Milli (m)</option>
+                <option value="1e3">Kilo (k)</option>
+                <option value="1e6">Mega (M)</option>
+                <option value="1e9">Giga (G)</option>
+            </select>
+
+            <select id="unit">
+                <option value="J">Joule (J)</option>
+                <option value="Jmol">Joule per mole (J/mol)</option>
+                <option value="calmol">cal/mol</option>
+                <option value="K">Kelvin (K)</option>
+                <option value="eV">Electron Volt (eV)</option>
+                <option value="cm-1">Wavenumber (cm⁻¹)</option>
+                <option value="m">Wavelength (m)</option>
+                <option value="Hz">Hertz (Hz)</option>
+                <option value="Eh">Hartree (Eh)</option>
+            </select><br><br>
+
+            <label for="outputPrefix">Convert To:</label><br>
+            <select id="outputPrefix">
+                <option value="1">(None)</option>
+                <option value="1e-9">Nano (n)</option>
+                <option value="1e-6">Micro (µ)</option>
+                <option value="1e-3">Milli (m)</option>
+                <option value="1e3">Kilo (k)</option>
+                <option value="1e6">Mega (M)</option>
+                <option value="1e9">Giga (G)</option>
+            </select>
+
+            <select id="outputUnit">
+                <option value="J">Joule (J)</option>
+                <option value="Jmol">Joule per mole (J/mol)</option>
+                <option value="calmol">cal/mol</option>
+                <option value="K">Kelvin (K)</option>
+                <option value="eV">Electron Volt (eV)</option>
+                <option value="cm-1">Wavenumber (cm⁻¹)</option>
+                <option value="m">Wavelength (m)</option>
+                <option value="Hz">Hertz (Hz)</option>
+                <option value="Eh">Hartree (Eh)</option>
+            </select><br><br>
+
+            <button onclick="convert()">Convert</button>
+        </div>
+
+        <div id="output"></div>
+
+        <!-- Extra space below output, before footer -->
+        <div style="height:40px;"></div>
+    </div>
+</section>
+
+<script>
+const h = 6.62607015e-34;       // Planck constant (J·s)
+const kB = 1.380649e-23;        // Boltzmann constant (J/K)
+const c = 299792458;             // speed of light (m/s)
+const eV_to_J = 1.602176634e-19;
+const cm1_to_J = h * c * 100;
+const N_A = 6.02214076e23;       // Avogadro's number
+const Eh_to_J = 4.3597447222071e-18;
+const cal_to_J = 4.184;
+
+function convert() {
+    let value = parseFloat(document.getElementById('value').value);
+    if (isNaN(value)) {
+        document.getElementById('output').innerHTML = `<p style="color:red;">Please enter a numeric value</p>`;
+        return;
+    }
+
+    let prefixFactor = parseFloat(document.getElementById('prefix').value);
+    let unit = document.getElementById('unit').value;
+    let outputPrefixFactor = parseFloat(document.getElementById('outputPrefix').value);
+    let outputUnit = document.getElementById('outputUnit').value;
+
+    let value_J = value * prefixFactor;
+
+    // Convert input to Joules
+    switch(unit) {
+        case "J": value_J *= 1; break;
+        case "Jmol": value_J *= 1 / N_A; break;
+        case "calmol": value_J *= cal_to_J / N_A; break;
+        case "K": value_J *= kB; break;
+        case "eV": value_J *= eV_to_J; break;
+        case "cm-1": value_J *= cm1_to_J; break;
+        case "m": value_J = h * c / value_J; break;
+        case "Hz": value_J = h * value_J; break;
+        case "Eh": value_J *= Eh_to_J; break;
+    }
+
+    // Convert Joules to output unit
+    let convertedValue;
+    switch(outputUnit) {
+        case "J": convertedValue = value_J; break;
+        case "Jmol": convertedValue = value_J * N_A; break;
+        case "calmol": convertedValue = value_J * N_A / cal_to_J; break;
+        case "K": convertedValue = value_J / kB; break;
+        case "eV": convertedValue = value_J / eV_to_J; break;
+        case "cm-1": convertedValue = value_J / cm1_to_J; break;
+        case "m": convertedValue = h * c / value_J; break;
+        case "Hz": convertedValue = value_J / h; break;
+        case "Eh": convertedValue = value_J / Eh_to_J; break;
+    }
+
+    convertedValue /= outputPrefixFactor;
+
+    // Pretty-print unit names
+    let unitText = outputUnit;
+    if (unitText === "Jmol") unitText = "J/mol";
+    if (unitText === "calmol") unitText = "cal/mol";
+
+    // Nice formatting: fixed 6 decimals for normal numbers, exponential for very large/small
+    let formattedValue = (Math.abs(convertedValue) < 1e-3 || Math.abs(convertedValue) > 1e6) ?
+        convertedValue.toExponential(6) :
+        convertedValue.toFixed(6);
+
+    document.getElementById('output').innerHTML = `
+        <div style="
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 1.2em;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        ">
+            <strong>Converted Value:</strong><br>
+            ${formattedValue} ${document.getElementById('outputPrefix').selectedOptions[0].text} ${unitText}
+        </div>
+    `;
+}
+</script>
     <footer>
         <div class="container">
             <p>&copy; <span id="year"></span> Euan Bassey. All rights reserved.</p>
