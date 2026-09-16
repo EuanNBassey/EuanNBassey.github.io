@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euan N. Bassey - NMR Periodic Table</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+:root{
+    --paper: #f5f6f3;
+    --paper-raised: #ffffff;
+    --ink: #1b1e22;
+    --ink-soft: #565c62;
+    --line: #ccd2d3;
+    --line-soft: #e1e5e5;
+    --accent: #0f6b72;
+    --accent-soft: #dcecec;
+    --muted-bg: #e7e8e6;
+    --muted-text: #9a9f9f;
+    --sans: 'IBM Plex Sans', Arial, sans-serif;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --spin-0-5: #a6cee3;
+    --spin-1: #1f78b4;
+    --spin-1-5: #b2df8a;
+    --spin-2: #33a02c;
+    --spin-2-5: #fb9a99;
+    --spin-3: #e31a1c;
+    --spin-3-5: #fdbf6f;
+    --spin-4: #ff7f00;
+    --spin-4-5: #cab2d6;
+    --spin-5: #6a3d9a;
+    --spin-6: #2b2b2b;
+    --spin-7: #b15928;
+    --spin-9: #656565;
+    --spin-none: var(--muted-bg);
+}
+
+*{ box-sizing: border-box; }
+
+body{
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    margin: 0;
+}
+
+main.pt-page{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 8px 20px 48px;
+}
+
+main.pt-page h2{
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+}
+
+.pt-intro{
+    max-width: 720px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin: 0 0 22px;
+}
+.pt-intro a{ color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+.pt-intro a:hover{ opacity: 0.75; }
+
+/* ---------- controls ---------- */
+.pt-controls{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.pt-search-wrap label{
+    display: block;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+}
+
+#pt-search{
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    padding: 8px 10px;
+    width: 240px;
+    max-width: 60vw;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper-raised);
+    color: var(--ink);
+}
+#pt-search:focus{
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.pt-legend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: center;
+}
+
+.pt-legend-item{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 3px 6px 3px 3px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    background: none;
+}
+.pt-legend-item:hover{ border-color: var(--line); }
+.pt-legend-item.is-active{ border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.pt-legend-swatch{
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex: none;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* ---------- grid ---------- */
+.pt-grid-scroll{
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.pt-grid{
+    display: grid;
+    grid-template-columns: repeat(18, minmax(58px, 1fr));
+    grid-template-rows: repeat(7, minmax(58px, auto)) 16px minmax(58px, auto) minmax(58px, auto);
+    gap: 3px;
+    min-width: 1080px;
+}
+
+.pt-cell{
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--paper-raised);
+    padding: 4px 5px 3px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.pt-cell:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    z-index: 2;
+}
+.pt-cell.pt-dim{ opacity: 0.22; }
+.pt-cell.pt-highlight{
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+}
+.pt-cell.pt-no-nmr{ background: var(--muted-bg); }
+
+.pt-cell-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-family: var(--mono);
+}
+.pt-cell-z{ font-size: 0.62rem; color: var(--ink-soft); }
+.pt-cell-count{
+    font-size: 0.55rem;
+    color: var(--paper-raised);
+    background: var(--ink-soft);
+    border-radius: 6px;
+    padding: 0px 4px;
+    line-height: 1.3;
+}
+.pt-cell-sym{
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-align: center;
+    line-height: 1.05;
+}
+.pt-cell-name{
+    font-size: 0.52rem;
+    text-align: center;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pt-cell-mass{
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    text-align: center;
+    color: var(--ink-soft);
+}
+.pt-cell-spinbar{
+    position: absolute;
+    left: 0; bottom: 0; top: 0;
+    width: 4px;
+    border-radius: 3px 0 0 3px;
+}
+
+.pt-placeholder{
+    border: 1px dashed var(--line);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted-text);
+    background: repeating-linear-gradient(135deg, var(--paper) 0 6px, var(--line-soft) 6px 7px);
+}
+
+.pt-footnote{
+    margin-top: 22px;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    max-width: 780px;
+    line-height: 1.5;
+}
+
+/* ---------- overlay / flip card ---------- */
+.pt-overlay{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+}
+.pt-overlay.is-open{ display: flex; }
+
+.pt-overlay-backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 22, 24, 0.55);
+    backdrop-filter: blur(1px);
+}
+
+.pt-card-3d{
+    position: relative;
+    width: min(560px, 100%);
+    max-height: 86vh;
+    perspective: 1600px;
+}
+
+.pt-card-inner{
+    position: relative;
+    width: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
+}
+.pt-card-inner.is-flipped{ transform: rotateY(180deg); }
+
+.pt-card-face{
+    background: var(--paper-raised);
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    backface-visibility: hidden;
+    padding: 26px 28px 22px;
+    max-height: 86vh;
+    overflow-y: auto;
+}
+.pt-card-front{
+    position: relative;
+}
+.pt-card-back{
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+}
+
+.pt-close{
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    line-height: 1;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 4px 6px;
+}
+.pt-close:hover{ color: var(--ink); }
+
+.pt-front-z{ font-family: var(--mono); color: var(--ink-soft); font-size: 0.85rem; }
+.pt-front-sym{
+    font-size: 4.6rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 6px 0 2px;
+}
+.pt-front-name{ font-size: 1.3rem; color: var(--ink-soft); margin-bottom: 14px; }
+.pt-front-mass{ font-family: var(--mono); font-size: 0.9rem; color: var(--ink-soft); }
+.pt-front-hint{
+    margin-top: 22px;
+    font-size: 0.75rem;
+    color: var(--muted-text);
+    font-style: italic;
+}
+
+.pt-back-header{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+.pt-back-sym{ font-size: 1.9rem; font-weight: 700; }
+.pt-back-name{ color: var(--ink-soft); font-size: 1rem; }
+
+.pt-back-section-label{
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    margin: 16px 0 6px;
+}
+.pt-econfig{
+    font-family: var(--mono);
+    font-size: 1rem;
+    background: var(--paper);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 8px 10px;
+}
+
+table.pt-iso-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+}
+table.pt-iso-table th{
+    text-align: left;
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+    padding: 4px 6px;
+}
+table.pt-iso-table td{
+    padding: 6px 6px;
+    border-bottom: 1px solid var(--line-soft);
+}
+table.pt-iso-table tr:last-child td{ border-bottom: none; }
+.pt-iso-nuclide{ display: flex; align-items: center; gap: 6px; }
+.pt-iso-dot{ width: 9px; height: 9px; border-radius: 2px; flex: none; border: 1px solid rgba(0,0,0,0.15); }
+.pt-nodata{ color: var(--muted-text); font-size: 0.85rem; margin-top: 6px; }
+
+@media (max-width: 640px){
+    .pt-front-sym{ font-size: 3.4rem; }
+    .pt-card-face{ padding: 20px 18px 18px; }
+}
+
+    </style>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3SM8P3KQ4N');
+</script>
+<body>
+    <header>
+        <img src="banner-image.png" alt="Banner" class="banner">
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="cv.html">CV</a></li>
+            <li><a href="publications.html">Publications</a></li>
+            <li><a href="talks.html">Talks</a></li>
+            <li class="dropdown">
+                <a href="#">Tools ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
+                    <li><a href="nmr_periodic_table.html">NMR Periodic Table</a></li>
+                    <li><a href="curieweiss.html">Curie-Weiss</a></li>
+                    <li><a href="unitconv.html">Unit Conversion</a></li>
+                    <li><a href="cfse.html">CFSE</a></li>
+                    <li><a href="xrd_reflections.html">XRD Utilities</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="pt-page">
+        <h2>NMR Periodic Table</h2>
+        <p class="pt-intro">
+            Every element, its ground-state electron configuration, and the spin, natural abundance and
+            (where relevant) quadrupole moment of each NMR-active isotope. Click a tile to flip it over.
+            Pairs well with the <a href="nmrfreqs.html">NMR frequency calculator</a>.
+        </p>
+
+        <div class="pt-controls">
+            <div class="pt-search-wrap">
+                <label for="pt-search">Jump to element</label>
+                <input type="text" id="pt-search" placeholder="Symbol or name, e.g. Pt or platinum" autocomplete="off">
+            </div>
+            <div class="pt-legend" id="pt-legend" aria-label="Nuclear spin color legend"></div>
+        </div>
+
+        <div class="pt-grid-scroll">
+            <div class="pt-grid" id="pt-grid"></div>
+        </div>
+
+        <p class="pt-footnote">
+            † marks a long-lived radiogenic isotope present in natural samples at trace abundance, rather than a
+            primordial-stable nuclide. Quadrupole moment is not applicable for <em>I</em> = 1/2 nuclei. Gyromagnetic
+            ratios and quadrupole moments are taken from the same reference set used in the frequency calculator
+            where available, supplemented with values derived from tabulated nuclear g-factors.
+        </p>
+    </main>
+
+    <div class="pt-overlay" id="pt-overlay" aria-hidden="true">
+        <div class="pt-overlay-backdrop" id="pt-overlay-backdrop"></div>
+        <div class="pt-card-3d" id="pt-card-3d">
+            <div class="pt-card-inner" id="pt-card-inner">
+                <div class="pt-card-face pt-card-front" id="pt-card-front"></div>
+                <div class="pt-card-face pt-card-back" id="pt-card-back"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="year"></span> Euan Bassey. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+const ELEMENTS_DATA = [{"Z":1,"symbol":"H","name":"Hydrogen","mass":"1.008","category":"nonmetal","period":1,"group":1,"econfig":"1s1","isotopes":[{"A":1,"spin":0.5,"abundance":99.9885,"gamma":42.5775,"quad_fm2":null,"radioactive":false},{"A":2,"spin":1.0,"abundance":0.0115,"gamma":6.5359,"quad_fm2":0.286,"radioactive":false}]},{"Z":2,"symbol":"He","name":"Helium","mass":"4.0026","category":"noble-gas","period":1,"group":18,"econfig":"1s2","isotopes":[{"A":3,"spin":0.5,"abundance":0.0001,"gamma":-32.436,"quad_fm2":null,"radioactive":false}]},{"Z":3,"symbol":"Li","name":"Lithium","mass":"6.94","category":"alkali-metal","period":2,"group":1,"econfig":"[He] 2s1","isotopes":[{"A":7,"spin":1.5,"abundance":92.41,"gamma":16.5484,"quad_fm2":-4.01,"radioactive":false},{"A":6,"spin":1.0,"abundance":7.59,"gamma":6.2662,"quad_fm2":-0.0808,"radioactive":false}]},{"Z":4,"symbol":"Be","name":"Beryllium","mass":"9.0122","category":"alkaline-earth","period":2,"group":2,"econfig":"[He] 2s2","isotopes":[{"A":9,"spin":1.5,"abundance":100.0,"gamma":-5.9837,"quad_fm2":5.288,"radioactive":false}]},{"Z":5,"symbol":"B","name":"Boron","mass":"10.81","category":"metalloid","period":2,"group":13,"econfig":"[He] 2s2 2p1","isotopes":[{"A":11,"spin":1.5,"abundance":80.1,"gamma":13.663,"quad_fm2":4.059,"radioactive":false},{"A":10,"spin":3.0,"abundance":19.9,"gamma":4.5752,"quad_fm2":8.459,"radioactive":false}]},{"Z":6,"symbol":"C","name":"Carbon","mass":"12.011","category":"nonmetal","period":2,"group":14,"econfig":"[He] 2s2 2p2","isotopes":[{"A":13,"spin":0.5,"abundance":1.07,"gamma":10.7084,"quad_fm2":null,"radioactive":false}]},{"Z":7,"symbol":"N","name":"Nitrogen","mass":"14.007","category":"nonmetal","period":2,"group":15,"econfig":"[He] 2s2 2p3","isotopes":[{"A":14,"spin":1.0,"abundance":99.632,"gamma":3.0777,"quad_fm2":2.044,"radioactive":false},{"A":15,"spin":0.5,"abundance":0.368,"gamma":-4.3173,"quad_fm2":null,"radioactive":false}]},{"Z":8,"symbol":"O","name":"Oxygen","mass":"15.999","category":"nonmetal","period":2,"group":16,"econfig":"[He] 2s2 2p4","isotopes":[{"A":17,"spin":2.5,"abundance":0.038,"gamma":-5.7743,"quad_fm2":-2.558,"radioactive":false}]},{"Z":9,"symbol":"F","name":"Fluorine","mass":"18.998","category":"halogen","period":2,"group":17,"econfig":"[He] 2s2 2p5","isotopes":[{"A":19,"spin":0.5,"abundance":100.0,"gamma":40.0776,"quad_fm2":null,"radioactive":false}]},{"Z":10,"symbol":"Ne","name":"Neon","mass":"20.180","category":"noble-gas","period":2,"group":18,"econfig":"[He] 2s2 2p6","isotopes":[{"A":21,"spin":1.5,"abundance":0.27,"gamma":-3.3631,"quad_fm2":10.155,"radioactive":false}]},{"Z":11,"symbol":"Na","name":"Sodium","mass":"22.990","category":"alkali-metal","period":3,"group":1,"econfig":"[Ne] 3s1","isotopes":[{"A":23,"spin":1.5,"abundance":100.0,"gamma":11.2695,"quad_fm2":10.4,"radioactive":false}]},{"Z":12,"symbol":"Mg","name":"Magnesium","mass":"24.305","category":"alkaline-earth","period":3,"group":2,"econfig":"[Ne] 3s2","isotopes":[{"A":25,"spin":2.5,"abundance":10.0,"gamma":-2.6083,"quad_fm2":19.94,"radioactive":false}]},{"Z":13,"symbol":"Al","name":"Aluminium","mass":"26.982","category":"post-transition-metal","period":3,"group":13,"econfig":"[Ne] 3s2 3p1","isotopes":[{"A":27,"spin":2.5,"abundance":100.0,"gamma":11.1031,"quad_fm2":14.66,"radioactive":false}]},{"Z":14,"symbol":"Si","name":"Silicon","mass":"28.085","category":"metalloid","period":3,"group":14,"econfig":"[Ne] 3s2 3p2","isotopes":[{"A":29,"spin":0.5,"abundance":4.6832,"gamma":-8.4655,"quad_fm2":null,"radioactive":false}]},{"Z":15,"symbol":"P","name":"Phosphorus","mass":"30.974","category":"nonmetal","period":3,"group":15,"econfig":"[Ne] 3s2 3p3","isotopes":[{"A":31,"spin":0.5,"abundance":100.0,"gamma":17.2514,"quad_fm2":null,"radioactive":false}]},{"Z":16,"symbol":"S","name":"Sulfur","mass":"32.06","category":"nonmetal","period":3,"group":16,"econfig":"[Ne] 3s2 3p4","isotopes":[{"A":33,"spin":1.5,"abundance":0.76,"gamma":3.2717,"quad_fm2":-6.78,"radioactive":false}]},{"Z":17,"symbol":"Cl","name":"Chlorine","mass":"35.45","category":"halogen","period":3,"group":17,"econfig":"[Ne] 3s2 3p5","isotopes":[{"A":35,"spin":1.5,"abundance":75.78,"gamma":4.1765,"quad_fm2":-8.165,"radioactive":false},{"A":37,"spin":1.5,"abundance":24.22,"gamma":3.4765,"quad_fm2":-6.435,"radioactive":false}]},{"Z":18,"symbol":"Ar","name":"Argon","mass":"39.948","category":"noble-gas","period":3,"group":18,"econfig":"[Ne] 3s2 3p6","isotopes":[]},{"Z":19,"symbol":"K","name":"Potassium","mass":"39.098","category":"alkali-metal","period":4,"group":1,"econfig":"[Ar] 4s1","isotopes":[{"A":39,"spin":1.5,"abundance":93.2581,"gamma":1.9895,"quad_fm2":5.85,"radioactive":false},{"A":41,"spin":1.5,"abundance":6.7302,"gamma":1.0919,"quad_fm2":7.11,"radioactive":false},{"A":40,"spin":4.0,"abundance":0.0117,"gamma":-2.4737,"quad_fm2":-7.3,"radioactive":false}]},{"Z":20,"symbol":"Ca","name":"Calcium","mass":"40.078","category":"alkaline-earth","period":4,"group":2,"econfig":"[Ar] 4s2","isotopes":[{"A":43,"spin":3.5,"abundance":0.135,"gamma":-2.8697,"quad_fm2":-4.08,"radioactive":false}]},{"Z":21,"symbol":"Sc","name":"Scandium","mass":"44.956","category":"transition-metal","period":4,"group":3,"econfig":"[Ar] 3d1 4s2","isotopes":[{"A":45,"spin":3.5,"abundance":100.0,"gamma":10.3591,"quad_fm2":-22.0,"radioactive":false}]},{"Z":22,"symbol":"Ti","name":"Titanium","mass":"47.867","category":"transition-metal","period":4,"group":4,"econfig":"[Ar] 3d2 4s2","isotopes":[{"A":47,"spin":2.5,"abundance":7.44,"gamma":-2.404,"quad_fm2":30.2,"radioactive":false},{"A":49,"spin":3.5,"abundance":5.41,"gamma":-2.4048,"quad_fm2":24.7,"radioactive":false}]},{"Z":23,"symbol":"V","name":"Vanadium","mass":"50.942","category":"transition-metal","period":4,"group":5,"econfig":"[Ar] 3d3 4s2","isotopes":[{"A":51,"spin":3.5,"abundance":99.75,"gamma":11.2133,"quad_fm2":-5.2,"radioactive":false},{"A":50,"spin":6.0,"abundance":0.25,"gamma":4.2505,"quad_fm2":21.0,"radioactive":false}]},{"Z":24,"symbol":"Cr","name":"Chromium","mass":"51.996","category":"transition-metal","period":4,"group":6,"econfig":"[Ar] 3d5 4s1","isotopes":[{"A":53,"spin":1.5,"abundance":9.501,"gamma":-2.4115,"quad_fm2":-15.0,"radioactive":false}]},{"Z":25,"symbol":"Mn","name":"Manganese","mass":"54.938","category":"transition-metal","period":4,"group":7,"econfig":"[Ar] 3d5 4s2","isotopes":[{"A":55,"spin":2.5,"abundance":100.0,"gamma":10.5762,"quad_fm2":33.0,"radioactive":false}]},{"Z":26,"symbol":"Fe","name":"Iron","mass":"55.845","category":"transition-metal","period":4,"group":8,"econfig":"[Ar] 3d6 4s2","isotopes":[{"A":57,"spin":0.5,"abundance":2.119,"gamma":1.3816,"quad_fm2":null,"radioactive":false}]},{"Z":27,"symbol":"Co","name":"Cobalt","mass":"58.933","category":"transition-metal","period":4,"group":9,"econfig":"[Ar] 3d7 4s2","isotopes":[{"A":59,"spin":3.5,"abundance":100.0,"gamma":10.0777,"quad_fm2":42.0,"radioactive":false}]},{"Z":28,"symbol":"Ni","name":"Nickel","mass":"58.693","category":"transition-metal","period":4,"group":10,"econfig":"[Ar] 3d8 4s2","isotopes":[{"A":61,"spin":1.5,"abundance":1.1399,"gamma":-3.8114,"quad_fm2":16.2,"radioactive":false}]},{"Z":29,"symbol":"Cu","name":"Copper","mass":"63.546","category":"transition-metal","period":4,"group":11,"econfig":"[Ar] 3d10 4s1","isotopes":[{"A":63,"spin":1.5,"abundance":69.17,"gamma":11.3188,"quad_fm2":-22.0,"radioactive":false},{"A":65,"spin":1.5,"abundance":30.83,"gamma":12.1027,"quad_fm2":-20.4,"radioactive":false}]},{"Z":30,"symbol":"Zn","name":"Zinc","mass":"65.38","category":"transition-metal","period":4,"group":12,"econfig":"[Ar] 3d10 4s2","isotopes":[{"A":67,"spin":2.5,"abundance":4.1,"gamma":2.6685,"quad_fm2":15.0,"radioactive":false}]},{"Z":31,"symbol":"Ga","name":"Gallium","mass":"69.723","category":"post-transition-metal","period":4,"group":13,"econfig":"[Ar] 3d10 4s2 4p1","isotopes":[{"A":69,"spin":1.5,"abundance":60.108,"gamma":10.2478,"quad_fm2":17.1,"radioactive":false},{"A":71,"spin":1.5,"abundance":39.892,"gamma":13.0207,"quad_fm2":10.7,"radioactive":false}]},{"Z":32,"symbol":"Ge","name":"Germanium","mass":"72.630","category":"metalloid","period":4,"group":14,"econfig":"[Ar] 3d10 4s2 4p2","isotopes":[{"A":73,"spin":4.5,"abundance":7.73,"gamma":-1.4897,"quad_fm2":-19.6,"radioactive":false}]},{"Z":33,"symbol":"As","name":"Arsenic","mass":"74.922","category":"metalloid","period":4,"group":15,"econfig":"[Ar] 3d10 4s2 4p3","isotopes":[{"A":75,"spin":1.5,"abundance":100.0,"gamma":7.315,"quad_fm2":31.4,"radioactive":false}]},{"Z":34,"symbol":"Se","name":"Selenium","mass":"78.971","category":"nonmetal","period":4,"group":16,"econfig":"[Ar] 3d10 4s2 4p4","isotopes":[{"A":77,"spin":0.5,"abundance":7.63,"gamma":8.1573,"quad_fm2":null,"radioactive":false}]},{"Z":35,"symbol":"Br","name":"Bromine","mass":"79.904","category":"halogen","period":4,"group":17,"econfig":"[Ar] 3d10 4s2 4p5","isotopes":[{"A":79,"spin":1.5,"abundance":50.69,"gamma":10.7042,"quad_fm2":31.3,"radioactive":false},{"A":81,"spin":1.5,"abundance":49.31,"gamma":11.5384,"quad_fm2":26.2,"radioactive":false}]},{"Z":36,"symbol":"Kr","name":"Krypton","mass":"83.798","category":"noble-gas","period":4,"group":18,"econfig":"[Ar] 3d10 4s2 4p6","isotopes":[{"A":83,"spin":4.5,"abundance":11.49,"gamma":-1.6442,"quad_fm2":25.9,"radioactive":false}]},{"Z":37,"symbol":"Rb","name":"Rubidium","mass":"85.468","category":"alkali-metal","period":5,"group":1,"econfig":"[Kr] 5s1","isotopes":[{"A":85,"spin":2.5,"abundance":72.17,"gamma":4.1264,"quad_fm2":27.6,"radioactive":false},{"A":87,"spin":1.5,"abundance":27.83,"gamma":13.984,"quad_fm2":13.35,"radioactive":false}]},{"Z":38,"symbol":"Sr","name":"Strontium","mass":"87.62","category":"alkaline-earth","period":5,"group":2,"econfig":"[Kr] 5s2","isotopes":[{"A":87,"spin":4.5,"abundance":7.0,"gamma":-1.8525,"quad_fm2":33.5,"radioactive":false}]},{"Z":39,"symbol":"Y","name":"Yttrium","mass":"88.906","category":"transition-metal","period":5,"group":3,"econfig":"[Kr] 4d1 5s2","isotopes":[{"A":89,"spin":0.5,"abundance":100.0,"gamma":-2.0949,"quad_fm2":null,"radioactive":false}]},{"Z":40,"symbol":"Zr","name":"Zirconium","mass":"91.224","category":"transition-metal","period":5,"group":4,"econfig":"[Kr] 4d2 5s2","isotopes":[{"A":91,"spin":2.5,"abundance":11.22,"gamma":-3.9748,"quad_fm2":-17.6,"radioactive":false}]},{"Z":41,"symbol":"Nb","name":"Niobium","mass":"92.906","category":"transition-metal","period":5,"group":5,"econfig":"[Kr] 4d4 5s1","isotopes":[{"A":93,"spin":4.5,"abundance":100.0,"gamma":10.4523,"quad_fm2":-32.0,"radioactive":false}]},{"Z":42,"symbol":"Mo","name":"Molybdenum","mass":"95.95","category":"transition-metal","period":5,"group":6,"econfig":"[Kr] 4d5 5s1","isotopes":[{"A":95,"spin":2.5,"abundance":15.92,"gamma":-2.7868,"quad_fm2":-2.2,"radioactive":false},{"A":97,"spin":2.5,"abundance":9.55,"gamma":-2.8457,"quad_fm2":25.5,"radioactive":false}]},{"Z":43,"symbol":"Tc","name":"Technetium","mass":"[98]","category":"transition-metal","period":5,"group":7,"econfig":"[Kr] 4d5 5s2","isotopes":[]},{"Z":44,"symbol":"Ru","name":"Ruthenium","mass":"101.07","category":"transition-metal","period":5,"group":8,"econfig":"[Kr] 4d7 5s1","isotopes":[{"A":101,"spin":2.5,"abundance":17.06,"gamma":-2.1916,"quad_fm2":45.7,"radioactive":false},{"A":99,"spin":2.5,"abundance":12.76,"gamma":-1.956,"quad_fm2":7.9,"radioactive":false}]},{"Z":45,"symbol":"Rh","name":"Rhodium","mass":"102.91","category":"transition-metal","period":5,"group":9,"econfig":"[Kr] 4d8 5s1","isotopes":[{"A":103,"spin":0.5,"abundance":100.0,"gamma":-1.3477,"quad_fm2":null,"radioactive":false}]},{"Z":46,"symbol":"Pd","name":"Palladium","mass":"106.42","category":"transition-metal","period":5,"group":10,"econfig":"[Kr] 4d10","isotopes":[{"A":105,"spin":2.5,"abundance":22.33,"gamma":-1.9576,"quad_fm2":66.0,"radioactive":false}]},{"Z":47,"symbol":"Ag","name":"Silver","mass":"107.87","category":"transition-metal","period":5,"group":11,"econfig":"[Kr] 4d10 5s1","isotopes":[{"A":107,"spin":0.5,"abundance":51.839,"gamma":-1.7331,"quad_fm2":null,"radioactive":false},{"A":109,"spin":0.5,"abundance":48.161,"gamma":-1.9924,"quad_fm2":null,"radioactive":false}]},{"Z":48,"symbol":"Cd","name":"Cadmium","mass":"112.41","category":"transition-metal","period":5,"group":12,"econfig":"[Kr] 4d10 5s2","isotopes":[{"A":111,"spin":0.5,"abundance":12.8,"gamma":-9.0691,"quad_fm2":null,"radioactive":false},{"A":113,"spin":0.5,"abundance":12.22,"gamma":-9.4871,"quad_fm2":null,"radioactive":false}]},{"Z":49,"symbol":"In","name":"Indium","mass":"114.82","category":"post-transition-metal","period":5,"group":13,"econfig":"[Kr] 4d10 5s2 5p1","isotopes":[{"A":115,"spin":4.5,"abundance":95.71,"gamma":9.3857,"quad_fm2":81.0,"radioactive":false},{"A":113,"spin":4.5,"abundance":4.29,"gamma":9.3655,"quad_fm2":79.9,"radioactive":false}]},{"Z":50,"symbol":"Sn","name":"Tin","mass":"118.71","category":"post-transition-metal","period":5,"group":14,"econfig":"[Kr] 4d10 5s2 5p2","isotopes":[{"A":119,"spin":0.5,"abundance":8.59,"gamma":-15.9659,"quad_fm2":null,"radioactive":false},{"A":117,"spin":0.5,"abundance":7.68,"gamma":-15.261,"quad_fm2":null,"radioactive":false},{"A":115,"spin":0.5,"abundance":0.34,"gamma":-14.0077,"quad_fm2":null,"radioactive":false}]},{"Z":51,"symbol":"Sb","name":"Antimony","mass":"121.76","category":"metalloid","period":5,"group":15,"econfig":"[Kr] 4d10 5s2 5p3","isotopes":[{"A":121,"spin":2.5,"abundance":57.21,"gamma":10.2552,"quad_fm2":-36.0,"radioactive":false},{"A":123,"spin":3.5,"abundance":42.79,"gamma":5.5532,"quad_fm2":-49.0,"radioactive":false}]},{"Z":52,"symbol":"Te","name":"Tellurium","mass":"127.60","category":"metalloid","period":5,"group":16,"econfig":"[Kr] 4d10 5s2 5p4","isotopes":[{"A":125,"spin":0.5,"abundance":7.07,"gamma":-13.5454,"quad_fm2":null,"radioactive":false},{"A":123,"spin":0.5,"abundance":0.89,"gamma":-11.2349,"quad_fm2":null,"radioactive":false}]},{"Z":53,"symbol":"I","name":"Iodine","mass":"126.90","category":"halogen","period":5,"group":17,"econfig":"[Kr] 4d10 5s2 5p5","isotopes":[{"A":127,"spin":2.5,"abundance":100.0,"gamma":8.5778,"quad_fm2":-71.0,"radioactive":false}]},{"Z":54,"symbol":"Xe","name":"Xenon","mass":"131.29","category":"noble-gas","period":5,"group":18,"econfig":"[Kr] 4d10 5s2 5p6","isotopes":[{"A":129,"spin":0.5,"abundance":26.44,"gamma":-11.8604,"quad_fm2":null,"radioactive":false},{"A":131,"spin":1.5,"abundance":21.18,"gamma":3.5159,"quad_fm2":-11.4,"radioactive":false}]},{"Z":55,"symbol":"Cs","name":"Caesium","mass":"132.91","category":"alkali-metal","period":6,"group":1,"econfig":"[Xe] 6s1","isotopes":[{"A":133,"spin":3.5,"abundance":100.0,"gamma":5.6233,"quad_fm2":-0.343,"radioactive":false}]},{"Z":56,"symbol":"Ba","name":"Barium","mass":"137.33","category":"alkaline-earth","period":6,"group":2,"econfig":"[Xe] 6s2","isotopes":[{"A":137,"spin":1.5,"abundance":11.232,"gamma":4.7634,"quad_fm2":24.5,"radioactive":false},{"A":135,"spin":1.5,"abundance":6.592,"gamma":4.2582,"quad_fm2":16.0,"radioactive":false}]},{"Z":57,"symbol":"La","name":"Lanthanum","mass":"138.91","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 5d1 6s2","isotopes":[{"A":139,"spin":3.5,"abundance":99.91,"gamma":6.0611,"quad_fm2":20.0,"radioactive":false},{"A":138,"spin":5.0,"abundance":0.09,"gamma":5.6615,"quad_fm2":45.0,"radioactive":false}]},{"Z":58,"symbol":"Ce","name":"Cerium","mass":"140.12","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f1 5d1 6s2","isotopes":[]},{"Z":59,"symbol":"Pr","name":"Praseodymium","mass":"140.91","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f3 6s2","isotopes":[{"A":141,"spin":2.5,"abundance":100.0,"gamma":13.0359,"quad_fm2":-5.89,"radioactive":false}]},{"Z":60,"symbol":"Nd","name":"Neodymium","mass":"144.24","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f4 6s2","isotopes":[{"A":143,"spin":3.5,"abundance":12.2,"gamma":-2.3189,"quad_fm2":-63.0,"radioactive":false},{"A":145,"spin":3.5,"abundance":8.3,"gamma":-1.4292,"quad_fm2":-33.0,"radioactive":false}]},{"Z":61,"symbol":"Pm","name":"Promethium","mass":"[145]","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f5 6s2","isotopes":[]},{"Z":62,"symbol":"Sm","name":"Samarium","mass":"150.36","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f6 6s2","isotopes":[{"A":147,"spin":3.5,"abundance":14.99,"gamma":-1.7746,"quad_fm2":-25.9,"radioactive":false},{"A":149,"spin":3.5,"abundance":13.82,"gamma":-1.4629,"quad_fm2":7.4,"radioactive":false}]},{"Z":63,"symbol":"Eu","name":"Europium","mass":"151.96","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f7 6s2","isotopes":[{"A":153,"spin":2.5,"abundance":52.19,"gamma":4.6742,"quad_fm2":241.2,"radioactive":false},{"A":151,"spin":2.5,"abundance":47.81,"gamma":10.5854,"quad_fm2":90.3,"radioactive":false}]},{"Z":64,"symbol":"Gd","name":"Gadolinium","mass":"157.25","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f7 5d1 6s2","isotopes":[{"A":157,"spin":1.5,"abundance":15.65,"gamma":-1.7139,"quad_fm2":135.0,"radioactive":false},{"A":155,"spin":1.5,"abundance":14.8,"gamma":-1.3072,"quad_fm2":127.0,"radioactive":false}]},{"Z":65,"symbol":"Tb","name":"Terbium","mass":"158.93","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f9 6s2","isotopes":[{"A":159,"spin":1.5,"abundance":100.0,"gamma":10.2353,"quad_fm2":143.2,"radioactive":false}]},{"Z":66,"symbol":"Dy","name":"Dysprosium","mass":"162.50","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f10 6s2","isotopes":[{"A":163,"spin":2.5,"abundance":24.9,"gamma":2.0515,"quad_fm2":264.8,"radioactive":false},{"A":161,"spin":2.5,"abundance":18.91,"gamma":-1.4644,"quad_fm2":250.7,"radioactive":false}]},{"Z":67,"symbol":"Ho","name":"Holmium","mass":"164.93","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f11 6s2","isotopes":[{"A":165,"spin":3.5,"abundance":100.0,"gamma":9.0877,"quad_fm2":358.0,"radioactive":false}]},{"Z":68,"symbol":"Er","name":"Erbium","mass":"167.26","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f12 6s2","isotopes":[{"A":167,"spin":3.5,"abundance":22.93,"gamma":-1.228,"quad_fm2":356.5,"radioactive":false}]},{"Z":69,"symbol":"Tm","name":"Thulium","mass":"168.93","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f13 6s2","isotopes":[{"A":169,"spin":0.5,"abundance":100.0,"gamma":-3.5301,"quad_fm2":null,"radioactive":false}]},{"Z":70,"symbol":"Yb","name":"Ytterbium","mass":"173.05","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f14 6s2","isotopes":[{"A":173,"spin":2.5,"abundance":16.13,"gamma":-2.073,"quad_fm2":280.0,"radioactive":false},{"A":171,"spin":0.5,"abundance":14.28,"gamma":7.5261,"quad_fm2":null,"radioactive":false}]},{"Z":71,"symbol":"Lu","name":"Lutetium","mass":"174.97","category":"lanthanide","period":6,"group":3,"econfig":"[Xe] 4f14 5d1 6s2","isotopes":[{"A":175,"spin":3.5,"abundance":97.41,"gamma":4.8625,"quad_fm2":349.0,"radioactive":false},{"A":176,"spin":7.0,"abundance":2.59,"gamma":3.4511,"quad_fm2":497.0,"radioactive":false}]},{"Z":72,"symbol":"Hf","name":"Hafnium","mass":"178.49","category":"transition-metal","period":6,"group":4,"econfig":"[Xe] 4f14 5d2 6s2","isotopes":[{"A":177,"spin":3.5,"abundance":18.6,"gamma":1.7284,"quad_fm2":336.5,"radioactive":false},{"A":179,"spin":4.5,"abundance":13.62,"gamma":-1.0856,"quad_fm2":379.3,"radioactive":false}]},{"Z":73,"symbol":"Ta","name":"Tantalum","mass":"180.95","category":"transition-metal","period":6,"group":5,"econfig":"[Xe] 4f14 5d3 6s2","isotopes":[{"A":181,"spin":3.5,"abundance":99.988,"gamma":5.1627,"quad_fm2":317.0,"radioactive":false},{"A":180,"spin":9.0,"abundance":0.012,"gamma":4.0865,"quad_fm2":480.0,"radioactive":false}]},{"Z":74,"symbol":"W","name":"Tungsten","mass":"183.84","category":"transition-metal","period":6,"group":6,"econfig":"[Xe] 4f14 5d4 6s2","isotopes":[{"A":183,"spin":0.5,"abundance":14.31,"gamma":1.7956,"quad_fm2":null,"radioactive":false}]},{"Z":75,"symbol":"Re","name":"Rhenium","mass":"186.21","category":"transition-metal","period":6,"group":7,"econfig":"[Xe] 4f14 5d5 6s2","isotopes":[{"A":187,"spin":2.5,"abundance":62.6,"gamma":9.817,"quad_fm2":207.0,"radioactive":false},{"A":185,"spin":2.5,"abundance":37.4,"gamma":9.7175,"quad_fm2":218.0,"radioactive":false}]},{"Z":76,"symbol":"Os","name":"Osmium","mass":"190.23","category":"transition-metal","period":6,"group":8,"econfig":"[Xe] 4f14 5d6 6s2","isotopes":[{"A":189,"spin":1.5,"abundance":16.15,"gamma":3.3536,"quad_fm2":85.6,"radioactive":false},{"A":187,"spin":0.5,"abundance":1.96,"gamma":0.9856,"quad_fm2":null,"radioactive":false}]},{"Z":77,"symbol":"Ir","name":"Iridium","mass":"192.22","category":"transition-metal","period":6,"group":9,"econfig":"[Xe] 4f14 5d7 6s2","isotopes":[{"A":193,"spin":1.5,"abundance":62.7,"gamma":0.8319,"quad_fm2":75.1,"radioactive":false},{"A":191,"spin":1.5,"abundance":37.3,"gamma":0.7659,"quad_fm2":81.6,"radioactive":false}]},{"Z":78,"symbol":"Pt","name":"Platinum","mass":"195.08","category":"transition-metal","period":6,"group":10,"econfig":"[Xe] 4f14 5d9 6s1","isotopes":[{"A":195,"spin":0.5,"abundance":33.832,"gamma":9.2923,"quad_fm2":null,"radioactive":false}]},{"Z":79,"symbol":"Au","name":"Gold","mass":"196.97","category":"transition-metal","period":6,"group":11,"econfig":"[Xe] 4f14 5d10 6s1","isotopes":[{"A":197,"spin":1.5,"abundance":100.0,"gamma":0.7529,"quad_fm2":54.7,"radioactive":false}]},{"Z":80,"symbol":"Hg","name":"Mercury","mass":"200.59","category":"transition-metal","period":6,"group":12,"econfig":"[Xe] 4f14 5d10 6s2","isotopes":[{"A":199,"spin":0.5,"abundance":16.87,"gamma":7.7123,"quad_fm2":null,"radioactive":false},{"A":201,"spin":1.5,"abundance":13.18,"gamma":-2.8469,"quad_fm2":38.6,"radioactive":false}]},{"Z":81,"symbol":"Tl","name":"Thallium","mass":"204.38","category":"post-transition-metal","period":6,"group":13,"econfig":"[Xe] 4f14 5d10 6s2 6p1","isotopes":[{"A":205,"spin":0.5,"abundance":70.476,"gamma":24.9749,"quad_fm2":null,"radioactive":false},{"A":203,"spin":0.5,"abundance":29.524,"gamma":24.7316,"quad_fm2":null,"radioactive":false}]},{"Z":82,"symbol":"Pb","name":"Lead","mass":"207.2","category":"post-transition-metal","period":6,"group":14,"econfig":"[Xe] 4f14 5d10 6s2 6p2","isotopes":[{"A":207,"spin":0.5,"abundance":22.1,"gamma":8.8816,"quad_fm2":null,"radioactive":false}]},{"Z":83,"symbol":"Bi","name":"Bismuth","mass":"208.98","category":"post-transition-metal","period":6,"group":15,"econfig":"[Xe] 4f14 5d10 6s2 6p3","isotopes":[{"A":209,"spin":4.5,"abundance":100.0,"gamma":6.963,"quad_fm2":-51.6,"radioactive":false}]},{"Z":84,"symbol":"Po","name":"Polonium","mass":"[209]","category":"metalloid","period":6,"group":16,"econfig":"[Xe] 4f14 5d10 6s2 6p4","isotopes":[]},{"Z":85,"symbol":"At","name":"Astatine","mass":"[210]","category":"halogen","period":6,"group":17,"econfig":"[Xe] 4f14 5d10 6s2 6p5","isotopes":[]},{"Z":86,"symbol":"Rn","name":"Radon","mass":"[222]","category":"noble-gas","period":6,"group":18,"econfig":"[Xe] 4f14 5d10 6s2 6p6","isotopes":[]},{"Z":87,"symbol":"Fr","name":"Francium","mass":"[223]","category":"alkali-metal","period":7,"group":1,"econfig":"[Rn] 7s1","isotopes":[]},{"Z":88,"symbol":"Ra","name":"Radium","mass":"[226]","category":"alkaline-earth","period":7,"group":2,"econfig":"[Rn] 7s2","isotopes":[]},{"Z":89,"symbol":"Ac","name":"Actinium","mass":"[227]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 6d1 7s2","isotopes":[]},{"Z":90,"symbol":"Th","name":"Thorium","mass":"232.04","category":"actinide","period":7,"group":3,"econfig":"[Rn] 6d2 7s2","isotopes":[]},{"Z":91,"symbol":"Pa","name":"Protactinium","mass":"231.04","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f2 6d1 7s2","isotopes":[{"A":231,"spin":1.5,"abundance":100.0,"gamma":10.2143,"quad_fm2":-170.0,"radioactive":true}]},{"Z":92,"symbol":"U","name":"Uranium","mass":"238.03","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f3 6d1 7s2","isotopes":[{"A":235,"spin":3.5,"abundance":0.72,"gamma":-0.8276,"quad_fm2":493.6,"radioactive":true}]},{"Z":93,"symbol":"Np","name":"Neptunium","mass":"[237]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f4 6d1 7s2","isotopes":[]},{"Z":94,"symbol":"Pu","name":"Plutonium","mass":"[244]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f6 7s2","isotopes":[]},{"Z":95,"symbol":"Am","name":"Americium","mass":"[243]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f7 7s2","isotopes":[]},{"Z":96,"symbol":"Cm","name":"Curium","mass":"[247]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f7 6d1 7s2","isotopes":[]},{"Z":97,"symbol":"Bk","name":"Berkelium","mass":"[247]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f9 7s2","isotopes":[]},{"Z":98,"symbol":"Cf","name":"Californium","mass":"[251]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f10 7s2","isotopes":[]},{"Z":99,"symbol":"Es","name":"Einsteinium","mass":"[252]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f11 7s2","isotopes":[]},{"Z":100,"symbol":"Fm","name":"Fermium","mass":"[257]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f12 7s2","isotopes":[]},{"Z":101,"symbol":"Md","name":"Mendelevium","mass":"[258]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f13 7s2","isotopes":[]},{"Z":102,"symbol":"No","name":"Nobelium","mass":"[259]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f14 7s2","isotopes":[]},{"Z":103,"symbol":"Lr","name":"Lawrencium","mass":"[266]","category":"actinide","period":7,"group":3,"econfig":"[Rn] 5f14 7s2 7p1","isotopes":[]},{"Z":104,"symbol":"Rf","name":"Rutherfordium","mass":"[267]","category":"transition-metal","period":7,"group":4,"econfig":"[Rn] 5f14 6d2 7s2","isotopes":[]},{"Z":105,"symbol":"Db","name":"Dubnium","mass":"[268]","category":"transition-metal","period":7,"group":5,"econfig":"[Rn] 5f14 6d3 7s2","isotopes":[]},{"Z":106,"symbol":"Sg","name":"Seaborgium","mass":"[269]","category":"transition-metal","period":7,"group":6,"econfig":"[Rn] 5f14 6d4 7s2","isotopes":[]},{"Z":107,"symbol":"Bh","name":"Bohrium","mass":"[270]","category":"transition-metal","period":7,"group":7,"econfig":"[Rn] 5f14 6d5 7s2","isotopes":[]},{"Z":108,"symbol":"Hs","name":"Hassium","mass":"[269]","category":"transition-metal","period":7,"group":8,"econfig":"[Rn] 5f14 6d6 7s2","isotopes":[]},{"Z":109,"symbol":"Mt","name":"Meitnerium","mass":"[278]","category":"unknown","period":7,"group":9,"econfig":"[Rn] 5f14 6d7 7s2","isotopes":[]},{"Z":110,"symbol":"Ds","name":"Darmstadtium","mass":"[281]","category":"unknown","period":7,"group":10,"econfig":"[Rn] 5f14 6d8 7s2","isotopes":[]},{"Z":111,"symbol":"Rg","name":"Roentgenium","mass":"[282]","category":"unknown","period":7,"group":11,"econfig":"[Rn] 5f14 6d9 7s2","isotopes":[]},{"Z":112,"symbol":"Cn","name":"Copernicium","mass":"[285]","category":"transition-metal","period":7,"group":12,"econfig":"[Rn] 5f14 6d10 7s2","isotopes":[]},{"Z":113,"symbol":"Nh","name":"Nihonium","mass":"[286]","category":"post-transition-metal","period":7,"group":13,"econfig":"[Rn] 5f14 6d10 7s2 7p1","isotopes":[]},{"Z":114,"symbol":"Fl","name":"Flerovium","mass":"[289]","category":"post-transition-metal","period":7,"group":14,"econfig":"[Rn] 5f14 6d10 7s2 7p2","isotopes":[]},{"Z":115,"symbol":"Mc","name":"Moscovium","mass":"[290]","category":"post-transition-metal","period":7,"group":15,"econfig":"[Rn] 5f14 6d10 7s2 7p3","isotopes":[]},{"Z":116,"symbol":"Lv","name":"Livermorium","mass":"[293]","category":"post-transition-metal","period":7,"group":16,"econfig":"[Rn] 5f14 6d10 7s2 7p4","isotopes":[]},{"Z":117,"symbol":"Ts","name":"Tennessine","mass":"[294]","category":"halogen","period":7,"group":17,"econfig":"[Rn] 5f14 6d10 7s2 7p5","isotopes":[]},{"Z":118,"symbol":"Og","name":"Oganesson","mass":"[294]","category":"noble-gas","period":7,"group":18,"econfig":"[Rn] 5f14 6d10 7s2 7p6","isotopes":[]}];
+    </script>
+    <script>
+(function(){
+    var SPIN_COLORS = {
+        "0.5": "var(--spin-0-5)", "1": "var(--spin-1)", "1.5": "var(--spin-1-5)",
+        "2": "var(--spin-2)", "2.5": "var(--spin-2-5)", "3": "var(--spin-3)",
+        "3.5": "var(--spin-3-5)", "4": "var(--spin-4)", "4.5": "var(--spin-4-5)",
+        "5": "var(--spin-5)", "6": "var(--spin-6)", "7": "var(--spin-7)", "9": "var(--spin-9)"
+    };
+
+    function spinFrac(s){
+        var doubled = Math.round(s * 2);
+        return (doubled % 2 === 0) ? String(doubled / 2) : (doubled + "/2");
+    }
+
+    function fmtAbund(v){
+        if (v < 0.01) { return (Math.round(v * 10000) / 10000) + "%"; }
+        return (Math.round(v * 100) / 100) + "%";
+    }
+
+    function fmtQuad(v){
+        if (v === null || v === undefined) return null;
+        var sign = v > 0 ? "+" : "";
+        return sign + v.toFixed(2) + " fm\u00B2";
+    }
+
+    function fmtGamma(v){
+        if (v === null || v === undefined) return "\u2014";
+        var sign = v > 0 ? "+" : "";
+        return sign + v.toFixed(3) + " MHz/T";
+    }
+
+    function dominantSpinKey(el){
+        if (!el.isotopes.length) return null;
+        return String(el.isotopes[0].spin);
+    }
+
+    function colorFor(el){
+        var key = dominantSpinKey(el);
+        return key ? SPIN_COLORS[key] : "var(--spin-none)";
+    }
+
+    function cellPos(el){
+        if (el.Z >= 57 && el.Z <= 71) return { row: 9, col: (el.Z - 57) + 4 };
+        if (el.Z >= 89 && el.Z <= 103) return { row: 10, col: (el.Z - 89) + 4 };
+        return { row: el.period, col: el.group };
+    }
+
+    var grid = document.getElementById("pt-grid");
+    var frag = document.createDocumentFragment();
+
+    ELEMENTS_DATA.forEach(function(el){
+        var pos = cellPos(el);
+        var cell = document.createElement("div");
+        cell.className = "pt-cell" + (el.isotopes.length ? "" : " pt-no-nmr");
+        cell.style.gridColumn = pos.col;
+        cell.style.gridRow = pos.row;
+        cell.dataset.z = el.Z;
+        cell.dataset.spin = dominantSpinKey(el) || "";
+        cell.dataset.symbol = el.symbol.toLowerCase();
+        cell.dataset.name = el.name.toLowerCase();
+
+        var bar = document.createElement("div");
+        bar.className = "pt-cell-spinbar";
+        bar.style.background = colorFor(el);
+        cell.appendChild(bar);
+
+        var top = document.createElement("div");
+        top.className = "pt-cell-top";
+        var z = document.createElement("span");
+        z.className = "pt-cell-z";
+        z.textContent = el.Z;
+        top.appendChild(z);
+        if (el.isotopes.length){
+            var count = document.createElement("span");
+            count.className = "pt-cell-count";
+            count.textContent = el.isotopes.length;
+            top.appendChild(count);
+        }
+        cell.appendChild(top);
+
+        var sym = document.createElement("div");
+        sym.className = "pt-cell-sym";
+        sym.textContent = el.symbol;
+        cell.appendChild(sym);
+
+        var name = document.createElement("div");
+        name.className = "pt-cell-name";
+        name.textContent = el.name;
+        cell.appendChild(name);
+
+        var mass = document.createElement("div");
+        mass.className = "pt-cell-mass";
+        mass.textContent = el.mass;
+        cell.appendChild(mass);
+
+        cell.addEventListener("click", function(){ openCard(el); });
+        frag.appendChild(cell);
+    });
+    grid.appendChild(frag);
+
+    // f-block placeholder markers
+    [[6, "57\u201371"], [7, "89\u2013103"]].forEach(function(pair){
+        var ph = document.createElement("div");
+        ph.className = "pt-placeholder";
+        ph.style.gridColumn = 3;
+        ph.style.gridRow = pair[0];
+        ph.textContent = pair[1];
+        grid.appendChild(ph);
+    });
+
+    // ---------- legend ----------
+    var legendOrder = ["0.5","1","1.5","2.5","3","3.5","4","4.5","5","6","7","9"];
+    var legend = document.getElementById("pt-legend");
+    var activeSpin = null;
+
+    legendOrder.forEach(function(key){
+        var present = ELEMENTS_DATA.some(function(el){ return dominantSpinKey(el) === key; });
+        if (!present) return;
+        var item = document.createElement("button");
+        item.type = "button";
+        item.className = "pt-legend-item";
+        item.dataset.spin = key;
+        var swatch = document.createElement("span");
+        swatch.className = "pt-legend-swatch";
+        swatch.style.background = SPIN_COLORS[key];
+        item.appendChild(swatch);
+        var label = document.createElement("span");
+        label.textContent = "I = " + spinFrac(parseFloat(key));
+        item.appendChild(label);
+        item.addEventListener("click", function(){
+            activeSpin = (activeSpin === key) ? null : key;
+            applyFilter();
+            Array.prototype.forEach.call(legend.querySelectorAll(".pt-legend-item"), function(n){
+                n.classList.toggle("is-active", n.dataset.spin === activeSpin);
+            });
+        });
+        legend.appendChild(item);
+    });
+    var noneItem = document.createElement("button");
+    noneItem.type = "button";
+    noneItem.className = "pt-legend-item";
+    noneItem.dataset.spin = "none";
+    var noneSwatch = document.createElement("span");
+    noneSwatch.className = "pt-legend-swatch";
+    noneSwatch.style.background = "var(--spin-none)";
+    noneItem.appendChild(noneSwatch);
+    var noneLabel = document.createElement("span");
+    noneLabel.textContent = "no NMR isotope";
+    noneItem.appendChild(noneLabel);
+    noneItem.addEventListener("click", function(){
+        activeSpin = (activeSpin === "none") ? null : "none";
+        applyFilter();
+        Array.prototype.forEach.call(legend.querySelectorAll(".pt-legend-item"), function(n){
+            n.classList.toggle("is-active", n.dataset.spin === activeSpin);
+        });
+    });
+    legend.appendChild(noneItem);
+
+    function applyFilter(){
+        var cells = grid.querySelectorAll(".pt-cell");
+        Array.prototype.forEach.call(cells, function(c){
+            if (!activeSpin){ c.classList.remove("pt-dim"); return; }
+            var match = activeSpin === "none" ? (c.dataset.spin === "") : (c.dataset.spin === activeSpin);
+            c.classList.toggle("pt-dim", !match);
+        });
+    }
+
+    // ---------- search ----------
+    var search = document.getElementById("pt-search");
+    function currentMatches(q){
+        q = q.trim().toLowerCase();
+        if (!q) return [];
+        return ELEMENTS_DATA.filter(function(el){
+            return el.symbol.toLowerCase() === q || el.symbol.toLowerCase().indexOf(q) === 0 || el.name.toLowerCase().indexOf(q) === 0;
+        });
+    }
+    search.addEventListener("input", function(){
+        var q = search.value.trim().toLowerCase();
+        var cells = grid.querySelectorAll(".pt-cell");
+        if (!q){
+            Array.prototype.forEach.call(cells, function(c){ c.classList.remove("pt-highlight", "pt-dim"); });
+            return;
+        }
+        var matches = currentMatches(q).map(function(el){ return String(el.Z); });
+        Array.prototype.forEach.call(cells, function(c){
+            var hit = matches.indexOf(c.dataset.z) !== -1;
+            c.classList.toggle("pt-highlight", hit);
+            c.classList.toggle("pt-dim", !hit);
+        });
+    });
+    search.addEventListener("keydown", function(e){
+        if (e.key === "Enter"){
+            var matches = currentMatches(search.value);
+            if (matches.length) openCard(matches[0]);
+        }
+    });
+
+    // ---------- flip overlay ----------
+    var overlay = document.getElementById("pt-overlay");
+    var backdrop = document.getElementById("pt-overlay-backdrop");
+    var inner = document.getElementById("pt-card-inner");
+    var frontEl = document.getElementById("pt-card-front");
+    var backEl = document.getElementById("pt-card-back");
+
+    function buildFront(el){
+        frontEl.innerHTML = "";
+        var closeBtn = document.createElement("button");
+        closeBtn.className = "pt-close";
+        closeBtn.setAttribute("aria-label", "Close");
+        closeBtn.innerHTML = "&times;";
+        closeBtn.addEventListener("click", closeCard);
+        frontEl.appendChild(closeBtn);
+
+        var z = document.createElement("div");
+        z.className = "pt-front-z";
+        z.textContent = "Z = " + el.Z;
+        frontEl.appendChild(z);
+
+        var sym = document.createElement("div");
+        sym.className = "pt-front-sym";
+        sym.style.color = colorFor(el) === "var(--spin-none)" ? "var(--ink)" : colorFor(el);
+        sym.textContent = el.symbol;
+        frontEl.appendChild(sym);
+
+        var name = document.createElement("div");
+        name.className = "pt-front-name";
+        name.textContent = el.name;
+        frontEl.appendChild(name);
+
+        var mass = document.createElement("div");
+        mass.className = "pt-front-mass";
+        mass.textContent = "Standard atomic weight: " + el.mass;
+        frontEl.appendChild(mass);
+
+        var hint = document.createElement("div");
+        hint.className = "pt-front-hint";
+        hint.textContent = "Click the card to see NMR data \u2192";
+        frontEl.appendChild(hint);
+
+        frontEl.addEventListener("click", flipToBack);
+    }
+
+    function buildBack(el){
+        backEl.innerHTML = "";
+        var closeBtn = document.createElement("button");
+        closeBtn.className = "pt-close";
+        closeBtn.setAttribute("aria-label", "Close");
+        closeBtn.innerHTML = "&times;";
+        closeBtn.addEventListener("click", closeCard);
+        backEl.appendChild(closeBtn);
+
+        var header = document.createElement("div");
+        header.className = "pt-back-header";
+        var sym = document.createElement("span");
+        sym.className = "pt-back-sym";
+        sym.textContent = el.symbol;
+        var name = document.createElement("span");
+        name.className = "pt-back-name";
+        name.textContent = el.name + " \u00B7 Z = " + el.Z;
+        header.appendChild(sym);
+        header.appendChild(name);
+        backEl.appendChild(header);
+
+        var confLabel = document.createElement("div");
+        confLabel.className = "pt-back-section-label";
+        confLabel.textContent = "Ground-state electron configuration";
+        backEl.appendChild(confLabel);
+        var conf = document.createElement("div");
+        conf.className = "pt-econfig";
+        conf.textContent = el.econfig;
+        backEl.appendChild(conf);
+
+        var isoLabel = document.createElement("div");
+        isoLabel.className = "pt-back-section-label";
+        isoLabel.textContent = "NMR-active isotopes";
+        backEl.appendChild(isoLabel);
+
+        if (!el.isotopes.length){
+            var nodata = document.createElement("div");
+            nodata.className = "pt-nodata";
+            nodata.textContent = "None \u2014 " + el.name + " has no naturally occurring isotope with nuclear spin I > 0.";
+            backEl.appendChild(nodata);
+        } else {
+            var table = document.createElement("table");
+            table.className = "pt-iso-table";
+            var thead = document.createElement("thead");
+            thead.innerHTML = "<tr><th>Isotope</th><th>I</th><th>Abundance</th><th>\u03B3 (MHz/T)</th><th>Q (fm\u00B2)</th></tr>";
+            table.appendChild(thead);
+            var tbody = document.createElement("tbody");
+            el.isotopes.forEach(function(iso){
+                var tr = document.createElement("tr");
+                var nuclideCell = document.createElement("td");
+                var wrap = document.createElement("span");
+                wrap.className = "pt-iso-nuclide";
+                var dot = document.createElement("span");
+                dot.className = "pt-iso-dot";
+                dot.style.background = SPIN_COLORS[String(iso.spin)] || "var(--spin-none)";
+                wrap.appendChild(dot);
+                var label = document.createElement("span");
+                label.innerHTML = "<sup>" + iso.A + "</sup>" + el.symbol + (iso.radioactive ? " \u2020" : "");
+                wrap.appendChild(label);
+                nuclideCell.appendChild(wrap);
+                tr.appendChild(nuclideCell);
+
+                var spinCell = document.createElement("td");
+                spinCell.textContent = spinFrac(iso.spin);
+                tr.appendChild(spinCell);
+
+                var abundCell = document.createElement("td");
+                abundCell.textContent = fmtAbund(iso.abundance);
+                tr.appendChild(abundCell);
+
+                var gammaCell = document.createElement("td");
+                gammaCell.textContent = fmtGamma(iso.gamma);
+                tr.appendChild(gammaCell);
+
+                var quadCell = document.createElement("td");
+                var q = fmtQuad(iso.quad_fm2);
+                quadCell.textContent = q === null ? (iso.spin === 0.5 ? "n/a (I=1/2)" : "\u2014") : q;
+                tr.appendChild(quadCell);
+
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            backEl.appendChild(table);
+        }
+    }
+
+    function openCard(el){
+        buildFront(el);
+        buildBack(el);
+        inner.classList.remove("is-flipped");
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+    function flipToBack(){ inner.classList.add("is-flipped"); }
+    function closeCard(){
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+    backdrop.addEventListener("click", closeCard);
+    document.addEventListener("keydown", function(e){
+        if (e.key === "Escape" && overlay.classList.contains("is-open")) closeCard();
+    });
+})();
+
+    </script>
+</body>
+</html>
