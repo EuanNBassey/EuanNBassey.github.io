@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Euan N. Bassey - NMR Freqs.</title>
+    <title>NMR Frequency Plot (Larmor Frequencies) – Euan N. Bassey</title>
     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -26,6 +26,19 @@
             max-height: 750px; /* Max width for larger screens */
         }
     </style>
+    <meta name="description" content="Interactive plot of the Larmor frequency of NMR-active nuclides versus magnetic field, with a downloadable gyromagnetic ratio table.">
+    <meta name="author" content="Euan N. Bassey">
+    <link rel="canonical" href="https://euannbassey.github.io/nmrfreqs.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Euan N. Bassey">
+    <meta property="og:title" content="NMR Frequency Plot (Larmor Frequencies) – Euan N. Bassey">
+    <meta property="og:description" content="Interactive plot of the Larmor frequency of NMR-active nuclides versus magnetic field, with a downloadable gyromagnetic ratio table.">
+    <meta property="og:url" content="https://euannbassey.github.io/nmrfreqs.html">
+    <meta property="og:image" content="https://euannbassey.github.io/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Euan N. Bassey – Magnetic Resonance Meets Materials Chemistry">
+    <meta name="twitter:card" content="summary_large_image">
 </head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3SM8P3KQ4N"></script>
@@ -50,7 +63,7 @@
             <li><a href="publications.html">Publications</a></li>
             <li><a href="talks.html">Talks</a></li>
             <li class="dropdown">
-                <a href="#">Tools ▼</a>
+                <a href="tools.html">Tools ▼</a>
                 <ul class="dropdown-menu">
                     <li><a href="nmrfreqs.html">NMR Frequencies</a></li>
                     <li><a href="periodic_table.html">Periodic Table</a></li>
@@ -342,7 +355,8 @@ updatePlot();
         
     <footer>
         <div class="container">
-            <p>&copy; <span id="year"></span> Euan Bassey. All rights reserved.</p>
+            <p>&copy; <span id="year"></span> Euan N. Bassey. All rights reserved.</p>
+            <p class="footer-links"><a href="https://orcid.org/0000-0001-8827-7175" rel="me noopener">ORCID</a> &middot; <a href="https://github.com/EuanNBassey" rel="me noopener">GitHub</a> &middot; <a href="https://www.linkedin.com/in/euan-bassey-158204171/" rel="me noopener">LinkedIn</a> &middot; <a href="https://bsky.app/profile/euannbassey.bsky.social" rel="me noopener">Bluesky</a> &middot; <a href="https://opennmr.github.io/" rel="noopener">openNMR</a></p>
         </div>
     </footer>
         <script>

@@ -381,3 +381,53 @@ img {
     width: fit-content;
     padding: 10px 20px;
 }
+
+/* Tools landing page + footer links */
+.tool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+section ul.tool-list li.tool-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+}
+
+.tool-card a {
+    font-weight: bold;
+    color: #008CBA;
+    text-decoration: none;
+}
+
+.tool-card a:hover {
+    text-decoration: underline;
+}
+
+.tool-card p {
+    margin-top: 6px;
+    font-size: 0.95em;
+}
+
+.software-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.software-item img {
+    flex: 0 0 auto;
+}
+
+.software-item h3 {
+    margin-bottom: 0;
+    padding-top: 0;
+}
+
+.footer-links {
+    margin-top: 8px;
+    font-size: 0.95em;
+}
