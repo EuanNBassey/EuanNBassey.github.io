@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curie-Weiss Law Plot – Euan N. Bassey</title>
     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
+    <script src="theme.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -59,12 +60,10 @@
   gtag('config', 'G-3SM8P3KQ4N');
 </script>
 <body>
-    <header>
-        <img src="banner-image.png" alt="Banner" class="banner">
-    </header>
 
     <nav>
         <div class="container">
+        <a class="site-name" href="index.html">Euan N. Bassey</a>
             <ul>
                 <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
@@ -86,6 +85,8 @@
             </ul>
         </div>
     </nav>
+
+    <main class="page">
   <h1>Interactive Curie-Weiss Law Plot</h1>
   
   <div class="input-section">
@@ -261,7 +262,9 @@ function setYAxisMinToZero() {
     // Initial plot rendering
     updatePlot();
   </script>
-<footer>
+    </main>
+
+    <footer>
         <div class="container">
             <p>&copy; <span id="year"></span> Euan N. Bassey. All rights reserved.</p>
             <p class="footer-links"><a href="https://orcid.org/0000-0001-8827-7175" rel="me noopener">ORCID</a> &middot; <a href="https://github.com/EuanNBassey" rel="me noopener">GitHub</a> &middot; <a href="https://www.linkedin.com/in/euan-bassey-158204171/" rel="me noopener">LinkedIn</a> &middot; <a href="https://bsky.app/profile/euannbassey.bsky.social" rel="me noopener">Bluesky</a> &middot; <a href="https://opennmr.github.io/" rel="noopener">openNMR</a></p>

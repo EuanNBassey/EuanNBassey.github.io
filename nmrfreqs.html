@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NMR Frequency Plot (Larmor Frequencies) – Euan N. Bassey</title>
     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
+    <script src="theme.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -50,12 +51,10 @@
   gtag('config', 'G-3SM8P3KQ4N');
 </script>
 <body>
-    <header>
-        <img src="banner-image.png" alt="Banner" class="banner">
-    </header>
 
     <nav>
         <div class="container">
+        <a class="site-name" href="index.html">Euan N. Bassey</a>
             <ul>
                 <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
@@ -77,6 +76,8 @@
             </ul>
         </div>
     </nav>
+
+    <main class="page">
 
     <h2>NMR Frequency: Interactive Plot</h2>
     <p> Here you will find an interactive plot of the Larmor frequency of NMR-active nuclides under an applied magnetic field. </p>
@@ -352,7 +353,8 @@ updatePlot();
             updatePlot();
         }
     </script>
-        
+    </main>
+
     <footer>
         <div class="container">
             <p>&copy; <span id="year"></span> Euan N. Bassey. All rights reserved.</p>
