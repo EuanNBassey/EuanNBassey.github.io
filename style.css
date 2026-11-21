@@ -796,21 +796,6 @@ html[data-theme="dark"] #cftSVG line {
     stroke: var(--ink);
 }
 
-/* Dark mode: Plotly charts (text, background and grid only; trace colours are untouched) */
-html[data-theme="dark"] .js-plotly-plot .main-svg .bg {
-    fill: transparent !important;
-}
-
-html[data-theme="dark"] .js-plotly-plot .main-svg text {
-    fill: var(--ink) !important;
-}
-
-html[data-theme="dark"] .js-plotly-plot .gridlayer path,
-html[data-theme="dark"] .js-plotly-plot .zerolinelayer path {
-    stroke: var(--border) !important;
-}
-
-html[data-theme="dark"] .js-plotly-plot .xaxislayer-above path,
-html[data-theme="dark"] .js-plotly-plot .yaxislayer-above path {
-    stroke: var(--lat-edge) !important;
-}
+/* Plotly charts stay on a light panel in dark mode: trace colours (including black) are fixed in the page scripts, so a dark panel would hide some of them. */
+.js-plotly-plot{border-radius:8px;overflow:hidden}
+html[data-theme="dark"] .js-plotly-plot{background:#fff;box-shadow:0 0 0 1px var(--border)}
